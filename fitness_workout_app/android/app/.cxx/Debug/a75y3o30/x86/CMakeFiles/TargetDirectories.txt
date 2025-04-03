@@ -1,0 +1,2 @@
+C:/Users/Admin/AndroidStudioProjects/fitness_workout_app/android/app/.cxx/Debug/a75y3o30/x86/CMakeFiles/edit_cache.dir
+C:/Users/Admin/AndroidStudioProjects/fitness_workout_app/android/app/.cxx/Debug/a75y3o30/x86/CMakeFiles/rebuild_cache.dir
