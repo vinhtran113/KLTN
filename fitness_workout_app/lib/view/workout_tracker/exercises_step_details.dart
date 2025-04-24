@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 import 'package:video_player/video_player.dart';
@@ -7,6 +6,7 @@ import '../../common/colo_extension.dart';
 import '../../common_widget/step_detail_row.dart';
 import '../../model/exercise_model.dart';
 import '../../main.dart';
+import '../../localization/app_localizations.dart';
 
 class ExercisesStepDetails extends StatefulWidget {
   final Exercise eObj;
@@ -25,16 +25,16 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
   @override
   void initState() {
     super.initState();
+
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.eObj.video))
       ..initialize().then((_) {
-        setState(() {}); // Cập nhật UI sau khi video đã sẵn sàng
+        setState(() {});
       });
 
-    // Lắng nghe khi video kết thúc
     _controller.addListener(() {
       if (_controller.value.position == _controller.value.duration) {
         setState(() {
-          _isPlaying = false; // Đặt lại trạng thái khi video kết thúc
+          _isPlaying = false;
         });
       }
     });
@@ -135,7 +135,8 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                 height: 4,
               ),
               Text(
-                "${widget.diff.toString()} | ${widget.eObj.difficulty[widget.diff]?.calo} Calories Burn",
+                "${AppLocalizations.of(context)?.translate(widget.diff.toString()) ?? widget.diff.toString()} | "
+                    "${widget.eObj.difficulty[widget.diff]?.calo} ${AppLocalizations.of(context)?.translate("Calories Burned") ?? "Calories Burned"}",
                 style: TextStyle(
                   color: darkmode? Colors.white60 : TColor.gray,
                   fontSize: 12,
@@ -145,7 +146,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                 height: 15,
               ),
               Text(
-                "Descriptions",
+                AppLocalizations.of(context)?.translate("Descriptions") ?? "Descriptions",
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700),
@@ -156,16 +157,15 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
               ReadMoreText(
                 widget.eObj.descriptions.toString(),
                 trimLines: 4,
-                colorClickableText: darkmode? TColor.white : TColor.black,
+                colorClickableText: darkmode ? TColor.white : TColor.black,
                 trimMode: TrimMode.Line,
-                trimCollapsedText: ' Read More ...',
-                trimExpandedText: ' Read Less',
+                trimCollapsedText: AppLocalizations.of(context)?.translate("Read More") ?? "Read More...",
+                trimExpandedText: AppLocalizations.of(context)?.translate("Read Less") ?? "Read Less",
                 style: TextStyle(
-                  color: darkmode? Colors.white60 : TColor.gray,
+                  color: darkmode ? Colors.white60 : TColor.gray,
                   fontSize: 12,
                 ),
-                moreStyle:
-                const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                moreStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
               ),
               const SizedBox(
                 height: 15,
@@ -174,7 +174,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "How To Do It",
+                    AppLocalizations.of(context)?.translate("How To Do It") ?? "How To Do It",
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700),
@@ -182,7 +182,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                   TextButton(
                     onPressed: () {},
                     child: Text(
-                      "${widget.eObj.steps.length} Steps",
+                      "${widget.eObj.steps.length} ${AppLocalizations.of(context)?.translate("Steps") ?? "Steps"}",
                       style: TextStyle(color: TColor.gray, fontSize: 12),
                     ),
                   )

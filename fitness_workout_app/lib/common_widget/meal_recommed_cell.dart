@@ -2,11 +2,14 @@ import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:flutter/material.dart';
 
 import '../common/colo_extension.dart';
+import '../model/meal_model.dart';
+import '../view/meal_planner/food_info_details_view.dart';
 
 class MealRecommendCell extends StatelessWidget {
-  final Map fObj;
+  final Meal fObj;
+  final Map mObj;
   final int index;
-  const MealRecommendCell({super.key, required this.index, required this.fObj});
+  const MealRecommendCell({super.key, required this.index, required this.fObj, required this.mObj});
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +35,23 @@ class MealRecommendCell extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset(
-            fObj["image"].toString(),
+          (fObj.image != null)
+              ? Image.network(
+            fObj.image.toString(),
+            width: media.width * 0.3,
+            height: media.width * 0.25,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return Image.asset(
+                "assets/img/no_image.png",
+                width: media.width * 0.3,
+                height: media.width * 0.25,
+                fit: BoxFit.contain,
+              );
+            },
+          )
+              : Image.asset(
+            "assets/img/no_image.png",
             width: media.width * 0.3,
             height: media.width * 0.25,
             fit: BoxFit.contain,
@@ -41,35 +59,45 @@ class MealRecommendCell extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Text(
-              fObj["name"],
+              fObj.name,
               style: TextStyle(
-                  color: TColor.black,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500),
+                color: TColor.black,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Text(
-              "${fObj["size"]} | ${fObj["time"]} | ${fObj["kcal"]}",
+              "${fObj.size} | ${fObj.time} Mins | ${fObj.nutri.getCalories()} kCal",
               style: TextStyle(color: TColor.gray, fontSize: 12),
             ),
           ),
-          const SizedBox(
-            height: 15,
-          ),
+          const SizedBox(height: 15),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: SizedBox(
               width: 90,
               height: 35,
               child: RoundButton(
-                  fontSize: 12,
-                  type: isEvent
-                      ? RoundButtonType.bgGradient
-                      : RoundButtonType.bgSGradient,
-                  title: "View",
-                  onPressed: () {}),
+                fontSize: 12,
+                type: isEvent
+                    ? RoundButtonType.bgGradient
+                    : RoundButtonType.bgSGradient,
+                title: "View",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FoodInfoDetailsView(
+                        dObj: fObj,
+                        mObj: mObj,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],

@@ -172,6 +172,77 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+  void handleSignupWithGG() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      String res = await AuthService().signInWithGoogle();
+
+      switch (res) {
+        case "success":
+          UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+          if (user != null) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const WelcomeView()),
+                  (route) => false,
+            );
+          } else {
+            throw Exception("Không thể lấy thông tin người dùng sau khi đăng nhập.");
+          }
+          break;
+
+        case "not-profile":
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const CompleteProfileView()),
+                (route) => false,
+          );
+          break;
+
+        case "not-level":
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const WhatYourGoalView()),
+                (route) => false,
+          );
+          break;
+
+        case "not-activate":
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Tài khoản bị khóa"),
+              content: const Text("Tài khoản của bạn chưa được kích hoạt."),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("OK"),
+                )
+              ],
+            ),
+          );
+          break;
+
+        default:
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Đăng nhập thất bại: $res')),
+          );
+      }
+    } catch (e) {
+      // Xử lý lỗi không mong muốn
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Đã xảy ra lỗi: ${e.toString()}")),
+      );
+    } finally {
+      // Luôn đảm bảo tắt loading
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery
@@ -276,7 +347,7 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     const Spacer(),
                     RoundButton(
-                        title: "Login",
+                        title: "Sign In",
                         onPressed: handleLogin
                     ),
                     SizedBox(
@@ -304,55 +375,45 @@ class _LoginViewState extends State<LoginView> {
                     SizedBox(
                       height: media.width * 0.04,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: TColor.white,
-                              border: Border.all(
-                                width: 1,
-                                color: TColor.gray.withOpacity(0.4),
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Image.asset(
+                    GestureDetector(
+                      onTap: handleSignupWithGG,
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: TColor.white,
+                          border: Border.all(
+                            width: 1,
+                            color: TColor.gray.withOpacity(0.4),
+                          ),
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: Offset(0, 5),
+                            )
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
                               "assets/img/google.png",
-                              width: 20,
-                              height: 20,
+                              width: 24,
+                              height: 24,
                             ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: media.width * 0.04,
-                        ),
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: TColor.white,
-                              border: Border.all(
-                                width: 1,
-                                color: TColor.gray.withOpacity(0.4),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Sign In with Google",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
                               ),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Image.asset(
-                              "assets/img/facebook.png",
-                              width: 20,
-                              height: 20,
-                            ),
-                          ),
-                        )
-                      ],
+                            )
+                          ],
+                        ),
+                      ),
                     ),
                     SizedBox(
                       height: media.width * 0.04,

@@ -1,11 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common_widget/meal_recommed_cell.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/meal_category_cell.dart';
 import '../../common_widget/popular_meal_row.dart';
-import '../../common_widget/today_meal_row.dart';
+import '../../common_widget/search_all_meal_row.dart';
+import '../../model/meal_model.dart';
+import '../../model/user_model.dart';
+import '../../services/auth.dart';
+import '../../services/meal.dart';
 import 'food_info_details_view.dart';
+import 'meal_by_category_view.dart';
 
 class MealFoodDetailsView extends StatefulWidget {
   final Map eObj;
@@ -17,82 +23,134 @@ class MealFoodDetailsView extends StatefulWidget {
 
 class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
   TextEditingController txtSearch = TextEditingController();
+  final MealService _mealService = MealService();
+  String level = '';
 
   List categoryArr = [
     {
-      "name": "Salad",
+      "name": "Main Dish",
+      "image": "assets/img/fried-rice_icon.png",
+    },
+    {
+      "name": "Side Dish",
       "image": "assets/img/c_1.png",
     },
     {
-      "name": "Cake",
-      "image": "assets/img/c_2.png",
+      "name": "Fast Food",
+      "image": "assets/img/FastFoodIcon.png",
     },
     {
-      "name": "Pie",
-      "image": "assets/img/c_3.png",
+      "name": "Beverage",
+      "image": "assets/img/healthy_drink_icon.png",
     },
     {
-      "name": "Smoothies",
+      "name": "Dessert",
       "image": "assets/img/c_4.png",
     },
     {
-      "name": "Salad",
-      "image": "assets/img/c_1.png",
-    },
-    {
-      "name": "Cake",
-      "image": "assets/img/c_2.png",
-    },
-    {
-      "name": "Pie",
+      "name": "Bakery & Snacks",
       "image": "assets/img/c_3.png",
     },
-    {
-      "name": "Smoothies",
-      "image": "assets/img/c_4.png",
-    },
   ];
 
-  List popularArr = [
-    {
-      "name": "Blueberry Pancake",
-      "image": "assets/img/f_1.png",
-      "b_image":"assets/img/pancake_1.png",
-      "size": "Medium",
-      "time": "30mins",
-      "kcal": "230kCal"
-    },
-    {
-      "name": "Salmon Nigiri",
-      "image": "assets/img/f_2.png",
-      "b_image": "assets/img/nigiri.png",
-      "size": "Medium",
-      "time": "20mins",
-      "kcal": "120kCal"
-    },
-  ];
+  List filteredCategoryArr = [];
+  List<Meal> recommendArr = [];
+  List<Meal> popularArr = [];
+  List<Meal> allMealArr = [];
+  List<Meal> filteredMeals = [];
 
-  List recommendArr = [
-    {
-      "name": "Honey Pancake",
-      "image": "assets/img/rd_1.png",
-      "size": "Easy",
-      "time": "30mins",
-      "kcal": "180kCal"
-    },
-    {
-      "name": "Canai Bread",
-      "image": "assets/img/m_4.png",
-      "size": "Easy",
-      "time": "20mins",
-      "kcal": "230kCal"
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadMealsByRecommendAndLevel(widget.eObj["name"]);
+    _loadPopularMeals(widget.eObj["name"]);
+    _loadAllMeals();
+    txtSearch.addListener(_onSearchChanged);
+
+    if (widget.eObj["name"].toString() == "Snack") {
+      filteredCategoryArr = categoryArr.where((category) {
+        return category["name"] != "Main Dish" && category["name"] != "Side Dish";
+      }).toList();
+    } else {
+      filteredCategoryArr = List.from(categoryArr);
+    }
+  }
+
+  @override
+  void dispose() {
+    txtSearch.removeListener(_onSearchChanged);
+    txtSearch.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    String keyword = txtSearch.text.trim().toLowerCase();
+    setState(() {
+      if (keyword.isEmpty) {
+        filteredMeals = [];
+      } else {
+        filteredMeals = allMealArr
+            .where((meal) => meal.name.toLowerCase().contains(keyword))
+            .toList();
+      }
+    });
+  }
+
+  void _loadMealsByRecommendAndLevel(String mealType) async {
+    UserModel? user = await AuthService().getUserInfo(
+      FirebaseAuth.instance.currentUser!.uid,
+    );
+
+    if (user != null) {
+      String lv = user.level;
+
+      List<Meal> meals = await _mealService.fetchMealsByRecommendAndLevel(
+        recommend: mealType,
+        level: lv,
+      );
+
+      setState(() {
+        level = lv;
+        recommendArr = meals;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không thể lấy thông tin người dùng')),
+      );
+    }
+  }
+
+  void _loadPopularMeals(String mealType) async {
+    try {
+      List<Meal> meals = await _mealService.fetchMealsWithRecommend(
+        recommend: mealType,
+      );
+      setState(() {
+        popularArr = meals;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e')),
+      );
+    }
+  }
+
+  void _loadAllMeals() async {
+    try {
+      List<Meal> meals = await _mealService.fetchAllMeals();
+      setState(() {
+        allMealArr = meals;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: TColor.white,
@@ -144,37 +202,54 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
               child: Row(
                 children: [
                   Expanded(
-                      child: TextField(
-                        controller: txtSearch,
-                        decoration: InputDecoration(
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            prefixIcon: Image.asset(
-                              "assets/img/search.png",
-                              width: 25,
-                              height: 25,
-                            ),
-                            hintText: "Search Pancake"),
-                      )),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    width: 1,
-                    height: 25,
-                    color: TColor.gray.withOpacity(0.3),
-                  ),
-                  InkWell(
-                    onTap: () {},
-                    child: Image.asset(
-                      "assets/img/Filter.png",
-                      width: 25,
-                      height: 25,
+                    child: TextField(
+                      controller: txtSearch,
+                      decoration: InputDecoration(
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          prefixIcon: Image.asset(
+                            "assets/img/search.png",
+                            width: 25,
+                            height: 25,
+                          ),
+                          hintText: "Search here..."),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
             SizedBox(
-              height: media.width * 0.05,
+              height: media.width * 0.01,
+            ),
+            txtSearch.text.isNotEmpty
+                ? ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: filteredMeals.length,
+                itemBuilder: (context, index) {
+                  Meal fObj = filteredMeals[index];
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FoodInfoDetailsView(
+                            dObj: fObj,
+                            mObj: widget.eObj,
+                          ),
+                        ),
+                      );
+                    },
+                    child: SearchAllMealRow(
+                      mObj: fObj,
+                      dObj: widget.eObj,
+                    ),
+                  );
+                },
+            ): SizedBox(),
+            SizedBox(
+              height: media.width * 0.03,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -194,81 +269,141 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
             SizedBox(
               height: 120,
               child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: categoryArr.length,
-                  itemBuilder: (context, index) {
-                    var cObj = categoryArr[index] as Map? ?? {};
-                    return MealCategoryCell(
-                      cObj: cObj,
-                      index: index,
-                    );
-                  }),
-            ),
-            SizedBox(
-              height: media.width * 0.05,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text(
-                "Recommendation\nfor Diet",
-                style: TextStyle(
-                    color: TColor.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700),
-              ),
-            ),
-            SizedBox(
-              height: media.width * 0.6,
-              child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: recommendArr.length,
-                  itemBuilder: (context, index) {
-                    var fObj = recommendArr[index] as Map? ?? {};
-                    return MealRecommendCell(
-                      fObj: fObj,
-                      index: index,
-                    );
-                  }),
-            ),
-            SizedBox(
-              height: media.width * 0.05,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text(
-                "Popular",
-                style: TextStyle(
-                    color: TColor.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700),
-              ),
-            ),
-            ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: popularArr.length,
+                scrollDirection: Axis.horizontal,
+                itemCount: filteredCategoryArr.length,
                 itemBuilder: (context, index) {
-                  var fObj = popularArr[index] as Map? ?? {};
+                  var cObj = filteredCategoryArr[index] as Map? ?? {};
                   return InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => FoodInfoDetailsView(
-                            dObj: fObj,
+                          builder: (context) => MealsByCategoryView(
+                            categoryName: cObj["name"],
                             mObj: widget.eObj,
                           ),
                         ),
                       );
                     },
-                    child: PopularMealRow(
-                      mObj: fObj,
+                    child: MealCategoryCell(
+                      cObj: cObj,
+                      index: index,
                     ),
                   );
-                }),
+                },
+              ),
+            ),
+            SizedBox(
+              height: media.width * 0.05,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Recommendation\nfor ${level.toString()}",
+                    style: TextStyle(
+                        color: TColor.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      "See All",
+                      style:
+                      TextStyle(color: TColor.gray, fontSize: 12),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(
+              height: media.width * 0.6,
+              child: recommendArr.isEmpty ? Center(
+                  child: Text(
+                    'Not Found',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                    ),
+                ),
+              ) : ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                scrollDirection: Axis.horizontal,
+                itemCount: recommendArr.length > 2 ? 2 : recommendArr.length,
+                itemBuilder: (context, index) {
+                  Meal fObj = recommendArr[index];
+                  return MealRecommendCell(
+                    fObj: fObj,
+                    index: index,
+                    mObj: widget.eObj,
+                  );
+                },
+              ),
+            ),
+            SizedBox(
+              height: media.width * 0.05,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Meal for ${widget.eObj["name"]}",
+                    style: TextStyle(
+                        color: TColor.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      "See All",
+                      style:
+                      TextStyle(color: TColor.gray, fontSize: 12),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            popularArr.isEmpty ? Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  "Not Found",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+              ),
+            ) : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: popularArr.length > 5 ? 5 : popularArr.length,
+              itemBuilder: (context, index) {
+                Meal fObj = popularArr[index];
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FoodInfoDetailsView(
+                          dObj: fObj,
+                          mObj: widget.eObj,
+                        ),
+                      ),
+                    );
+                  },
+                  child: PopularMealRow(
+                    mObj: fObj,
+                  ),
+                );
+              },
+            ),
             SizedBox(
               height: media.width * 0.05,
             ),

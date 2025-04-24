@@ -1,9 +1,11 @@
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:flutter/material.dart';
 
+import '../model/meal_model.dart';
+
 
 class PopularMealRow extends StatelessWidget {
-  final Map mObj;
+  final Meal mObj;
   const PopularMealRow({super.key, required this.mObj});
 
   @override
@@ -17,8 +19,20 @@ class PopularMealRow extends StatelessWidget {
             boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)]),
         child: Row(
           children: [
-            Image.asset(
-              mObj["image"].toString(),
+            (mObj.image != null) ? Image.network(mObj.image.toString(),
+              width: 50,
+              height: 50,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  "assets/img/no_image.png",
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.contain,
+                );
+              },
+            )
+                : Image.asset("assets/img/no_image.png",
               width: 50,
               height: 50,
               fit: BoxFit.contain,
@@ -31,14 +45,14 @@ class PopularMealRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    mObj["name"].toString(),
+                    mObj.name.toString(),
                     style: TextStyle(
                         color: TColor.black,
                         fontSize: 14,
                         fontWeight: FontWeight.w500),
                   ),
                   Text(
-                    "${mObj["size"]} | ${mObj["time"]} | ${mObj["kcal"]}",
+                    "${mObj.size} | ${mObj.time} Mins | ${mObj.nutri.getCalories()} kCal",
                     style: TextStyle(color: TColor.gray, fontSize: 12),
                   )
                 ],

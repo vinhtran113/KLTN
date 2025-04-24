@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../localization/app_localizations.dart';
 
 String getTime(int value, {String formatStr = "hh:mm a"}) {
   var format = DateFormat(formatStr);
@@ -27,18 +29,18 @@ String dateToString(DateTime date, {String formatStr = "dd/MM/yyyy hh:mm a"}) {
   return format.format(date);
 }
 
-String getDayTitle(String dateStr, {String formatStr = "dd/MM/yyyy hh:mm a"} ) {
+String getDayTitle(BuildContext context, String dateStr, {String formatStr = "dd/MM/yyyy hh:mm a"}) {
   var date = stringToDate(dateStr, formatStr: formatStr);
 
   if (date.isToday) {
-    return "Today";
+    return AppLocalizations.of(context)?.translate("Today") ?? "Today";
   } else if (date.isTomorrow) {
-    return "Tomorrow";
+    return AppLocalizations.of(context)?.translate("Tomorrow") ?? "Tomorrow";
   } else if (date.isYesterday) {
-    return "Yesterday";
+    return AppLocalizations.of(context)?.translate("Yesterday") ?? "Yesterday";
   } else {
     var outFormat = DateFormat("E");
-    return outFormat.format(date) ;
+    return outFormat.format(date);
   }
 }
 

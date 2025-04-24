@@ -5,6 +5,7 @@ import '../../common_widget/round_button.dart';
 import '../../services/workout_tracker.dart';
 import 'workout_tracker_view.dart';
 import '../../main.dart';
+import '../../localization/app_localizations.dart';
 
 class FinishedWorkoutView extends StatefulWidget {
   final String historyId;
@@ -59,7 +60,7 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
               ),
 
               Text(
-                "Congratulations, You Have Finished Your Workout",
+                AppLocalizations.of(context)?.translate("Congratulations, You Have Finished Your Workout") ?? "Congratulations, You Have Finished Your Workout",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,
@@ -128,8 +129,8 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Text(
-                          "Minutes",
+                        Text(
+                          AppLocalizations.of(context)?.translate("Minutes") ?? "Minutes",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -144,7 +145,7 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
 
               const Spacer(),
               RoundButton(
-                  title: "Back To Home",
+                  title: AppLocalizations.of(context)?.translate("Back To Home") ?? "Back To Home",
                   onPressed: () {
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
@@ -157,7 +158,6 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
               const SizedBox(
                 height: 50,
               ),
-
             ],
           ),
         ),

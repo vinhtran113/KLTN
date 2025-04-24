@@ -1,6 +1,7 @@
 import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:flutter/material.dart';
 import '../common/colo_extension.dart';
+import '../../localization/app_localizations.dart';
 
 class SelectTrainRow extends StatelessWidget {
   final Map wObj;
@@ -51,7 +52,7 @@ class SelectTrainRow extends StatelessWidget {
                     width: 100,
                     height: 30,
                     child: RoundButton(
-                      title: "Select",
+                      title: AppLocalizations.of(context)?.translate("Select") ?? "Select",
                       fontSize: 12,
                       type: RoundButtonType.textGradient,
                       elevation: 0.05,

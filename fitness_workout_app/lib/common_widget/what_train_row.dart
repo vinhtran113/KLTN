@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../common/colo_extension.dart';
 import '../view/workout_tracker/workour_detail_view.dart';
+import '../../localization/app_localizations.dart';
 
 class WhatTrainRow extends StatelessWidget {
   final Map wObj;
@@ -56,7 +57,7 @@ class WhatTrainRow extends StatelessWidget {
                         width: 100,
                         height: 30,
                         child: RoundButton(
-                          title: "View More",
+                          title: AppLocalizations.of(context)?.translate("View More") ?? "View More",
                           fontSize: 10,
                           type: RoundButtonType.textGradient,
                           elevation: 0.05,

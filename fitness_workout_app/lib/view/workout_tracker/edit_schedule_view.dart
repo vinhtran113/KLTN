@@ -12,6 +12,7 @@ import '../../common_widget/round_button.dart';
 import '../../model/workout_schedule_model.dart';
 import '../../services/workout_tracker.dart';
 import '../../main.dart';
+import '../../localization/app_localizations.dart';
 
 class EditScheduleView extends StatefulWidget {
   final WorkoutSchedule schedule;
@@ -112,11 +113,10 @@ class _EditScheduleViewState extends State<EditScheduleView> {
           padding: const EdgeInsets.all(10),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: ["Beginner", "Normal", "Professional"].map((
-                difficulty) {
+            children: ["Beginner", "Normal", "Professional"].map((difficulty) {
               return ListTile(
                 title: Text(
-                  difficulty,
+                  AppLocalizations.of(context)?.translate(difficulty) ?? difficulty,
                   style: TextStyle(color: darkmode? TColor.white : TColor.black, fontSize: 14),
                 ),
                 onTap: () {
@@ -165,7 +165,7 @@ class _EditScheduleViewState extends State<EditScheduleView> {
           ),
         ),
         title: Text(
-          "Edit Schedule",
+          AppLocalizations.of(context)?.translate("Edit Schedule") ?? "Edit Schedule",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
@@ -195,7 +195,7 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                   height: media.width * 0.04,
               ),
               Text(
-                "Time",
+                AppLocalizations.of(context)?.translate("Time") ?? "Time",
                 style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500),
@@ -214,7 +214,7 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                   height: media.width * 0.06,
               ),
               Text(
-                "Details Workout",
+                AppLocalizations.of(context)?.translate("Details Workout") ?? "Details Workout",
                 style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500),
@@ -224,7 +224,7 @@ class _EditScheduleViewState extends State<EditScheduleView> {
               ),
               IconTitleNextRow(
                 icon: "assets/img/choose_workout.png",
-                title: "Choose Workout",
+                title: AppLocalizations.of(context)?.translate("Choose Workout") ?? "Choose Workout",
                 time: selectedWorkout.text,
                 color: TColor.lightGray,
                 onPressed: () async {
@@ -273,7 +273,7 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          "Difficulty",
+                          AppLocalizations.of(context)?.translate("Difficulty") ?? "Difficulty",
                           style: TextStyle(color: TColor.gray, fontSize: 12),
                         ),
                       ),
@@ -308,7 +308,7 @@ class _EditScheduleViewState extends State<EditScheduleView> {
               ),
               RepetitionsRow(
                 icon: "assets/img/Repeat.png",
-                title: "Custom Repetitions",
+                title: AppLocalizations.of(context)?.translate("Custom Repetitions") ?? "Custom Repetitions",
                 color: TColor.lightGray,
                 repetitionController: selectedRepetition,
               ),
@@ -319,7 +319,7 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Enable Notifications",
+                    AppLocalizations.of(context)?.translate("Enable Notifications") ?? "Enable Notifications",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -338,7 +338,7 @@ class _EditScheduleViewState extends State<EditScheduleView> {
               ),
               Spacer(),
               RoundButton(
-                  title: "Save",
+                  title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
                   onPressed: _handleUpdateSchedule),
               const SizedBox(
                 height: 20,

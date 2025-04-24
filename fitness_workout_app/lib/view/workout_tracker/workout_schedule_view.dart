@@ -11,6 +11,7 @@ import '../../services/workout_tracker.dart';
 import 'add_schedule_view.dart';
 import 'edit_schedule_view.dart';
 import '../../main.dart';
+import '../../localization/app_localizations.dart';
 
 class WorkoutScheduleView extends StatefulWidget {
   final Function? onScheduleAdded;
@@ -143,7 +144,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
           ),
         ),
         title: Text(
-          "Workout Schedule",
+          AppLocalizations.of(context)?.translate("Workout Schedule") ?? "Workout Schedule",
           style: TextStyle(
               fontSize: 16, fontWeight: FontWeight.w700),
         ),
@@ -311,7 +312,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                             ),
                                                           ),
                                                           Text(
-                                                            "Workout Schedule",
+                                                            AppLocalizations.of(context)?.translate("Workout Schedule") ?? "Workout Schedule",
                                                             style: TextStyle(
                                                                 color: TColor
                                                                     .black,
@@ -358,13 +359,13 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                               }
                                                             },
                                                             itemBuilder: (BuildContext context) =>
-                                                            <PopupMenuEntry<String>>[const PopupMenuItem<String>(
+                                                            <PopupMenuEntry<String>>[PopupMenuItem<String>(
                                                                 value: 'edit',
-                                                                child: Text('Edit'),
+                                                                child: Text(AppLocalizations.of(context)?.translate("Edit") ?? "Edit"),
                                                               ),
-                                                              const PopupMenuItem<String>(
+                                                              PopupMenuItem<String>(
                                                                 value: 'delete',
-                                                                child: Text('Delete'),
+                                                                child: Text(AppLocalizations.of(context)?.translate("Delete") ?? "Delete"),
                                                               ),
                                                             ],
                                                           )
@@ -391,7 +392,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                           const SizedBox(
                                                               width: 8),
                                                           Text(
-                                                            "${getDayTitle(sObj["start_time"].toString())}|${getStringDateToOtherFormate(
+                                                            "${getDayTitle(context, sObj["start_time"].toString())} | ${getStringDateToOtherFormate(
                                                                 sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
                                                             style: TextStyle(
                                                                 color: TColor.gray,

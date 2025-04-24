@@ -1,12 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:fitness_workout_app/common_widget/round_textfield.dart';
 import 'package:fitness_workout_app/view/login/complete_profile_view.dart';
 import 'package:fitness_workout_app/view/login/login_view.dart';
+import 'package:fitness_workout_app/view/login/welcome_view.dart';
+import 'package:fitness_workout_app/view/login/what_your_goal_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_workout_app/services/auth.dart';
 import '../setting/PrivacyPolicy_and_TermOfUse_View.dart';
+import 'package:fitness_workout_app/model/user_model.dart';
 
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
@@ -70,6 +74,77 @@ class _SignUpViewState extends State<SignUpView> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  void handleSignupWithGG() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      String res = await AuthService().signInWithGoogle();
+
+      switch (res) {
+        case "success":
+          UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+          if (user != null) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const WelcomeView()),
+                  (route) => false,
+            );
+          } else {
+            throw Exception("Không thể lấy thông tin người dùng sau khi đăng nhập.");
+          }
+          break;
+
+        case "not-profile":
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const CompleteProfileView()),
+                (route) => false,
+          );
+          break;
+
+        case "not-level":
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const WhatYourGoalView()),
+                (route) => false,
+          );
+          break;
+
+        case "not-activate":
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Tài khoản bị khóa"),
+              content: const Text("Tài khoản của bạn chưa được kích hoạt."),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("OK"),
+                )
+              ],
+            ),
+          );
+          break;
+
+        default:
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Đăng nhập thất bại: $res')),
+          );
+      }
+    } catch (e) {
+      // Xử lý lỗi không mong muốn
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Đã xảy ra lỗi: ${e.toString()}")),
+      );
+    } finally {
+      // Luôn đảm bảo tắt loading
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -218,12 +293,11 @@ class _SignUpViewState extends State<SignUpView> {
                       height: media.width * 0.4,
                     ),
                     RoundButton(
-                      title: "Register",
+                      title: "Sign Up",
                       onPressed: () {
                         if (!isCheck) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(
-                                'Bạn cần chấp nhận các điều khoản trước khi đăng ký')),
+                            SnackBar(content: Text('Bạn cần chấp nhận các điều khoản trước khi đăng ký')),
                           );
                           return;
                         }
@@ -254,57 +328,45 @@ class _SignUpViewState extends State<SignUpView> {
                     SizedBox(
                       height: media.width * 0.04,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: TColor.white,
-                              border: Border.all(
-                                width: 1,
-                                color: TColor.gray.withOpacity(0.4),
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Image.asset(
+                    GestureDetector(
+                      onTap: handleSignupWithGG,
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: TColor.white,
+                          border: Border.all(
+                            width: 1,
+                            color: TColor.gray.withOpacity(0.4),
+                          ),
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: Offset(0, 5),
+                            )
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
                               "assets/img/google.png",
-                              width: 20,
-                              height: 20,
+                              width: 24,
+                              height: 24,
                             ),
-                          ),
-                        ),
-
-                        SizedBox(
-                          width: media.width * 0.04,
-                        ),
-
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: TColor.white,
-                              border: Border.all(
-                                width: 1,
-                                color: TColor.gray.withOpacity(0.4),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Sign Up with Google",
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
                               ),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Image.asset(
-                              "assets/img/facebook.png",
-                              width: 20,
-                              height: 20,
-                            ),
-                          ),
-                        )
-                      ],
+                            )
+                          ],
+                        ),
+                      ),
                     ),
                     SizedBox(
                       height: media.width * 0.04,
@@ -327,7 +389,7 @@ class _SignUpViewState extends State<SignUpView> {
                             ),
                           ),
                           Text(
-                            "Login",
+                            "Sign In",
                             style: TextStyle(
                                 color: TColor.black,
                                 fontSize: 14,

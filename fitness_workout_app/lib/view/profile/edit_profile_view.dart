@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../common_widget/GenderDropdown.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
+import '../../common_widget/round_textfield_2.dart';
 import '../../common_widget/selectDate.dart';
 import '../../model/user_model.dart';
 import '../../services/auth.dart';
@@ -31,6 +32,8 @@ class _EditProfileViewState extends State<EditProfileView> {
   final TextEditingController selectHeight = TextEditingController();
   final TextEditingController fnameController = TextEditingController();
   final TextEditingController lnameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passController = TextEditingController();
   String currentPic = '';
   final ImagePicker _picker = ImagePicker();
 
@@ -46,8 +49,9 @@ class _EditProfileViewState extends State<EditProfileView> {
     selectHeight.text = widget.user.height;
     selectDate.text = widget.user.dateOfBirth;
     selectedGender.text = widget.user.gender;
-    currentPic =
-    widget.user.pic.isNotEmpty ? widget.user.pic : "assets/img/u2.png";
+    emailController.text = widget.user.email;
+    passController.text = widget.user.pass;
+    currentPic = widget.user.pic.isNotEmpty ? widget.user.pic : "assets/img/u2.png";
   }
 
   @override
@@ -58,6 +62,8 @@ class _EditProfileViewState extends State<EditProfileView> {
     selectHeight.dispose();
     selectDate.dispose();
     selectedGender.dispose();
+    emailController.dispose();
+    passController.dispose();
     super.dispose();
   }
 
@@ -257,11 +263,19 @@ class _EditProfileViewState extends State<EditProfileView> {
                           SizedBox(
                             height: media.width * 0.04,
                           ),
+                          RoundTextField2(
+                            labelText: "Email",
+                            icon: "assets/img/email.png",
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                          SizedBox(
+                            height: media.width * 0.04,
+                          ),
                           GenderDropdown(
                             icon: "assets/img/gender.png",
-                            labelText: AppLocalizations.of(context)?.translate("Choose Gender") ?? "Choose Gender",
-                            options: [AppLocalizations.of(context)?.translate("Male") ?? "Male",
-                              AppLocalizations.of(context)?.translate("Female") ?? "Female"],
+                            labelText:"Choose Gender",
+                            options: ["Male", "Female"],
                             controller: selectedGender,
                           ),
                           SizedBox(
@@ -363,17 +377,19 @@ class _EditProfileViewState extends State<EditProfileView> {
                           SizedBox(
                             height: media.width * 0.04,
                           ),
-                          RoundButton(
-                            title: AppLocalizations.of(context)?.translate("Change password") ?? "Change password",
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (
-                                      context) => const ChangePasswordView(),
-                                ),
-                              );
-                            },
+                          Visibility(
+                            visible: passController.text.isNotEmpty,
+                            child: RoundButton(
+                              title: AppLocalizations.of(context)?.translate("Change password") ?? "Change password",
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ChangePasswordView(),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),

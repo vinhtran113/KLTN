@@ -9,6 +9,7 @@ import '../../model/exercise_model.dart';
 import '../../services/workout_tracker.dart';
 import 'finished_workout_view.dart';
 import '../../main.dart';
+import '../../localization/app_localizations.dart';
 
 class WorkOutDet extends StatelessWidget {
   final List<Exercise> exercises;
@@ -34,10 +35,13 @@ class WorkOutDet extends StatelessWidget {
       create: (context) => TimerModelSec(
           context, currentExercise.difficulty[diff]!.time, exercises, index,
           historyId, diff),
-      child: WillPopScope(
-        onWillPop: () async {
-          Provider.of<TimerModelSec>(context, listen: false).show();
-          return false; // Không quay lại màn hình trước
+      child: PopScope(
+        canPop: false, // Ngừng việc quay lại màn hình trước
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) {
+            // Hiển thị hộp thoại xác nhận hoặc xử lý gì đó nếu pop không thành công
+            Provider.of<TimerModelSec>(context, listen: false).show();
+          }
         },
         child: Scaffold(
           backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
@@ -104,8 +108,9 @@ class WorkOutDet extends StatelessWidget {
                         }, child: Container(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 15),
-                            child: const Text(
-                              "PAUSE", style: TextStyle(fontSize: 20),)));
+                            child: Text(
+                                AppLocalizations.of(context)?.translate("PAUSE") ?? "PAUSE",
+                              style: TextStyle(fontSize: 20),)));
                       },
                     ),
                     Spacer(),
@@ -154,8 +159,8 @@ class WorkOutDet extends StatelessWidget {
                                     ),
                                   );
                                 },
-                                child: const Text(
-                                  "Previous",
+                                child: Text(
+                                    AppLocalizations.of(context)?.translate("Previous") ?? "Previous",
                                   style: TextStyle(fontSize: 16),
                                 ),
                               );
@@ -215,8 +220,8 @@ class WorkOutDet extends StatelessWidget {
                                 },
                                 child: Text(
                                   index == exercises.length - 1
-                                      ? "Finish"
-                                      : "Next",
+                                      ? AppLocalizations.of(context)?.translate("Finish") ?? "Finish"
+                                      : AppLocalizations.of(context)?.translate("Next") ?? "Next",
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               );
@@ -231,9 +236,9 @@ class WorkOutDet extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 15),
-                          child: Text("Next: ${index != exercises.length - 1
+                          child: Text("${AppLocalizations.of(context)?.translate("Next:") ?? "Next:"} ${index != exercises.length - 1
                               ? exercises[index + 1].name
-                              : 'Finish'}",
+                              : AppLocalizations.of(context)?.translate("Finish") ?? "Finish"}",
                             style: const TextStyle(fontSize: 18,
                                 fontWeight: FontWeight.bold),),
                         ))
@@ -257,7 +262,7 @@ class WorkOutDet extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text("Pause", style: TextStyle(fontSize: 40,
+                            Text(AppLocalizations.of(context)?.translate("Pause") ?? "Pause", style: TextStyle(fontSize: 40,
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold),),
                             const SizedBox(height: 30,),
@@ -304,8 +309,8 @@ class WorkOutDet extends StatelessWidget {
                               },
                               child: Container(
                                 width: 180,
-                                child: const Text(
-                                  "Restart",
+                                child: Text(
+                                    AppLocalizations.of(context)?.translate("Restart") ?? "Restart",
                                   style: TextStyle(color: Colors.white),
                                   textAlign: TextAlign.center,
                                 ),
@@ -373,8 +378,8 @@ class WorkOutDet extends StatelessWidget {
                               },
                               child: Container(
                                 width: 180,
-                                child: const Text(
-                                  "Quit",
+                                child: Text(
+                                  AppLocalizations.of(context)?.translate("Quit") ?? "Quit",
                                   style: TextStyle(color: Colors.white),
                                   textAlign: TextAlign.center,
                                 ),
@@ -385,7 +390,7 @@ class WorkOutDet extends StatelessWidget {
                             }, child: Container(
                               width: 180,
                               child: Text(
-                                "Resume", textAlign: TextAlign.center,),
+                                AppLocalizations.of(context)?.translate("Resume") ?? "Resume", textAlign: TextAlign.center),
                             ), style: ButtonStyle(
                                 backgroundColor: MaterialStateProperty.all(
                                     Colors.white)),)

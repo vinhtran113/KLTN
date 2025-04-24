@@ -50,7 +50,7 @@ class _TodayMealRowState extends State<TodayMealRow> {
                         fontWeight: FontWeight.w500),
                   ),
                   Text(
-                    "${getDayTitle(widget.mObj["time"].toString())} | ${getStringDateToOtherFormate(widget.mObj["time"].toString(), outFormatStr: "h:mm aa")}",
+                    "${getDayTitle(context, widget.mObj["time"].toString())} | ${getStringDateToOtherFormate(widget.mObj["time"].toString(), outFormatStr: "h:mm aa")}",
                     style: TextStyle(
                       color: TColor.gray,
                       fontSize: 10,

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
 import 'package:intl/intl.dart';
 import 'package:mailer/mailer.dart';
@@ -34,6 +35,11 @@ class AuthService {
       // Lấy thông tin user từ Firestore dựa trên email
       var userSnapshot = await _firestore.collection('users').where('email', isEqualTo: email).get();
       if (userSnapshot.docs.isNotEmpty) {
+        var userData = userSnapshot.docs.first.data();
+        // Nếu password là rỗng => nghĩa là đã đăng ký bằng phương thức khác (Google)
+        if ((userData['password'] ?? "") == "") {
+          return "Email này đã được đăng ký bằng phương thức khác. Vui lòng đăng nhập bằng Google.";
+        }
         return "Email này đã được đăng ký.";
       }
       if (email.isNotEmpty ||
@@ -61,6 +67,83 @@ class AuthService {
       return err.toString();
     }
     return res;
+  }
+
+  Future<String> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      if (googleUser == null) {
+        return "Đăng nhập bằng Google bị hủy";
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Lấy email trước khi đăng nhập bằng Google credential
+      final email = googleUser.email;
+
+      // Kiểm tra xem email này đã đăng ký bằng email/password chưa
+      var emailSnapshot = await _firestore.collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (emailSnapshot.docs.isNotEmpty) {
+        var userData = emailSnapshot.docs.first.data();
+        if ((userData['password'] ?? "") != "") {
+          // Đã có tài khoản dùng email/password, không cho đăng nhập bằng Google
+          return "Email này đã được đăng ký bằng phương thức email/password. Vui lòng đăng nhập bằng email và mật khẩu.";
+        }
+      }
+
+      // Nếu không trùng, tiếp tục đăng nhập bằng Google
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+
+      User? user = userCredential.user;
+
+      if (user == null) {
+        return "Lỗi không xác định khi đăng nhập";
+      }
+
+      // Kiểm tra nếu người dùng đã có trong Firestore (dựa theo UID của Google)
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(user.uid).get();
+
+      if (!userDoc.exists) {
+        // Nếu chưa có, tạo mới user
+        await _firestore.collection("users").doc(user.uid).set({
+          'fname': user.displayName?.split(" ").first ?? '',
+          'lname': user.displayName?.split(" ").last ?? '',
+          'uid': user.uid,
+          'email': user.email,
+          'password': "", // để trống vì đăng nhập bằng Google
+          'role': 'user',
+          'activate': true,
+          'weight': "",
+          'level': "",
+          'pic': user.photoURL,
+        });
+        return "not-profile"; // Điều hướng người dùng đi cập nhật hồ sơ
+      } else {
+        final data = userDoc.data() as Map<String, dynamic>;
+        if (!data['activate']) return "not-activate";
+        if (data['weight'] == "") return "not-profile";
+        if (data['level'] == "") return "not-level";
+      }
+
+      // Load các notification nếu cần
+      String addData = await notificationServices.loadAllNotifications();
+      if (addData != "success") {
+        return addData;
+      }
+
+      return "success";
+    } catch (e) {
+      return e.toString();
+    }
   }
 
   // logIn user
@@ -94,7 +177,10 @@ class AuthService {
       }
 
       String checkPass = userDoc['password'];
-      if(password != checkPass){
+      if((checkPass ?? "") == ""){
+        return "Email này đã được đăng ký bằng phương thức khác. Vui lòng đăng nhập bằng Google.";
+      }
+      else if(password != checkPass){
         return "Mật khẩu của bạn không chính xác!";
       }
 
@@ -125,7 +211,19 @@ class AuthService {
 
   // for sighout
   logOut() async {
-    await _auth.signOut();
+    try {
+      // Sign out khỏi Firebase
+      await _auth.signOut();
+
+      // Sign out khỏi Google nếu đang đăng nhập bằng Google
+      final googleSignIn = GoogleSignIn();
+      if (await googleSignIn.isSignedIn()) {
+        await googleSignIn.signOut();
+      }
+
+    } catch (e) {
+      print("Lỗi khi đăng xuất: $e");
+    }
   }
 
   Future<String> completeUserProfile({

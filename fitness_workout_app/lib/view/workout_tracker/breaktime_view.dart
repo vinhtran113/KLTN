@@ -3,6 +3,7 @@ import 'package:fitness_workout_app/view/workout_tracker/workout_start_view.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../model/exercise_model.dart';
+import '../../localization/app_localizations.dart';
 
 class BreakTime extends StatelessWidget {
   final List<Exercise> exercises;
@@ -37,7 +38,7 @@ class BreakTime extends StatelessWidget {
             children: [
               Spacer(),
               Text(
-                "Break Time",
+                AppLocalizations.of(context)?.translate("Break Time") ?? "Break Time",
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               Consumer<TimerModelSec>(
@@ -57,7 +58,7 @@ class BreakTime extends StatelessWidget {
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
-                      child: Text("+10 sec", style: TextStyle(fontSize: 19)),
+                      child: Text("+10 ${AppLocalizations.of(context)?.translate("sec") ?? "sec"}", style: TextStyle(fontSize: 19)),
                     ),
                   );
                 },
@@ -88,7 +89,7 @@ class BreakTime extends StatelessWidget {
                             );
                           },
                           child: Text(
-                            "Previous",
+                            AppLocalizations.of(context)?.translate("Previous") ?? "Previous",
                             style: const TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         );
@@ -115,7 +116,7 @@ class BreakTime extends StatelessWidget {
                             );
                           },
                           child: Text(
-                            "Skip",
+                              AppLocalizations.of(context)?.translate("Skip") ?? "Skip",
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         );
@@ -130,7 +131,8 @@ class BreakTime extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                   child: Text(
-                    "Next: ${index != exercises.length ? exercises[index].name : 'Finish'}",
+                    "${AppLocalizations.of(context)?.translate("Next:") ?? "Next:"}"
+                        " ${index != exercises.length ? exercises[index].name : AppLocalizations.of(context)?.translate("Finish") ?? "Finish"}",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),

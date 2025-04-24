@@ -53,11 +53,13 @@ class _GenderDropdownState extends State<GenderDropdown> {
             Expanded(
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
-                  value: AppLocalizations.of(context)?.translate(widget.controller.text),
+                  value: widget.controller.text.isEmpty ? null : widget.controller.text,
                   items: widget.options.map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value),
+                      child: Text(
+                        AppLocalizations.of(context)?.translate(value) ?? value,
+                      ),
                     );
                   }).toList(),
                   onChanged: (value) {

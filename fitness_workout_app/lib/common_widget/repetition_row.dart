@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../common/colo_extension.dart';
+import '../../localization/app_localizations.dart';
 
 class RepetitionsRow extends StatefulWidget {
   final String icon;
@@ -86,7 +87,7 @@ class _RepetitionsRowState extends State<RepetitionsRow> {
                   children: [
                     // Checkbox cho "Everyday"
                     CheckboxListTile(
-                      title: const Text("Everyday"),
+                      title: Text(AppLocalizations.of(context)?.translate("everyday") ?? "Everyday"),
                       value: isEveryday,
                       onChanged: (bool? value) {
                         setState(() {
@@ -104,7 +105,7 @@ class _RepetitionsRowState extends State<RepetitionsRow> {
                     // Checkbox cho các ngày trong tuần
                     ...daysOfWeek.map((day) {
                       return CheckboxListTile(
-                        title: Text(day),
+                        title: Text(AppLocalizations.of(context)?.translate(day.toLowerCase()) ?? day),
                         value: selectedDays[day],
                         onChanged: (bool? value) {
                           setState(() {
@@ -127,7 +128,7 @@ class _RepetitionsRowState extends State<RepetitionsRow> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text("Save"),
+                      child: Text(AppLocalizations.of(context)?.translate("Save") ?? "Save"),
                     ),
                   ],
                 ),

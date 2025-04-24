@@ -3,6 +3,7 @@ import 'package:fitness_workout_app/common_widget/select_train_row.dart';
 import 'package:flutter/material.dart';
 import '../../services/workout_tracker.dart';
 import '../../main.dart';
+import '../../localization/app_localizations.dart';
 
 class SelectWorkoutView extends StatefulWidget {
   const SelectWorkoutView({super.key});
@@ -82,7 +83,7 @@ class _SelectWorkoutViewState extends State<SelectWorkoutView> {
                 ),
               ),
               title: Text(
-                "Workout List",
+                AppLocalizations.of(context)?.translate("Workout List") ?? "Workout List",
                 style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w700),
@@ -110,7 +111,7 @@ class _SelectWorkoutViewState extends State<SelectWorkoutView> {
                         controller: _searchController,
                         style: TextStyle(color: darkmode? TColor.white : TColor.black),
                         decoration: InputDecoration(
-                          hintText: 'Search...',
+                          hintText: AppLocalizations.of(context)?.translate("Search...") ?? "Search...",
                           hintStyle: TextStyle(color: darkmode? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7)),
                           filled: true,
                           fillColor: Colors.grey.withOpacity(0.1),

@@ -2,6 +2,7 @@ import 'package:fitness_workout_app/view/login/login_view.dart';
 import 'package:fitness_workout_app/view/profile/change_goal_view.dart';
 import 'package:fitness_workout_app/view/profile/edit_profile_view.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
@@ -82,8 +83,13 @@ class _ProfileViewState extends State<ProfileView> {
                 // Xóa thông báo và đăng xuất
                 await _localNotifications.cancelAll();
                 await NotificationServices().clearNotificationArr();
+                // Reset chế độ darkmode
                 darkModeNotifier.value = false;
-                //_saveDarkModePreference(false);
+                // Reset ngôn ngữ về "en"
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('locale', 'en');
+                localeNotifier.value = const Locale('en');
+
                 await AuthService().logOut();
                 // Điều hướng đến LoginView và xóa lịch sử
                 Navigator.of(context).pushAndRemoveUntil(

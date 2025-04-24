@@ -1,12 +1,14 @@
 import 'package:dotted_dashed_line/dotted_dashed_line.dart';
+import 'package:fitness_workout_app/model/meal_model.dart';
 import 'package:flutter/material.dart';
 
 import '../common/colo_extension.dart';
 
 class FoodStepDetailRow extends StatelessWidget {
-  final Map sObj;
+  final RecipeModel? sObj;
+  final int index;
   final bool isLast;
-  const FoodStepDetailRow({super.key, required this.sObj, this.isLast = false});
+  const FoodStepDetailRow({super.key, required this.sObj, required this.index, this.isLast = false});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +54,7 @@ class FoodStepDetailRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Step ${ sObj["no"].toString()}",
+                "Step ${(index + 1).toString()}",
                 style: TextStyle(
                     color: TColor.black,
                     fontSize: 14,
@@ -60,7 +62,7 @@ class FoodStepDetailRow extends StatelessWidget {
                 ),
               ),
               Text(
-                sObj["detail"].toString(),
+                sObj!.detail.toString(),
                 style: TextStyle(color: TColor.gray, fontSize: 12),
               ),
             ],

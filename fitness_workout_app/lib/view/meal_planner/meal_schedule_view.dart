@@ -5,6 +5,7 @@ import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart
 import '../../common/colo_extension.dart';
 import '../../common_widget/meal_food_schedule_row.dart';
 import '../../common_widget/nutritions_row.dart';
+import '../../view/meal_planner/add_meal_schedule_view.dart';
 
 class MealScheduleView extends StatefulWidget {
   const MealScheduleView({super.key});
@@ -355,8 +356,36 @@ class _MealScheduleViewState extends State<MealScheduleView> {
                     )
                   ],
                 ),
-              ))
+              ),
+          )
         ],
+      ),
+      floatingActionButton: InkWell(
+        onTap: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddMealScheduleView(date: _selectedDateAppBBar,),
+            ),
+          );
+        },
+        child: Container(
+          width: 55,
+          height: 55,
+          decoration: BoxDecoration(
+              gradient: LinearGradient(colors: TColor.secondaryG),
+              borderRadius: BorderRadius.circular(27.5),
+              boxShadow: const [
+                BoxShadow(
+                    color: Colors.black12, blurRadius: 5, offset: Offset(0, 2))
+              ]),
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.add,
+            size: 20,
+            color: TColor.white,
+          ),
+        ),
       ),
     );
   }

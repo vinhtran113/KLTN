@@ -10,6 +10,7 @@ import '../../common_widget/exercises_row.dart';
 import '../../model/exercise_model.dart';
 import '../../services/workout_tracker.dart';
 import '../../main.dart';
+import '../../localization/app_localizations.dart';
 
 class WorkoutDetailView extends StatefulWidget {
   final Map dObj;
@@ -78,7 +79,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
             children: ["Beginner", "Normal", "Professional"].map((difficulty) {
               return ListTile(
                 title: Text(
-                  difficulty,
+                  AppLocalizations.of(context)?.translate(difficulty) ?? difficulty,
                   style: TextStyle(color: darkmode? TColor.white : TColor.black, fontSize: 14),
                 ),
                 onTap: () {
@@ -233,10 +234,9 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                       fontWeight: FontWeight.w700),
                                 ),
                                 Text(
-                                  "${exercisesArr.length
-                                      .toString()} Exercises | ${listInfo["time"]
-                                      .toString()} | ${listInfo["calo"]
-                                      .toString()}",
+                                  "${exercisesArr.length.toString()} ${AppLocalizations.of(context)?.translate("exercise") ?? "Exercises"} | "
+                                      "${listInfo["time"].toString()} ${AppLocalizations.of(context)?.translate("Mins") ?? "Mins"} | "
+                                      "${listInfo["calo"].toString()} ${AppLocalizations.of(context)?.translate("Calories Burned") ?? "Calories Burned"}",
                                   style: TextStyle(
                                       color: TColor.gray, fontSize: 12),
                                 ),
@@ -277,7 +277,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  "Difficulty",
+                                  AppLocalizations.of(context)?.translate("Difficulty") ?? "Difficulty",
                                   style: TextStyle(
                                       color: darkmode? TColor.white : TColor.gray, fontSize: 12),
                                 ),
@@ -313,8 +313,8 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                       ),
                       IconTitleNextRow(
                           icon: "assets/img/time.png",
-                          title: "Schedule Workout",
-                          time: "Add to Schedule",
+                          title: AppLocalizations.of(context)?.translate("Workout Schedule") ?? "Workout Schedule",
+                          time: AppLocalizations.of(context)?.translate("Add to Schedule") ?? "Add to Schedule",
                           color: darkmode? TColor.white.withOpacity(0.8) : TColor.primaryColor2.withOpacity(0.3),
                           onPressed: () {
                             Navigator.push(context, MaterialPageRoute(builder: (
@@ -327,7 +327,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "You'll Need",
+                            AppLocalizations.of(context)?.translate("You'll Need") ?? "You'll Need",
                             style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700),
@@ -335,7 +335,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                           TextButton(
                             onPressed: () {},
                             child: Text(
-                              "${youArr.length} Items",
+                              "${youArr.length} ${AppLocalizations.of(context)?.translate("Items") ?? "Items"}",
                               style:
                               TextStyle(color: TColor.gray, fontSize: 12),
                             ),
@@ -415,17 +415,14 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Exercises",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700),
+                            AppLocalizations.of(context)?.translate("Exercises") ?? "Exercises",
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                           ),
                           TextButton(
                             onPressed: () {},
                             child: Text(
-                              "${exercisesArr.length.toString()} Exercises",
-                              style:
-                              TextStyle(color: TColor.gray, fontSize: 12),
+                              "${exercisesArr.length.toString()} ${AppLocalizations.of(context)?.translate("exercise") ?? "Exercises"}",
+                              style: TextStyle(color: TColor.gray, fontSize: 12),
                             ),
                           )
                         ],
@@ -454,7 +451,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      RoundButton(title: "Start Workout",
+                      RoundButton(title: AppLocalizations.of(context)?.translate("Start Workout") ?? "Start Workout",
                           onPressed: _createHistory
                       )
                     ],

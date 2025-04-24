@@ -264,8 +264,8 @@ class WorkoutService {
       int totalTimeInMinutes = (totalTimeInSeconds / 60).round();
 
       // Lưu kết quả vào map
-      data['time'] = "$totalTimeInMinutes Mins";
-      data['calo'] = "$totalCalo Calories Burned";
+      data['time'] = "$totalTimeInMinutes";
+      data['calo'] = "$totalCalo";
     } catch (e) {
       print("Error fetching time and calo: $e");
     }

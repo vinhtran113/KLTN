@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../common/colo_extension.dart';
 import '../../model/exercise_model.dart';
 import '../../main.dart';
+import '../../localization/app_localizations.dart';
 
 class ReadyView extends StatelessWidget {
   final List<Exercise> exercises;
@@ -31,7 +32,7 @@ class ReadyView extends StatelessWidget {
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height / 2 - 100),
                 Text(
-                  "ARE YOU READY?",
+                  AppLocalizations.of(context)?.translate("ARE YOU READY?") ?? "ARE YOU READY?",
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 40),
@@ -50,8 +51,9 @@ class ReadyView extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                     child: Text(
-                      "Next: ${exercises.isNotEmpty ? exercises[index].name : 'No Exercise'}",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        "${AppLocalizations.of(context)?.translate("Next:") ?? "Next:"} "
+                            "${exercises.isNotEmpty ? exercises[index].name : (AppLocalizations.of(context)?.translate("No Exercise") ?? "No Exercise")}",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
