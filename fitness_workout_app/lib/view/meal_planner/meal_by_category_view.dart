@@ -144,9 +144,20 @@ class _MealsByCategoryViewState extends State<MealsByCategoryView> {
                       ),
                     ),
                   ),
-
                   // Hiển thị danh sách
-                  ListView.builder(
+                  filteredMeals.isEmpty ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Text(
+                        "Not Found",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ) : ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 15.0),
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,

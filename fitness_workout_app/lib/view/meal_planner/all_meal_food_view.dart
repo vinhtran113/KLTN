@@ -1,53 +1,68 @@
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:flutter/material.dart';
-import '../../common_widget/what_train_row.dart';
-import '../../services/workout_tracker.dart';
+import '../../common_widget/search_all_meal_row.dart';
+import '../../model/meal_model.dart';
+import '../../services/meal.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';
+import 'food_info_details_view.dart';
 
-class AllWorkoutView extends StatefulWidget {
-  const AllWorkoutView({super.key});
+class AllMealFoodView extends StatefulWidget {
+  final Map mObj;
+  const AllMealFoodView({super.key, required this.mObj});
 
   @override
-  State<AllWorkoutView> createState() => _AllWorkoutViewState();
+  State<AllMealFoodView> createState() => _AllMealFoodViewState();
 }
 
-class _AllWorkoutViewState extends State<AllWorkoutView> {
-  final WorkoutService _workoutService = WorkoutService();
-  List<Map<String, dynamic>> whatArr = [];
-  List<Map<String, dynamic>> filteredArr = [];
+class _AllMealFoodViewState extends State<AllMealFoodView> {
+  final MealService _mealService = MealService();
+  List<Meal> allMealByCateArr = [];
+  List<Meal> filteredMeals = [];
   TextEditingController _searchController = TextEditingController();
   bool darkmode = darkModeNotifier.value;
 
   @override
   void initState() {
     super.initState();
-    _loadCategoryWorkouts();
-    _searchController.addListener(_filterWorkouts);
+    _loadAllMealsByRecommend();
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadCategoryWorkouts() async {
-    List<Map<String, dynamic>> workouts = await _workoutService.fetchWorkoutList();
+  void _onSearchChanged() {
+    String keyword = _searchController.text.trim().toLowerCase();
     setState(() {
-      whatArr = workouts;
-      filteredArr = workouts; // Hiển thị tất cả ban đầu
+      if (keyword.isEmpty) {
+        // Trở lại danh sách được recommend
+        filteredMeals = allMealByCateArr;
+      } else {
+        filteredMeals = allMealByCateArr.where((meal) =>
+            meal.name.toLowerCase().contains(keyword)).toList();
+      }
     });
   }
 
-  void _filterWorkouts() {
-    String query = _searchController.text.toLowerCase();
-    setState(() {
-      filteredArr = whatArr.where((workout) {
-        // Tìm kiếm dựa trên tên hoặc các thuộc tính khác
-        return workout["title"].toLowerCase().contains(query); // Giả sử mỗi phần tử có trường 'name'
-      }).toList();
-    });
+  void _loadAllMealsByRecommend() async {
+    try {
+      List<Meal> meals = await _mealService.fetchMealsWithRecommend(
+        recommend: widget.mObj["name"],
+      );
+      setState(() {
+        allMealByCateArr = meals;
+        filteredMeals = meals;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e')),
+      );
+    }
   }
 
   @override
@@ -84,7 +99,7 @@ class _AllWorkoutViewState extends State<AllWorkoutView> {
                 ),
               ),
               title: Text(
-                AppLocalizations.of(context)?.translate("Workout List") ?? "Workout List",
+                AppLocalizations.of(context)?.translate("Food Of ${widget.mObj["name"]}") ?? "Food Of ${widget.mObj["name"]}",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
               ),
             ),
@@ -123,23 +138,42 @@ class _AllWorkoutViewState extends State<AllWorkoutView> {
                       ),
                     ),
                   ),
-                  filteredArr.isEmpty ? Center(
+                  // Hiển thị danh sách
+                  filteredMeals.isEmpty ? Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Text(
                         "Not Found",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ) : ListView.builder(
-                    padding: EdgeInsets.zero,
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    itemCount: filteredArr.length,
+                    itemCount: filteredMeals.length,
                     itemBuilder: (context, index) {
-                      var wObj = filteredArr[index] as Map? ?? {};
+                      Meal fObj = filteredMeals[index];
                       return InkWell(
-                        child: WhatTrainRow(wObj: wObj),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FoodInfoDetailsView(
+                                dObj: fObj,
+                                mObj: widget.mObj,
+                              ),
+                            ),
+                          );
+                        },
+                        child: SearchAllMealRow(
+                          mObj: fObj,
+                          dObj: widget.mObj,
+                        ),
                       );
                     },
                   ),

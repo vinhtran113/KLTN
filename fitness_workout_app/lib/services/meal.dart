@@ -40,7 +40,7 @@ class MealService {
     for (var name in allIngredientNames) {
       final doc = await FirebaseFirestore.instance
           .collection('Ingredients')
-          .doc(name.toLowerCase()) // assuming doc id is lowercase name
+          .doc(name) // assuming doc id is lowercase name
           .get();
       if (doc.exists) {
         ingredientsData[name] = doc.data()!;
@@ -88,8 +88,9 @@ class MealService {
     for (var name in allIngredientNames) {
       final doc = await FirebaseFirestore.instance
           .collection('Ingredients')
-          .doc(name.toLowerCase()) // assuming doc id is lowercase name
+          .doc(name)
           .get();
+
       if (doc.exists) {
         ingredientsData[name] = doc.data()!;
       }
@@ -99,6 +100,7 @@ class MealService {
       for (var i = 0; i < meal.ingredients.length; i++) {
         final ing = meal.ingredients[i];
         final extra = ingredientsData[ing.name];
+        print("Gán: ${extra}");
         if (extra != null) {
           meal.ingredients[i] = Ingredient(
             name: ing.name,
@@ -132,8 +134,9 @@ class MealService {
     for (var name in allIngredientNames) {
       final doc = await FirebaseFirestore.instance
           .collection('Ingredients')
-          .doc(name.toLowerCase()) // assuming doc id is lowercase name
+          .doc(name) // assuming doc id is lowercase name
           .get();
+
       if (doc.exists) {
         ingredientsData[name] = doc.data()!;
       }
@@ -143,6 +146,7 @@ class MealService {
       for (var i = 0; i < meal.ingredients.length; i++) {
         final ing = meal.ingredients[i];
         final extra = ingredientsData[ing.name];
+
         if (extra != null) {
           meal.ingredients[i] = Ingredient(
             name: ing.name,
@@ -150,9 +154,11 @@ class MealService {
             unit: extra['unit'] ?? '',
             image: extra['image'] ?? '',
           );
+
         }
       }
     }
+
     return meals;
   }
 
@@ -180,7 +186,7 @@ class MealService {
     for (var name in allIngredientNames) {
       final doc = await FirebaseFirestore.instance
           .collection('Ingredients')
-          .doc(name.toLowerCase()) // assuming doc id is lowercase name
+          .doc(name) // assuming doc id is lowercase name
           .get();
       if (doc.exists) {
         ingredientsData[name] = doc.data()!;
@@ -203,5 +209,19 @@ class MealService {
     }
     return meals;
   }
+
+  Future<List<Ingredient>> fetchAvailableIngredients() async {
+    final snapshot = await FirebaseFirestore.instance.collection('Ingredients').get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      return Ingredient(
+        name: data['name'] ?? '',
+        unit: data['unit'] ?? '',
+        image: data['image'] ?? '',
+        amount: 0,
+      );
+    }).toList();
+  }
+
 
 }

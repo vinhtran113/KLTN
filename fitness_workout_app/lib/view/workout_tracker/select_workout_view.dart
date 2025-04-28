@@ -124,7 +124,15 @@ class _SelectWorkoutViewState extends State<SelectWorkoutView> {
                       ),
                     ),
                   ),
-                  ListView.builder(
+                  filteredArr.isEmpty ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Text(
+                        "Not Found",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ) : ListView.builder(
                       padding: EdgeInsets.zero,
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,

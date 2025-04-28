@@ -2,12 +2,13 @@ import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:flutter/material.dart';
 import '../common/colo_extension.dart';
 import '../../localization/app_localizations.dart';
+import '../model/meal_model.dart';
 
-class SelectTrainRow extends StatelessWidget {
-  final Map wObj;
-  final Function(String) onSelect;
+class SelectFoodRow extends StatelessWidget {
+  final Meal wObj;
+  final Function(Meal) onSelect;
 
-  const SelectTrainRow({super.key, required this.wObj, required this.onSelect});
+  const SelectFoodRow({super.key, required this.wObj, required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,7 @@ class SelectTrainRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    wObj["title"].toString(),
+                    wObj.name.toString(),
                     style: TextStyle(
                         color: TColor.black,
                         fontSize: 14,
@@ -41,7 +42,7 @@ class SelectTrainRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "${wObj["exercises"]} | ${wObj["time"]}",
+                    "${wObj.size} | ${wObj.time} Mins | ${wObj.nutri.getCalories()} kCal",
                     style: TextStyle(
                       color: TColor.gray,
                       fontSize: 12,
@@ -58,7 +59,7 @@ class SelectTrainRow extends StatelessWidget {
                       elevation: 0.05,
                       fontWeight: FontWeight.w700,
                       onPressed: () {
-                        onSelect(wObj["title"].toString());
+                        onSelect(wObj);
                       },
                     ),
                   )
@@ -79,8 +80,8 @@ class SelectTrainRow extends StatelessWidget {
                 ),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(30),
-                  child: wObj["image"] != null && wObj["image"].toString().isNotEmpty ? Image.network(
-                    wObj["image"].toString(),
+                  child: wObj.image != null && wObj.image.toString().isNotEmpty ? Image.network(
+                    wObj.image.toString(),
                     width: 90,
                     height: 90,
                     fit: BoxFit.contain,

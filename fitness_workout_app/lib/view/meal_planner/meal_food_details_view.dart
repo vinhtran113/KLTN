@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common_widget/meal_recommed_cell.dart';
+import 'package:fitness_workout_app/view/meal_planner/recommend_meal_food_view.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
@@ -10,6 +11,7 @@ import '../../model/meal_model.dart';
 import '../../model/user_model.dart';
 import '../../services/auth.dart';
 import '../../services/meal.dart';
+import 'all_meal_food_view.dart';
 import 'food_info_details_view.dart';
 import 'meal_by_category_view.dart';
 
@@ -222,32 +224,45 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
               height: media.width * 0.01,
             ),
             txtSearch.text.isNotEmpty
-                ? ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: filteredMeals.length,
-                itemBuilder: (context, index) {
-                  Meal fObj = filteredMeals[index];
-                  return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FoodInfoDetailsView(
-                            dObj: fObj,
-                            mObj: widget.eObj,
-                          ),
+                ? (filteredMeals.isEmpty
+                ? Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  "Not Found",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ) : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: filteredMeals.length,
+              itemBuilder: (context, index) {
+                Meal fObj = filteredMeals[index];
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FoodInfoDetailsView(
+                          dObj: fObj,
+                          mObj: widget.eObj,
                         ),
-                      );
-                    },
-                    child: SearchAllMealRow(
-                      mObj: fObj,
-                      dObj: widget.eObj,
-                    ),
-                  );
-                },
-            ): SizedBox(),
+                      ),
+                    );
+                  },
+                  child: SearchAllMealRow(
+                    mObj: fObj,
+                    dObj: widget.eObj,
+                  ),
+                );
+              },
+            )) : SizedBox(),
             SizedBox(
               height: media.width * 0.03,
             ),
@@ -310,7 +325,17 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
                         fontWeight: FontWeight.w700),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RecommendMealFoodView(
+                            level: level.toString(),
+                            mObj: widget.eObj,
+                          ),
+                        ),
+                      );
+                    },
                     child: Text(
                       "See All",
                       style:
@@ -361,7 +386,16 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
                         fontWeight: FontWeight.w700),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AllMealFoodView(
+                            mObj: widget.eObj,
+                          ),
+                        ),
+                      );
+                    },
                     child: Text(
                       "See All",
                       style:
