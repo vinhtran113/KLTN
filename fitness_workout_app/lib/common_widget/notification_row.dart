@@ -5,7 +5,7 @@ import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:flutter/material.dart';
 
 import '../main.dart';
-import '../view/workout_tracker/workour_detail_view.dart';
+import '../view/workout_tracker/workout_detail_view.dart';
 
 class NotificationRow extends StatelessWidget {
   final Map nObj;

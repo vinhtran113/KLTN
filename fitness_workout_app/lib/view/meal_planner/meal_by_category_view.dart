@@ -2,7 +2,7 @@ import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:flutter/material.dart';
 import '../../common_widget/search_all_meal_row.dart';
 import '../../model/meal_model.dart';
-import '../../services/meal.dart';
+import '../../services/meal_services.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';
 import 'food_info_details_view.dart';

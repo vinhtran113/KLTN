@@ -6,11 +6,12 @@ import 'package:intl/intl.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common/common.dart';
+import '../../common_widget/delete_button.dart';
 import '../../common_widget/icon_title_next_row.dart';
 import '../../common_widget/repetition_row.dart';
 import '../../common_widget/round_button.dart';
 import '../../model/workout_schedule_model.dart';
-import '../../services/workout_tracker.dart';
+import '../../services/workout_services.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';
 
@@ -131,6 +132,43 @@ class _EditScheduleViewState extends State<EditScheduleView> {
         );
       },
     );
+  }
+
+  void _confirmDeleteSchedule() async {
+    // Hiển thị một hộp thoại xác nhận trước khi xoá
+    bool? confirm = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Delete'),
+          content: Text(
+              'Are you sure you want to delete this workout schedule?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+    // Nếu người dùng xác nhận, gọi hàm xoá lịch bài tập
+    if (confirm == true) {
+      String res = await _workoutService.deleteWorkoutSchedule(scheduleId:  widget.schedule.id);
+      if (res == "success") {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Workout schedule deleted successfully')));
+
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$res')),);
+      }
+    }
   }
 
   @override
@@ -340,6 +378,12 @@ class _EditScheduleViewState extends State<EditScheduleView> {
               RoundButton(
                   title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
                   onPressed: _handleUpdateSchedule),
+              SizedBox(
+                height: media.width * 0.03,
+              ),
+              DeleteButton(
+                title: AppLocalizations.of(context)?.translate("Delete") ?? "Delete",
+                onPressed: _confirmDeleteSchedule),
               const SizedBox(
                 height: 20,
               ),

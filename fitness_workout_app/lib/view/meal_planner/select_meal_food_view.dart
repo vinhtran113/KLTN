@@ -3,7 +3,7 @@ import 'package:fitness_workout_app/view/meal_planner/select_detail_food_view.da
 import 'package:flutter/material.dart';
 import '../../common_widget/select_food_row.dart';
 import '../../model/meal_model.dart';
-import '../../services/meal.dart';
+import '../../services/meal_services.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';
 

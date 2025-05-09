@@ -1,6 +1,8 @@
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:flutter/material.dart';
 
+import '../view/meal_planner/food_info_details2_view.dart';
+
 class MealFoodScheduleRow extends StatelessWidget {
   final Map mObj;
   final int index;
@@ -21,10 +23,25 @@ class MealFoodScheduleRow extends StatelessWidget {
                     color: index % 2 == 0 ? TColor.primaryColor2.withOpacity(0.4) : TColor.secondaryColor2.withOpacity(0.4) ,
                     borderRadius: BorderRadius.circular(10)),
                 alignment: Alignment.center,
-                child: Image.asset(
+                child: (mObj["image"] != null && mObj["image"].toString().startsWith('http')) ?
+                Image.network(
                   mObj["image"].toString(),
-                  width: 40,
-                  height: 40,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      "assets/img/no_image.png",
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.contain,
+                    );
+                  },
+                )
+                    : Image.asset(
+                  "assets/img/no_image.png",
+                  width: 50,
+                  height: 50,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -44,7 +61,7 @@ class MealFoodScheduleRow extends StatelessWidget {
                         fontWeight: FontWeight.w700),
                   ),
                   Text(
-                    mObj["time"].toString(),
+                    "${mObj["time"].toString()} | ${mObj["totalCalories"].toStringAsFixed(0)} kCal",
                     style: TextStyle(
                       color: TColor.gray,
                       fontSize: 10,
@@ -54,7 +71,14 @@ class MealFoodScheduleRow extends StatelessWidget {
               ),
             ),
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FoodInfoDetails2View(dObj: mObj),
+                  ),
+                );
+              },
               icon: Image.asset(
                 "assets/img/next_go.png",
                 width: 25,

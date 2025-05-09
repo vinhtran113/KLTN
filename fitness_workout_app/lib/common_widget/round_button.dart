@@ -54,16 +54,15 @@ class RoundButton extends StatelessWidget {
                 fontSize: fontSize,
                 fontWeight: fontWeight))
             : ShaderMask(
-          blendMode: BlendMode.srcIn,
-          shaderCallback: (bounds) {
-            return LinearGradient(
-                colors: TColor.primaryG,
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight)
-                .createShader(
-                Rect.fromLTRB(0, 0, bounds.width, bounds.height));
-          },
-          child: Text(title,
+            blendMode: BlendMode.srcIn,
+            shaderCallback: (bounds) {
+              return LinearGradient(
+                  colors: TColor.primaryG,
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight)
+                  .createShader(
+                  Rect.fromLTRB(0, 0, bounds.width, bounds.height));},
+            child: Text(title,
               style: TextStyle(
                   color:  TColor.primaryColor1,
                   fontSize: fontSize,

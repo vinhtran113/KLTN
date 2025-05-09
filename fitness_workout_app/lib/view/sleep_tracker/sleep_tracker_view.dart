@@ -6,7 +6,7 @@ import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/today_sleep_schedule_row.dart';
 import '../../model/alarm_model.dart';
-import '../../services/alarm.dart';
+import '../../services/alarm_services.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';
 

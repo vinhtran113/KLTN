@@ -1,5 +1,5 @@
-import 'package:fitness_workout_app/services/auth.dart';
-import 'package:fitness_workout_app/services/notification.dart';
+import 'package:fitness_workout_app/services/auth_services.dart';
+import 'package:fitness_workout_app/services/notification_services.dart';
 import 'package:fitness_workout_app/view/login/complete_profile_view.dart';
 import 'package:fitness_workout_app/view/login/what_your_goal_view.dart';
 import 'package:fitness_workout_app/view/main_tab/main_tab_view.dart';

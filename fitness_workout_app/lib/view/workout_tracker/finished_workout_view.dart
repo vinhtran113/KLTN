@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
-import '../../services/workout_tracker.dart';
+import '../../services/workout_services.dart';
 import 'workout_tracker_view.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';

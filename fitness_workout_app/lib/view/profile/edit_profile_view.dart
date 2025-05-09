@@ -13,7 +13,7 @@ import '../../common_widget/round_textfield.dart';
 import '../../common_widget/round_textfield_2.dart';
 import '../../common_widget/selectDate.dart';
 import '../../model/user_model.dart';
-import '../../services/auth.dart';
+import '../../services/auth_services.dart';
 import 'change_password_view.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';

@@ -1,6 +1,6 @@
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitness_workout_app/services/alarm.dart';
+import 'package:fitness_workout_app/services/alarm_services.dart';
 import 'package:fitness_workout_app/view/sleep_tracker/sleep_add_alarm_view.dart';
 import 'package:flutter/material.dart';
 
@@ -54,7 +54,6 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -311,10 +310,7 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  SleepAddAlarmView(
-                    date: _selectedDateAppBBar,
-                  ),
+              builder: (context) => SleepAddAlarmView(date: _selectedDateAppBBar),
             ),
           );
           if (result == true) {

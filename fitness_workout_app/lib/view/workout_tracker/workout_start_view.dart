@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../common/colo_extension.dart';
 import '../../model/exercise_model.dart';
-import '../../services/workout_tracker.dart';
+import '../../services/workout_services.dart';
 import 'finished_workout_view.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';

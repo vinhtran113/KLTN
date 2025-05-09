@@ -3,7 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../model/exercise_model.dart';
 import '../model/workout_schedule_model.dart';
-import 'notification.dart';
+import 'notification_services.dart';
 
 class WorkoutService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -460,6 +460,7 @@ class WorkoutService {
         'notify': notify,
         'id_cate': id_workout,
         'pic': pic,
+        'id_notify': '0',
       };
       DocumentReference docRef = await workoutScheduleRef.add(workoutData);
       await docRef.update({

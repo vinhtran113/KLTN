@@ -1,128 +1,13 @@
-class Ingredient {
-  final String name;
-  final double amount;
-  final String unit;
-  final String image;
-
-  Ingredient({
-    required this.name,
-    required this.amount,
-    required this.unit,
-    required this.image,
-  });
-
-  factory Ingredient.fromMap(Map<String, dynamic> map) {
-    return Ingredient(
-      name: map['name'] ?? '',
-      amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
-      unit: map['unit'] ?? '',
-      image: map['image'] ?? ' ',
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'name': name,
-      'amount': amount,
-      'unit': unit,
-      'image': image,
-    };
-  }
-
-}
-
-class Nutrition {
-  final Map<String, double> values;
-
-  Nutrition({required this.values});
-
-  factory Nutrition.fromMap(Map<String, dynamic> map) {
-    return Nutrition(
-      values: map.map((key, value) => MapEntry(key, ((value as num?)?.toDouble() ?? 0.0))),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return values;
-  }
-
-  double getCalories() {
-    return values['calories'] ?? 0.0;
-  }
-
-  String getImage(String key) {
-    switch (key.toLowerCase()) {
-      case 'calories':
-        return 'assets/img/burn.png';
-      case 'caffeine':
-        return 'assets/img/caffeine.png';
-      case 'fat':
-        return 'assets/img/egg.png';
-      case 'protein':
-        return 'assets/img/proteins.png';
-      case 'carbo':
-        return 'assets/img/carbo.png';
-      default:
-        return 'assets/img/no_image.png';
-    }
-  }
-
-  /// Trả ra list dùng để hiển thị
-  List<Map<String, String>> toDisplayList() {
-    return values.entries.map((entry) {
-      final key = entry.key;
-      final value = entry.value;
-      final displayTitle = '$value ${_getUnit(key)}';
-      return {
-        'title': displayTitle,
-        'image': getImage(key),
-      };
-    }).toList();
-  }
-
-  String _getUnit(String key) {
-    switch (key.toLowerCase()) {
-      case 'calories':
-        return 'kCal';
-      case 'sugar':
-      case 'fat':
-      case 'protein':
-      case 'carbo':
-        return 'g';
-      case 'caffeine':
-        return 'mg';
-      default:
-        return '';
-    }
-  }
-}
-
-class RecipeModel {
-  final String detail;
-
-  RecipeModel({
-    required this.detail,
-  });
-
-  factory RecipeModel.fromJson(Map<String, dynamic> data) {
-    return RecipeModel(
-      detail: data['detail'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toFirestore() {
-    return {
-      'detail': detail,
-    };
-  }
-}
+import 'ingredient_model.dart';
+import 'nutrition_model.dart';
+import 'recipe_model.dart';
 
 class Meal {
   final String description;
   final String image;
   final List<String> category;
   final List<String> level;
-  final Map<int, RecipeModel> recipe;
+  final Map<int, Recipe> recipe;
   final List<String> recommend;
   final List<Ingredient> ingredients;
   final Nutrition nutri;
@@ -152,7 +37,7 @@ class Meal {
       level: List<String>.from(map['level'] ?? []),
       recipe: (map['recipe'] as Map<String, dynamic>?)?.map(
             (key, value) {
-          return MapEntry(int.parse(key), RecipeModel.fromJson(Map<String, dynamic>.from(value)));
+          return MapEntry(int.parse(key), Recipe.fromJson(Map<String, dynamic>.from(value)));
         },
       ) ?? {},
       recommend: List<String>.from(map['recommend'] ?? []),
@@ -191,4 +76,23 @@ class Meal {
       };
     }).toList();
   }
+
+  double getTotalCalories() {
+    return ingredients.fold(0, (sum, ing) => sum + (ing.amount * ing.caloriesPerUnit));
+  }
+
+  factory Meal.empty() => Meal(
+    description: '',
+    image: '',
+    category: [],
+    level: [],
+    recipe: {},
+    recommend: [],
+    ingredients: [],
+    nutri: Nutrition.empty(),  // bạn cũng cần tạo hàm empty() trong Nutrition
+    name: '',
+    size: '',
+    time: 0,
+  );
+
 }

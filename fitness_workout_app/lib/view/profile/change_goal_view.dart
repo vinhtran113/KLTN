@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
 import '../../model/user_model.dart';
-import '../../services/auth.dart';
+import '../../services/auth_services.dart';
 import '../main_tab/main_tab_view.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';

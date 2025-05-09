@@ -7,7 +7,7 @@ import 'package:fitness_workout_app/view/login/signup_view.dart';
 import 'package:fitness_workout_app/view/login/welcome_view.dart';
 import 'package:fitness_workout_app/view/login/what_your_goal_view.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_workout_app/services/auth.dart';
+import 'package:fitness_workout_app/services/auth_services.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
 
 import 'complete_profile_view.dart';

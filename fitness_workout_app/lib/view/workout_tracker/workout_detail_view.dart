@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../common_widget/exercises_row.dart';
 import '../../model/exercise_model.dart';
-import '../../services/workout_tracker.dart';
+import '../../services/workout_services.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';
 

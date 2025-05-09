@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../common/colo_extension.dart';
+import '../model/ingredient_model.dart';
 import '../model/meal_model.dart';
-import '../services/meal.dart';
+import '../services/meal_services.dart';
 
 class IconSelectFoodRow extends StatefulWidget {
   final String icon;
@@ -189,7 +190,7 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
                         onPressed: () => widget.onRemove(mealIndex),
                         icon: const Icon(Icons.delete, size: 18, color: Colors.red),
                         label: const Text(
-                          "Remove Meal",
+                          "Remove",
                           style: TextStyle(color: Colors.red, fontSize: 12),
                         ),
                       ),
@@ -302,6 +303,7 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
                           amount: newAmount,
                           unit: selectedIngredient!.unit,
                           image: selectedIngredient!.image,
+                          caloriesPerUnit: selectedIngredient!.caloriesPerUnit,
                         );
                       });
                     }
@@ -314,6 +316,7 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
                           amount: newAmount,
                           unit: selectedIngredient!.unit,
                           image: selectedIngredient!.image,
+                          caloriesPerUnit: selectedIngredient!.caloriesPerUnit,
                         ),
                       );
                     });

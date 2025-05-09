@@ -9,7 +9,7 @@ import '../../common/common.dart';
 import '../../common_widget/icon_title_next_row.dart';
 import '../../common_widget/repetition_row.dart';
 import '../../common_widget/round_button.dart';
-import '../../services/workout_tracker.dart';
+import '../../services/workout_services.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';
 

@@ -4,7 +4,7 @@ import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:fitness_workout_app/common_widget/round_textfield.dart';
 import 'package:fitness_workout_app/view/login/welcome_view.dart';
 import 'package:flutter/material.dart';
-import 'package:fitness_workout_app/services/auth.dart';
+import 'package:fitness_workout_app/services/auth_services.dart';
 
 class ActivateAccountView extends StatefulWidget {
   const ActivateAccountView({super.key});

@@ -9,7 +9,9 @@ import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../view/workout_tracker/workour_detail_view.dart';
+import '../view/meal_planner/meal_schedule_view.dart';
+import '../view/sleep_tracker/sleep_schedule_view.dart';
+import '../view/workout_tracker/workout_detail_view.dart';
 
 class NotificationServices {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -34,11 +36,17 @@ class NotificationServices {
   final AndroidNotificationChannel _wakeUpChannel = const AndroidNotificationChannel(
     'wake_up_channel',
     'Wake Up Notifications',
-    description: 'This channel is used for wake-up alarms',
+    description: 'This channel is used for wake-up reminders',
     importance: Importance.max,
     sound: RawResourceAndroidNotificationSound('alarm'),
   );
 
+  final AndroidNotificationChannel _mealChannel = const AndroidNotificationChannel(
+    'meal_channel',
+    'Meal Notifications',
+    description: 'This channel is used for meal reminders',
+    importance: Importance.max,
+  );
 
   NotificationServices() {
     // Khởi tạo múi giờ
@@ -131,14 +139,30 @@ class NotificationServices {
         final payload = notificationResponse.payload;
         if (payload != null) {
           try {
-            // Parse JSON từ payload
             final Map<String, dynamic> data = jsonDecode(payload);
-            // Điều hướng đến trang WorkoutDetailView
-            navigatorKey.currentState?.push(
-              MaterialPageRoute(
-                builder: (context) => WorkoutDetailView(dObj: data),
-              ),
-            );
+            final String type = data['type'] ?? '';
+
+            if (type == 'workout') {
+              navigatorKey.currentState?.push(
+                MaterialPageRoute(
+                  builder: (context) => WorkoutDetailView(dObj: data),
+                ),
+              );
+            } else if (type == 'meal') {
+              navigatorKey.currentState?.push(
+                MaterialPageRoute(
+                  builder: (context) =>
+                  const MealScheduleView(),
+                ),
+              );
+            } else if(type == 'alarm') {
+              navigatorKey.currentState?.push(
+                  MaterialPageRoute(builder: (context) =>
+                  const SleepScheduleView())
+              );
+            } else {
+              print("Unknown notification type: $type");
+            }
           } catch (e) {
             print("Error decoding payload: $e");
           }
@@ -153,7 +177,7 @@ class NotificationServices {
     await platform?.createNotificationChannel(_androidChannel);
     await platform?.createNotificationChannel(_sleepChannel);
     await platform?.createNotificationChannel(_wakeUpChannel);
-
+    await platform?.createNotificationChannel(_mealChannel);
   }
 
   void handleMessage(RemoteMessage? message) {
@@ -227,6 +251,9 @@ class NotificationServices {
         'It\'s time to prepare for bed!',
         scheduledTZDateTime,
         platformDetails,
+        payload: jsonEncode({
+          'type': 'alarm',
+        }),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
       );
@@ -237,14 +264,17 @@ class NotificationServices {
         'Bedtime Reminder',
         'It\'s time to prepare for bed!',
         scheduledTZDateTime,
+        payload: jsonEncode({
+          'type': 'alarm',
+        }),
         platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
     } else {
-      // Tính toán ngày kết thúc (30 ngày sau)
-      final DateTime endDate = bedtime.add(Duration(days: 30));
+      // Tính toán ngày kết thúc (365 ngày sau)
+      final DateTime endDate = bedtime.add(Duration(days: 365));
       final tz.TZDateTime endTZDateTime = tz.TZDateTime.from(endDate, tz.local);
       // Chia danh sách các ngày lặp lại
       List<String> daysOfWeek = repeatInterval.split(',');
@@ -265,6 +295,9 @@ class NotificationServices {
             'Bedtime Reminder',
             'It\'s time to prepare for bed!',
             currentScheduledTime,
+            payload: jsonEncode({
+              'type': 'alarm',
+            }),
             platformDetails,
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
             uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
@@ -282,6 +315,9 @@ class NotificationServices {
           'Bedtime Reminder',
           'It\'s time to prepare for bed!',
           scheduledTZDateTime,
+          payload: jsonEncode({
+            'type': 'alarm',
+          }),
           platformDetails,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
@@ -300,7 +336,7 @@ class NotificationServices {
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'wake_up_channel',
       'Wake Up Notifications',
-      channelDescription: 'This channel is used for wake-up alarms',
+      channelDescription: 'This channel is used for wake-up reminders',
       importance: Importance.max,
       priority: Priority.high,
       icon: 'icon_app',
@@ -327,6 +363,9 @@ class NotificationServices {
         'Wake Up Alarm',
         'Time to wake up and start your day!',
         scheduledTZDateTime,
+        payload: jsonEncode({
+          'type': 'alarm',
+        }),
         platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
@@ -338,14 +377,17 @@ class NotificationServices {
         'Wake Up Alarm',
         'Time to wake up and start your day!',
         scheduledTZDateTime,
+        payload: jsonEncode({
+          'type': 'alarm',
+        }),
         platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
     } else {
-      // Tính toán ngày kết thúc (30 ngày sau)
-      final DateTime endDate = wakeUpTime.add(Duration(days: 30));
+      // Tính toán ngày kết thúc (365 ngày sau)
+      final DateTime endDate = wakeUpTime.add(Duration(days: 365));
       final tz.TZDateTime endTZDateTime = tz.TZDateTime.from(endDate, tz.local);
       // Chia danh sách các ngày lặp lại
       List<String> daysOfWeek = repeatInterval.split(',');
@@ -366,6 +408,9 @@ class NotificationServices {
             'Wake Up Alarm',
             'Time to wake up and start your day!',
             currentScheduledTime,
+            payload: jsonEncode({
+              'type': 'alarm',
+            }),
             platformDetails,
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
             uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
@@ -383,6 +428,9 @@ class NotificationServices {
           'Wake Up Alarm',
           'Time to wake up and start your day!',
           scheduledTZDateTime,
+          payload: jsonEncode({
+            'type': 'alarm',
+          }),
           platformDetails,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
@@ -390,6 +438,47 @@ class NotificationServices {
       }
     }
     print('Notification ID updated for wakeup ${id.hashCode +1 }');
+    return id.hashCode.toString();
+  }
+
+  Future<String> scheduleMealNotification({
+    required String id,
+    required String mealType,
+    required DateTime Time,
+    required String Name,
+    required String pic,
+  }) async {
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'meal_channel',
+      'Meal Notifications',
+      channelDescription: 'This channel is used for meal reminders',
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: 'icon_app',
+    );
+    const NotificationDetails platformDetails = NotificationDetails(android: androidDetails,);
+
+    DateTime newScheduledTime = Time;
+
+    final tz.TZDateTime scheduledTZDateTime = tz.TZDateTime.from(newScheduledTime, tz.local);
+
+    // Thông báo một lần
+    await _localNotifications.zonedSchedule(
+      id.hashCode,
+      'Meal Reminder',
+      'It\'s time for your $mealType: $Name',
+      scheduledTZDateTime,
+      platformDetails,
+      payload: jsonEncode({
+        'type': 'meal',
+        'mealType': mealType,
+        'name': Name,
+        'image': pic,
+      }),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+    );
+    print('Notification ID updated for meal ${id.hashCode}');
     return id.hashCode.toString();
   }
 
@@ -436,7 +525,8 @@ class NotificationServices {
           'id': id_cate,
           'title': workoutName,
           'image': pic,
-          'difficulty': diff
+          'difficulty': diff,
+          'type': 'workout',
         }),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
@@ -462,7 +552,8 @@ class NotificationServices {
           'id': id_cate,
           'title': workoutName,
           'image': pic,
-          'difficulty': diff
+          'difficulty': diff,
+          'type': 'workout',
         }),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
@@ -478,8 +569,8 @@ class NotificationServices {
       };
       await _addNotificationToArr(data, scheduledTZDateTime); // Pass the scheduled time
     } else {
-      // Tính toán ngày kết thúc (30 ngày sau)
-      final DateTime endDate = scheduledTime.add(Duration(days: 30));
+      // Tính toán ngày kết thúc (365 ngày sau)
+      final DateTime endDate = scheduledTime.add(Duration(days: 365));
       final tz.TZDateTime endTZDateTime = tz.TZDateTime.from(endDate, tz.local);
       // Chia danh sách các ngày lặp lại
       List<String> daysOfWeek = repeatInterval.split(',');
@@ -505,7 +596,8 @@ class NotificationServices {
               'id': id_cate,
               'title': workoutName,
               'image': pic,
-              'difficulty': diff
+              'difficulty': diff,
+              'type': 'workout',
             }),
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
             uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
@@ -537,7 +629,8 @@ class NotificationServices {
             'id': id_cate,
             'title': workoutName,
             'image': pic,
-            'difficulty': diff
+            'difficulty': diff,
+            'type': 'workout',
           }),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,

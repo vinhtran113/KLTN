@@ -1,4 +1,4 @@
-import 'package:fitness_workout_app/services/tips.dart';
+import 'package:fitness_workout_app/services/tip_services.dart';
 import 'package:fitness_workout_app/view/tips/tips_details_view.dart';
 import 'package:flutter/material.dart';
 

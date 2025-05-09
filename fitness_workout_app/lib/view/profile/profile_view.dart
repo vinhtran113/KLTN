@@ -12,8 +12,8 @@ import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
 
 import '../../main.dart';
-import '../../services/auth.dart';
-import '../../services/notification.dart';
+import '../../services/auth_services.dart';
+import '../../services/notification_services.dart';
 import '../setting/ContactUs_View.dart';
 import '../setting/PrivacyPolicy_and_TermOfUse_View.dart';
 import '../setting/Statistics_Chart_View.dart';

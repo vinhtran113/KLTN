@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitness_workout_app/services/alarm.dart';
+import 'package:fitness_workout_app/services/alarm_services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -25,8 +25,8 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
   final TextEditingController selectedRepetition = TextEditingController();
   bool isBedEnabled = true;
   bool isWakeupEnabled = true;
-  String selectedTimeBed = "09:00 PM";
-  String selectedTimeWakeup = "06:00 AM";
+  String selectedTimeBed = "";
+  String selectedTimeWakeup = "";
   bool isLoading = false;
   String day = "";
   bool darkmode = darkModeNotifier.value;

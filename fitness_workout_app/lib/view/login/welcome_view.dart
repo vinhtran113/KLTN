@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
-import '../../services/auth.dart';
+import '../../services/auth_services.dart';
 import '../main_tab/main_tab_view.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
 

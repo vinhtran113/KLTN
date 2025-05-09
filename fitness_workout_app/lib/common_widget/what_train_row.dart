@@ -2,7 +2,7 @@ import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:flutter/material.dart';
 
 import '../common/colo_extension.dart';
-import '../view/workout_tracker/workour_detail_view.dart';
+import '../view/workout_tracker/workout_detail_view.dart';
 import '../../localization/app_localizations.dart';
 
 class WhatTrainRow extends StatelessWidget {

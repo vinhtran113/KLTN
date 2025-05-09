@@ -7,7 +7,7 @@ import 'package:fitness_workout_app/model/user_model.dart';
 import 'package:intl/intl.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
-import 'notification.dart';
+import 'notification_services.dart';
 
 class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

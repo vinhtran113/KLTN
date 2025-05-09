@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/notification_row.dart';
-import '../../services/notification.dart';
+import '../../services/notification_services.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';
 

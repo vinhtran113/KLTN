@@ -6,7 +6,7 @@ import '../../common_widget/find_eat_cell.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/today_meal_row.dart';
 import 'meal_schedule_view.dart';
-import '../../services/meal.dart';
+import '../../services/meal_services.dart';
 
 class MealPlannerView extends StatefulWidget {
   const MealPlannerView({super.key});

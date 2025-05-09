@@ -4,7 +4,7 @@ import 'package:fitness_workout_app/view/login/welcome_view.dart';
 import 'package:flutter/material.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
-import '../../services/auth.dart';
+import '../../services/auth_services.dart';
 import 'activate_account.dart';
 
 class WhatYourGoalView extends StatefulWidget {

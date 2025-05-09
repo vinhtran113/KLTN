@@ -3,7 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
 import '../model/alarm_model.dart';
-import 'notification.dart';
+import 'notification_services.dart';
 
 class AlarmService{
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -59,6 +59,7 @@ class AlarmService{
         'uid': uid,
         'notify_Bed': notify_Bed,
         'notify_Wakeup': notify_Bed,
+        'id_notify': '0',
       };
       DocumentReference docRef = await alarmRef.add(alarmData);
       await docRef.update({
@@ -112,17 +113,17 @@ class AlarmService{
 
         // Chuyển đổi chuỗi ngày thành DateTime để xử lý
         final String day = data['day'];
-        final String hourBed = data['hourBed'];
+        final String hourWakeup = data['hourWakeup'];
 
         DateTime selectedDay = dateFormat.parse(day);
-        DateTime selectedHourBed = hourFormat.parse(hourBed);
+        DateTime selectedHour = hourFormat.parse(hourWakeup);
 
         DateTime selectedDateTimeBed = DateTime(
           selectedDay.year,
           selectedDay.month,
           selectedDay.day,
-          selectedHourBed.hour,
-          selectedHourBed.minute,
+          selectedHour.hour,
+          selectedHour.minute,
         );
         // Lọc các lịch có repeat_interval là "no" và ngày đã qua
         if (data['repeat_interval'] == "no" && selectedDateTimeBed.isBefore(DateTime.now())) {
@@ -275,17 +276,17 @@ class AlarmService{
 
         // Chuyển đổi chuỗi ngày thành DateTime để xử lý
         final String day = data['day'];
-        final String hourBed = data['hourBed'];
+        final String hourWakeup = data['hourWakeup'];
 
         DateTime selectedDay = dateFormat.parse(day);
-        DateTime selectedHourBed = hourFormat.parse(hourBed);
+        DateTime selectedHour = hourFormat.parse(hourWakeup);
 
         DateTime selectedDateTimeBed = DateTime(
           selectedDay.year,
           selectedDay.month,
           selectedDay.day,
-          selectedHourBed.hour,
-          selectedHourBed.minute,
+          selectedHour.hour,
+          selectedHour.minute,
         );
 
         bool isInRepeatInterval = repeatInterval.contains(currentDayOfWeek);

@@ -1,12 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/model/alarm_model.dart';
-import 'package:fitness_workout_app/services/alarm.dart';
+import 'package:fitness_workout_app/services/alarm_services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common/common.dart';
+import '../../common_widget/delete_button.dart';
 import '../../common_widget/icon_title_next_row.dart';
 import '../../common_widget/repetition_row.dart';
 import '../../common_widget/round_button.dart';
@@ -26,8 +27,8 @@ class _SleepEditAlarmViewState extends State<SleepEditAlarmView> {
   final TextEditingController selectedRepetition = TextEditingController();
   bool isBedEnabled = true;
   bool isWakeupEnabled = true;
-  String selectedTimeBed = "09:00 PM";
-  String selectedTimeWakeup = "06:00 AM";
+  String selectedTimeBed = "";
+  String selectedTimeWakeup = "";
   bool isLoading = false;
   String day = "";
   DateTime? parsedDay;
@@ -122,6 +123,43 @@ class _SleepEditAlarmViewState extends State<SleepEditAlarmView> {
       setState(() {
         selectedTimeWakeup = formattedTime; // Luôn là dạng 12-hour format
       });
+    }
+  }
+
+  void _confirmDeleteSchedule() async {
+    // Hiển thị một hộp thoại xác nhận trước khi xoá
+    bool? confirm = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Delete'),
+          content: Text(
+              'Are you sure you want to delete this alarm?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+    // Nếu người dùng xác nhận
+    if (confirm == true) {
+      String res = await _alarmService.deleteAlarmSchedule(alarmId: widget.schedule.id);
+      if (res == "success") {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Alarm schedule deleted successfully')));
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$res')),
+        );
+      }
     }
   }
 
@@ -296,8 +334,13 @@ class _SleepEditAlarmViewState extends State<SleepEditAlarmView> {
                 ],
               ),
               const Spacer(),
-              RoundButton(title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
+              RoundButton(
+                  title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
                   onPressed: _handleUpdateSchedule),
+              SizedBox(height: media.width * 0.03),
+              DeleteButton(
+                title: AppLocalizations.of(context)?.translate("Delete") ?? "Delete",
+                onPressed: _confirmDeleteSchedule),
               const SizedBox(
                 height: 20,
               ),

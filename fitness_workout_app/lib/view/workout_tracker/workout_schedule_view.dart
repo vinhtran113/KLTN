@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../common/colo_extension.dart';
 import '../../common/common.dart';
 import '../../model/workout_schedule_model.dart';
-import '../../services/workout_tracker.dart';
+import '../../services/workout_services.dart';
 import 'add_schedule_view.dart';
 import 'edit_schedule_view.dart';
 import '../../main.dart';
