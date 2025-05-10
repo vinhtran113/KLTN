@@ -336,6 +336,7 @@ class MealService {
     required DateTime date,
     required String mealType,
     required String mealName,
+    required String id_notify,
   }) async {
     final docRef = FirebaseFirestore.instance
         .collection('MealSchedules')
@@ -352,6 +353,8 @@ class MealService {
     List<dynamic> meals = data[mealType];
 
     meals.removeWhere((meal) => meal['name'] == mealName);
+
+    await notificationServices.cancelNotificationById(int.parse(id_notify));
 
     await docRef.update({mealType: meals});
     return null;
@@ -458,6 +461,7 @@ class MealService {
               'mealType': type,
               'date': date,
               'totalCalories': calories,
+              'id_notify': m['id_notify'] ?? '0',
               'notify': m['notify'] ?? true,
               'ingredients': ingredients,
               'nutri': nutri, // Gắn dữ liệu nutrition vào

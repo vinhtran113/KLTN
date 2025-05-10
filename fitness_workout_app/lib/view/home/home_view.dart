@@ -285,7 +285,7 @@ class _HomeViewState extends State<HomeView> {
                               height: media.width * 0.85,
                               width: media.width * 0.07,
                               backgroundColor: Colors.grey.shade100,
-                              foregrondColor: Colors.purple,
+                              foregroundColor: Colors.purple,
                               ratio: 0.5,
                               direction: Axis.vertical,
                               curve: Curves.fastLinearToSlowEaseIn,

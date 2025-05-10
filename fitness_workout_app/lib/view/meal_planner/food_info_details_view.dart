@@ -5,6 +5,7 @@ import 'package:readmore/readmore.dart';
 
 import '../../common_widget/food_step_detail_row.dart';
 import '../../model/meal_model.dart';
+import 'add_meal_schedule_view.dart';
 import 'meal_schedule_view.dart';
 
 class FoodInfoDetailsView extends StatefulWidget {
@@ -402,21 +403,34 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                   ),
                 ),
                 SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: RoundButton(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          child: RoundButton(
                             title: "Add to ${widget.mObj["name"]} Meal",
                             onPressed: () {
-
-                            }),
-                      ),
-                    ],
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AddMealScheduleView(
+                                    date: DateTime.now(),
+                                    initialMeal: widget.dObj,
+                                    initialMealType: widget.mObj["name"].toString(),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),

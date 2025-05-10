@@ -20,17 +20,25 @@ import '../../services/notification_services.dart';
 
 class AddMealScheduleView extends StatefulWidget {
   final DateTime date;
-  const AddMealScheduleView({super.key, required this.date});
+  final Meal? initialMeal;
+  final String? initialMealType;
+
+  const AddMealScheduleView({
+    super.key,
+    required this.date,
+    this.initialMeal,
+    this.initialMealType,
+  });
 
   @override
   State<AddMealScheduleView> createState() => _AddMealScheduleViewState();
 }
 
 class _AddMealScheduleViewState extends State<AddMealScheduleView> {
-  final TextEditingController selectedMealType = TextEditingController();
   final MealService _mealService = MealService();
   final NotificationServices _notificationServices = NotificationServices();
   List<Meal> selectedFoods = [];
+  late final TextEditingController selectedMealType;
 
   bool isNotificationEnabled = true;
   String selectedTime = "";
@@ -41,12 +49,20 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
   @override
   void initState() {
     super.initState();
+
+    selectedMealType = TextEditingController(
+      text: widget.initialMealType ?? '',
+    );
+
+    if (widget.initialMeal != null) {
+      selectedFoods.add(widget.initialMeal!);
+    }
   }
 
   @override
   void dispose() {
-    super.dispose();
     selectedMealType.dispose();
+    super.dispose();
   }
 
   Future<void> _selectTime(BuildContext context) async {
@@ -205,7 +221,7 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
       final totalCal = meal.ingredients.fold<double>(
         0.0, (sum, ing) => sum + (ing.amount * (ing.caloriesPerUnit ?? 0.0)),
       );
-      String id_notify = '';
+      String id_notify = '0';
 
       if (isNotificationEnabled) {
         final DateFormat hourFormat = DateFormat('hh:mm a');
@@ -529,17 +545,27 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                         fit: BoxFit.cover,
                       ),
                     ),
-                    SizedBox(height: media.width * 0.02),
                   ],
                 ) : SizedBox(height: media.width * 0.8),
-                RoundButton(
-                    title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
-                    onPressed: _handleAddMealSchedule
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
               ],
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: RoundButton(
+                        title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
+                        onPressed: _handleAddMealSchedule
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           if (isLoading)

@@ -447,14 +447,19 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                   ),
                 ),
                 SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      RoundButton(title: AppLocalizations.of(context)?.translate("Start Workout") ?? "Start Workout",
-                          onPressed: _createHistory
-                      )
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          child: RoundButton(title: AppLocalizations.of(context)?.translate("Start Workout") ?? "Start Workout",
+                              onPressed: _createHistory),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               ],

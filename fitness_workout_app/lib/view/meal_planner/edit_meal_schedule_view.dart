@@ -103,10 +103,7 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(check)));
       return;
     }
-
-    setState(() {
-      isLoading = true;
-    });
+    setState(() {isLoading = true;});
 
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
@@ -147,7 +144,6 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
           ],
         ),
       );
-
       if (!proceed) {
         setState(() {
           isLoading = false;
@@ -156,8 +152,9 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
       }
     }
 
-    // Gọi notification nếu bật
-    String id_notify = "";
+    String id_notify = widget.bObj['id_notify'];
+    await _notificationServices.cancelNotificationById(int.parse(id_notify));
+
     if (isNotificationEnabled) {
       final DateFormat hourFormat = DateFormat('hh:mm a');
       DateTime selectedDay = date;
@@ -170,7 +167,6 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
         selectedHour.hour,
         selectedHour.minute,
       );
-
       String id = selectedFood.name + selectedDateTime.toString();
 
       id_notify = await _notificationServices.scheduleMealNotification(
@@ -200,9 +196,7 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
       meal: updatedMeal,
     );
 
-    setState(() {
-      isLoading = false;
-    });
+    setState(() {isLoading = false;});
 
     if (result != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
@@ -307,6 +301,7 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
       date: date,
       mealType: selectedMealType.text.toLowerCase(),
       mealName: widget.bObj['name'],
+      id_notify: widget.bObj['id_notify'],
     );
 
     setState(() {
@@ -479,22 +474,34 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
                     ],
                   ),
                 ),
-                SizedBox(
-                  height: media.width * 0.9,
-                ),
-                RoundButton(
-                    title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
-                    onPressed: _handleEditMealSchedule,
-                ),
-                SizedBox(height: media.width * 0.03),
-                DeleteButton(
-                  title: AppLocalizations.of(context)?.translate("Delete") ?? "Delete",
-                  onPressed: _handleDeleteMeal,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
               ],
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Column(
+                      children: [
+                        RoundButton(
+                          title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
+                          onPressed: _handleEditMealSchedule,
+                        ),
+                        SizedBox(height: media.width * 0.03),
+                        DeleteButton(
+                          title: AppLocalizations.of(context)?.translate("Delete") ?? "Delete",
+                          onPressed: _handleDeleteMeal,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           if (isLoading)
