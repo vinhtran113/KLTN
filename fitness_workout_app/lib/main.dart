@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fitness_workout_app/services/auth_services.dart';
 import 'package:fitness_workout_app/services/notification_services.dart';
 import 'package:fitness_workout_app/view/login/complete_profile_view.dart';
@@ -7,10 +9,14 @@ import 'package:fitness_workout_app/view/on_boarding/started_view.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'chatbox/firebase_options.dart';
 import 'model/user_model.dart';
 import 'localization/app_localizations.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 final darkModeNotifier = ValueNotifier<bool>(false); // Trạng thái dark mode
@@ -18,20 +24,62 @@ ValueNotifier<Locale> localeNotifier = ValueNotifier<Locale>(const Locale('en', 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  await NotificationServices().initNotifications();
 
-// Đọc trạng thái Dark Mode và ngôn ngữ từ SharedPreferences
-  final prefs = await SharedPreferences.getInstance();
-  darkModeNotifier.value = prefs.getBool('isDarkMode') ?? false;
-  String? savedLocale = prefs.getString('locale');
-  if (savedLocale != null) {
-    localeNotifier.value = Locale(savedLocale);
+  try {
+    await dotenv.load(fileName: ".env");
+    print("✅ .env loaded");
+    await Firebase.initializeApp();
+    await NotificationServices().initNotifications();
+    print("✅ Notifications initialized");
+
+    await requestPermissions();
+    print("✅ Permissions granted");
+
+    final prefs = await SharedPreferences.getInstance();
+    darkModeNotifier.value = prefs.getBool('isDarkMode') ?? false;
+    String? savedLocale = prefs.getString('locale');
+    if (savedLocale != null) {
+      localeNotifier.value = Locale(savedLocale);
+    }
+  } catch (e, stackTrace) {
+    print('❌ Initialization failed: $e');
+    print(stackTrace);
+    return;
   }
 
-  runApp(const MyApp());
+  runZonedGuarded(
+        () => runApp(
+      ProviderScope(
+        child: const MyApp(),
+      ),
+    ),
+        (error, stackTrace) {
+      print('Uncaught error: $error');
+      print(stackTrace);
+    },
+  );
 }
 
+
+// Hàm xin quyền người dùng
+Future<void> requestPermissions() async {
+  var cameraStatus = await Permission.camera.request();
+  if (cameraStatus.isDenied) {
+    print("Camera permission denied");
+  }
+
+  var storageStatus = await Permission.storage.request();
+  if (storageStatus.isDenied) {
+    print("Storage permission denied");
+  }
+
+  var manageStatus = await Permission.manageExternalStorage.request();
+  if (manageStatus.isDenied) {
+    print("Manage External Storage permission denied");
+  }
+}
+
+// App chính
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -88,10 +136,10 @@ class MyApp extends StatelessWidget {
     if (FirebaseAuth.instance.currentUser != null) {
       user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
     }
-    if (user?.gender == ''){
+    if (user?.gender == '') {
       return const CompleteProfileView();
     }
-    if (user?.level == ''){
+    if (user?.level == '') {
       return const WhatYourGoalView();
     }
     if (user != null) {

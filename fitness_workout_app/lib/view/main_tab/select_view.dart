@@ -3,6 +3,7 @@ import 'package:fitness_workout_app/view/meal_planner/meal_planner_view.dart';
 import 'package:fitness_workout_app/view/workout_tracker/workout_tracker_view.dart';
 import 'package:flutter/material.dart';
 
+import '../../chatbox/screens/chat/chat_screen.dart';
 import '../../common/colo_extension.dart';
 import '../../main.dart';
 import '../sleep_tracker/sleep_tracker_view.dart';
@@ -277,7 +278,12 @@ class _SelectViewState extends State<SelectView> {
                           child: RoundButton(
                             title: AppLocalizations.of(context)?.translate("Start") ?? "Start",
                             fontSize: 12,
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const ChatScreen()),
+                              );
+                            },
                           ),
                         ),
                       ],
