@@ -132,6 +132,7 @@ class AuthService {
         if (!data['activate']) return "not-activate";
         if (data['weight'] == "") return "not-profile";
         if (data['level'] == "") return "not-level";
+        if (data['ActivityLevel'] == "") return "not-ActivityLevel";
       }
 
       // Load các notification nếu cần
@@ -193,6 +194,8 @@ class AuthService {
       if(level == ""){
         return "not-level";
       }
+
+      if (userDoc['ActivityLevel'] == "") return "not-ActivityLevel";
 
       await _auth.signInWithEmailAndPassword(
         email: email,
@@ -303,14 +306,27 @@ class AuthService {
     }
   }
 
-  Future<void> updateUserLevel(String uid, String level) async {
+  Future<String> updateUserLevel(String uid, String level) async {
     try {
       await _firestore.collection('users').doc(uid).update({
         'level': level,
       });
+      return "success";
     } catch (e) {
       print('Error updating user level: $e');
-      throw e;
+      return e.toString();
+    }
+  }
+
+  Future<String> updateUserActivityLevel(String uid, String level) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'ActivityLevel': level,
+      });
+      return "success";
+    } catch (e) {
+      print('Error updating user Activity Level: $e');
+      return e.toString();
     }
   }
 

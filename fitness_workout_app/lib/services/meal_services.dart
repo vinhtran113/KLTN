@@ -480,6 +480,71 @@ class MealService {
     return result;
   }
 
+  Future<List<Map<String, dynamic>>> fetchMealScheduleForDate(String uid, DateTime date) async {
+    final docId = '${uid}_${DateFormat('yyyy-MM-dd').format(date)}';
+    final docRef = FirebaseFirestore.instance.collection('MealSchedules').doc(docId);
+    final doc = await docRef.get();
+
+    final List<Map<String, dynamic>> result = [];
+
+    if (!doc.exists) return result;
+
+    final data = doc.data()!;
+
+    for (final type in ['breakfast', 'lunch', 'dinner', 'snacks']) {
+      if (data.containsKey(type)) {
+        final List<dynamic> meals = data[type];
+        double totalCalories = 0.0;
+
+        final List<Map<String, dynamic>> mealList = [];
+
+        for (final m in meals) {
+          final name = m['name'] ?? '';
+          final calories = (m['totalCalories'] ?? 0.0) as num;
+          totalCalories += calories;
+
+          final ingredients = (m['ingredients'] as List<dynamic>?)
+              ?.map((i) => Map<String, dynamic>.from(i))
+              .toList() ?? [];
+
+          // Truy vấn thêm nutrition
+          final mealQuery = await FirebaseFirestore.instance
+              .collection('Meals')
+              .where('name', isEqualTo: name)
+              .limit(1)
+              .get();
+
+          Map<String, dynamic> nutri = {};
+          if (mealQuery.docs.isNotEmpty) {
+            nutri = mealQuery.docs.first.data()['nutri'] ?? {};
+          }
+
+          mealList.add({
+            'name': name,
+            'image': m['image'] ?? '',
+            'time': m['time'] ?? '',
+            'mealType': type,
+            'date': date,
+            'totalCalories': calories,
+            'id_notify': m['id_notify'] ?? '0',
+            'notify': m['notify'] ?? true,
+            'ingredients': ingredients,
+            'nutri': nutri,
+          });
+        }
+
+        result.add({
+          'mealType': type,
+          'date': date,
+          'meals': mealList,
+          'totalCalories': totalCalories,
+        });
+      }
+    }
+
+    return result;
+  }
+
   Future<Meal> getMealByName(String name) async {
     final snapshot = await FirebaseFirestore.instance
         .collection('Meals')

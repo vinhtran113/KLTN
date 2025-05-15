@@ -241,36 +241,6 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
     }
   }
 
-  void _showMealTypeSelector(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: ["Breakfast", "Lunch", "Dinner", "Snacks"].map((mealtype) {
-              return ListTile(
-                title: Text(
-                  AppLocalizations.of(context)?.translate(mealtype) ?? mealtype,
-                  style: TextStyle(
-                      color: darkmode ? TColor.white : TColor.black,
-                      fontSize: 14),
-                ),
-                onTap: () {
-                  setState(() {
-                    selectedMealType.text = mealtype;
-                  });
-                  Navigator.pop(context);
-                },
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _handleDeleteMeal() async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -315,7 +285,6 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
       Navigator.pop(context, true);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

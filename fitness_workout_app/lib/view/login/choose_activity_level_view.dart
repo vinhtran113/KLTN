@@ -6,38 +6,49 @@ import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
 import '../../services/auth_services.dart';
 import 'activate_account.dart';
-import 'choose_activity_level_view.dart';
 
-class WhatYourGoalView extends StatefulWidget {
-  const WhatYourGoalView({super.key});
+class ChooseActivityLevelView extends StatefulWidget {
+  const ChooseActivityLevelView({super.key});
 
   @override
-  State<WhatYourGoalView> createState() => _WhatYourGoalViewState();
+  State<ChooseActivityLevelView> createState() => _ChooseActivityLevelViewState();
 }
 
-class _WhatYourGoalViewState extends State<WhatYourGoalView> {
+class _ChooseActivityLevelViewState extends State<ChooseActivityLevelView> {
   CarouselSliderController buttonCarouselController = CarouselSliderController();
-  String selectedGoal = "Improve Shape";
+  String selectedGoal = "Sedentary";
   int currentIndex = 0;
 
   List goalArr = [
     {
-      "image": "assets/img/goal_1.png",
-      "title": "Improve Shape",
+      "image": "assets/img/ActivityLevel_1.png",
+      "title": "Sedentary",
       "subtitle":
-      "I have a low amount of body fat\nand need/want to build more\nmuscle"
+      "I spend most of my day sitting.\nMovement is minimal,\nand workouts are rare."
     },
     {
-      "image": "assets/img/goal_2.png",
-      "title": "Lean & Tone",
+      "image": "assets/img/ActivityLevel_2.png",
+      "title": "Lightly Active",
       "subtitle":
-      "I’m “skinny fat”. look thin but have\nno shape. I want to add learn\nmuscle in the right way"
+      "I take light walks or\nexercise a few days a week.\nI'm starting to move more."
     },
     {
-      "image": "assets/img/goal_3.png",
-      "title": "Lose a Fat",
+      "image": "assets/img/ActivityLevel_3.png",
+      "title": "Moderately Active",
       "subtitle":
-      "I want to drop all this fat and\ngain muscle mass"
+      "I work out occasionally,\nabout 3–5 days a week.\nMy lifestyle balances rest and effort."
+    },
+    {
+      "image": "assets/img/ActivityLevel_4.png",
+      "title": "Very Active",
+      "subtitle":
+      "I work out regularly,\nabout 5–7 days a week.\nMy body is used to challenge,\nand I thrive on movement"
+    },
+    {
+      "image": "assets/img/ActivityLevel_5.png",
+      "title": "Extra Active",
+      "subtitle":
+      "I push my limits daily,\neither through tough training or\na physically demanding job.\nMy engine is always running."
     },
   ];
 
@@ -129,7 +140,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
                       height: media.width * 0.05,
                     ),
                     Text(
-                      "What is your goal?",
+                      "What is your activity level?",
                       style: TextStyle(
                           color: TColor.black,
                           fontSize: 20,
@@ -144,15 +155,15 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
                     RoundButton(
                         title: "Confirm",
                         onPressed: () async {
-                          String result = await AuthService().updateUserLevel(
+                          String result = await AuthService()
+                              .updateUserActivityLevel(
                               FirebaseAuth.instance.currentUser!.uid,
                               selectedGoal);
                           if (result == "success") {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (
-                                    context) => const ChooseActivityLevelView(),
+                                builder: (context) => const WelcomeView(),
                               ),
                             );
                           } else {

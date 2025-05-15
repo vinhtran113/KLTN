@@ -12,6 +12,7 @@ class UserModel {
   final String pic;
   final String level;
   final String pass;
+  final String ActivityLevel;
 
   UserModel({
     required this.uid,
@@ -25,6 +26,7 @@ class UserModel {
     required this.pic,
     required this.level,
     required this.pass,
+    required this.ActivityLevel,
   });
 
   // Tính tuổi người dùng từ ngày sinh
@@ -58,6 +60,7 @@ class UserModel {
       pic: json['pic'] ?? '',
       level: json['level'] ?? '',
       pass: json['password'] ?? '',
+      ActivityLevel: json['ActivityLevel'] ?? '',
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -5,6 +6,10 @@ import '../../common/colo_extension.dart';
 import '../../common_widget/find_eat_cell.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/today_meal_row.dart';
+import '../../localization/app_localizations.dart';
+import '../../model/user_model.dart';
+import '../../services/auth_services.dart';
+import '../main_tab/main_tab_view.dart';
 import 'meal_schedule_view.dart';
 import '../../services/meal_services.dart';
 
@@ -17,25 +22,23 @@ class MealPlannerView extends StatefulWidget {
 
 class _MealPlannerViewState extends State<MealPlannerView> {
   final MealService _mealService = MealService();
+  String selectedType = "Breakfast";
+  List<Map<String, dynamic>> todayMealList = [];
+  Map<String, List<Map<String, dynamic>>> allMealListByType = {
+    'breakfast': [],
+    'lunch': [],
+    'dinner': [],
+    'snacks': [],
+  };
+
 
   @override
   void initState() {
     super.initState();
     _loadMealCounts();
+    _loadTodayMeals();
   }
 
-  List todayMealArr = [
-    {
-      "name": "Salmon Nigiri",
-      "image": "assets/img/m_1.png",
-      "time": "28/05/2023 07:00 AM"
-    },
-    {
-      "name": "Lowfat Milk",
-      "image": "assets/img/m_2.png",
-      "time": "28/05/2023 08:00 AM"
-    },
-  ];
 
   List<Map<String, dynamic>> mealTypes = [
     {"name": "Breakfast", "image": "assets/img/breakfast_icon.png"},
@@ -53,6 +56,69 @@ class _MealPlannerViewState extends State<MealPlannerView> {
     }
   }
 
+  void _loadTodayMeals() async {
+    final allMeals = await _mealService.fetchMealScheduleForDate(FirebaseAuth.instance.currentUser!.uid, DateTime.now());
+
+    final Map<String, List<Map<String, dynamic>>> temp = {
+      'breakfast': [],
+      'lunch': [],
+      'dinner': [],
+      'snacks': [],
+    };
+
+    for (var e in allMeals) {
+      temp[e['mealType']] = List<Map<String, dynamic>>.from(e['meals']);
+    }
+
+    setState(() {
+      allMealListByType = temp;
+      todayMealList = temp[selectedType.toLowerCase()] ?? [];
+    });
+  }
+
+  void getUserInfo() async {
+    try {
+      // Lấy thông tin người dùng
+      UserModel? user = await AuthService().getUserInfo(
+          FirebaseAuth.instance.currentUser!.uid);
+
+      if (user != null) {
+        // Điều hướng đến HomeView với user
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainTabView(user: user, initialTab: 1),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Có lỗi xảy ra')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
+  }
+
+  Future<void> _handleDeleteMeal(String name, String id_notify) async {
+    final result = await _mealService.deleteMealFromSchedule(
+      uid: FirebaseAuth.instance.currentUser!.uid,
+      date: DateTime.now(),
+      mealType: selectedType.toLowerCase(),
+      mealName: name,
+      id_notify: id_notify,
+    );
+
+    if (result != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Xoá món ăn thành công')));
+      _loadTodayMeals();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -63,9 +129,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
         centerTitle: true,
         elevation: 0,
         leading: InkWell(
-          onTap: () {
-            Navigator.pop(context);
-          },
+          onTap: getUserInfo,
           child: Container(
             margin: const EdgeInsets.all(8),
             height: 40,
@@ -274,8 +338,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                           style: TextStyle(
                               color: TColor.black,
                               fontSize: 14,
-                              fontWeight: FontWeight.w700),
-                        ),
+                              fontWeight: FontWeight.w700)),
                         SizedBox(
                           width: 80,
                           height: 30,
@@ -309,8 +372,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                         style: TextStyle(
                             color: TColor.black,
                             fontSize: 16,
-                            fontWeight: FontWeight.w700),
-                      ),
+                            fontWeight: FontWeight.w700)),
                       Container(
                           height: 30,
                           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -324,22 +386,22 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                                 "Breakfast",
                                 "Lunch",
                                 "Dinner",
-                                "Snack",
-                              ]
-                                  .map((name) => DropdownMenuItem(
+                                "Snacks",
+                              ].map((name) => DropdownMenuItem(
                                 value: name,
                                 child: Text(
                                   name,
-                                  style: TextStyle(
-                                      color: TColor.gray, fontSize: 14),
-                                ),
-                              ))
-                                  .toList(),
-                              onChanged: (value) {},
-                              icon:
-                              Icon(Icons.expand_more, color: TColor.white),
+                                  style: TextStyle(color: TColor.gray, fontSize: 14),
+                                ))).toList(),
+                              onChanged: (value){
+                                setState(() {
+                                  selectedType = value!;
+                                  todayMealList = allMealListByType[selectedType.toLowerCase()] ?? [];
+                                });
+                              },
+                              icon: Icon(Icons.expand_more, color: TColor.white),
                               hint: Text(
-                                "Breakfast",
+                                selectedType,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: TColor.white, fontSize: 12),
@@ -349,19 +411,71 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                     ],
                   ),
                   SizedBox(
-                    height: media.width * 0.05,
+                    height: media.width * 0.03,
                   ),
                   ListView.builder(
-                      padding: EdgeInsets.zero,
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: todayMealArr.length,
-                      itemBuilder: (context, index) {
-                        var mObj = todayMealArr[index] as Map? ?? {};
-                        return TodayMealRow(
-                          mObj: mObj,
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: todayMealList.isEmpty ? 1 : todayMealList.length,
+                    itemBuilder: (context, index) {
+                      if (todayMealList.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            "Not Scheduled",
+                            style: TextStyle(color: Colors.grey),
+                          ),
                         );
-                      }),
+                      }
+                      var wObj = todayMealList[index] as Map? ?? {};
+                      return Dismissible(
+                        key: Key(wObj["name"]),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        confirmDismiss: (direction) async {
+                          // Hiển thị hộp thoại xác nhận trước khi xoá
+                          bool? confirm = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text(AppLocalizations.of(context)?.translate("Confirm Delete") ?? "Confirm Delete"),
+                                content: Text(
+                                    AppLocalizations.of(context)?.translate("Confirm Delete des 1") ?? "Are you sure you want to delete this meal schedule?"
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(false),
+                                    child: Text(AppLocalizations.of(context)?.translate("Cancel") ?? "Cancel"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(true),
+                                    child: Text(AppLocalizations.of(context)?.translate("Delete") ?? "Delete"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          // Nếu người dùng xác nhận, cho phép xoá
+                          return confirm == true;
+                        },
+                        onDismissed: (direction) {
+                          // Gọi hàm xác nhận xoá (nếu xác nhận, sẽ xoá phần tử)
+                          _handleDeleteMeal(wObj["name"], wObj["id_notify"]);
+                        },
+                        child: TodayMealRow(
+                            mObj: wObj,
+                            onRefresh: () {
+                              _loadTodayMeals();
+                            },
+                          ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),

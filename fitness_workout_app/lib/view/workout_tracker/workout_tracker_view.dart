@@ -314,24 +314,24 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                       ],
                     ),
                   ),
+                  SizedBox(
+                      height: media.width * 0.03,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)?.translate("Upcoming Workout") ?? "Upcoming Workout",
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: media.width * 0.03,
+                  ),
                   if (latestArr.isNotEmpty) ...[
-                    SizedBox(
-                      height: media.width * 0.05,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)?.translate("Upcoming Workout") ?? "Upcoming Workout",
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: media.width * 0.01,
-                    ),
                     ListView.builder(
                       padding: EdgeInsets.zero,
                       physics: const NeverScrollableScrollPhysics(),
@@ -356,7 +356,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                                 return AlertDialog(
                                   title: Text(AppLocalizations.of(context)?.translate("Confirm Delete") ?? "Confirm Delete"),
                                   content: Text(
-                                      AppLocalizations.of(context)?.translate("Confirm Delete des1") ?? "Are you sure you want to delete this workout schedule?"
+                                      AppLocalizations.of(context)?.translate("Confirm Delete des") ?? "Are you sure you want to delete this workout schedule?"
                                   ),
                                   actions: [
                                     TextButton(
@@ -387,11 +387,15 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                         );
                       },
                     ),
-                  ],
+                  ] else const Center(
+                        child: Text(
+                        "Not Scheduled",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
                   if (lastWorkoutArr.isNotEmpty) ...[
-                    // Nếu lastWorkoutArr không rỗng, hiển thị các widget dưới đây
                     SizedBox(
-                      height: media.width * 0.05,
+                      height: media.width * 0.03,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -439,7 +443,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                     )
                   ],
                   SizedBox(
-                    height: media.width * 0.05,
+                    height: media.width * 0.03,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

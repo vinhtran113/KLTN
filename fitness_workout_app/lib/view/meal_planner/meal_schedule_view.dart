@@ -10,6 +10,7 @@ import '../../common_widget/nutritions_row.dart';
 import '../../services/meal_services.dart';
 import '../../view/meal_planner/add_meal_schedule_view.dart';
 import 'edit_meal_schedule_view.dart';
+import 'meal_planner_view.dart';
 
 class MealScheduleView extends StatefulWidget {
   const MealScheduleView({super.key});
@@ -164,7 +165,12 @@ class _MealScheduleViewState extends State<MealScheduleView> {
         elevation: 0,
         leading: InkWell(
           onTap: () {
-            Navigator.pop(context);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const MealPlannerView(),
+              ),
+            );
           },
           child: Container(
             margin: const EdgeInsets.all(8),
@@ -276,7 +282,7 @@ class _MealScheduleViewState extends State<MealScheduleView> {
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Text(
                           "Not Scheduled",
-                          style: TextStyle(fontSize: 13),
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
                         ),
                       ),
                     ) : ListView.builder(
@@ -332,7 +338,7 @@ class _MealScheduleViewState extends State<MealScheduleView> {
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Text(
                           "Not Scheduled",
-                          style: TextStyle(fontSize: 13),
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
                         ),
                       ),
                     ) : ListView.builder(
@@ -388,7 +394,7 @@ class _MealScheduleViewState extends State<MealScheduleView> {
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Text(
                           "Not Scheduled",
-                          style: TextStyle(fontSize: 13),
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
                         ),
                       ),
                     ) : ListView.builder(
@@ -444,7 +450,7 @@ class _MealScheduleViewState extends State<MealScheduleView> {
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Text(
                           "Not Scheduled",
-                          style: TextStyle(fontSize: 13),
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
                         ),
                       ),
                     ) : ListView.builder(

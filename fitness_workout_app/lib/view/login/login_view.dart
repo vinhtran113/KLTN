@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:fitness_workout_app/services/auth_services.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
 
+import 'choose_activity_level_view.dart';
 import 'complete_profile_view.dart';
 
 class LoginView extends StatefulWidget {
@@ -61,6 +62,14 @@ class _LoginViewState extends State<LoginView> {
 
       if (res == "not-level") {
         _showNeedCompleteGoalDialog(context);
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
+      if (res == "not-ActivityLevel") {
+        _showNeedCompleteActivityLevelDialog(context);
         setState(() {
           isLoading = false;
         });
@@ -172,6 +181,31 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+  void _showNeedCompleteActivityLevelDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Complete your activity level"),
+          content: const Text("Bạn chưa hoàn thành việc thiết lập tài khoản?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => const ChooseActivityLevelView(),
+                  ),
+                      (route) => false,
+                );
+              },
+              child: const Text("Xác nhận"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void handleSignupWithGG() async {
     setState(() {
       isLoading = true;
@@ -206,6 +240,12 @@ class _LoginViewState extends State<LoginView> {
                 (route) => false,
           );
           break;
+
+        case "not-ActivityLevel":
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const ChooseActivityLevelView()),
+              (route) => false,
+        );
 
         case "not-activate":
           showDialog(

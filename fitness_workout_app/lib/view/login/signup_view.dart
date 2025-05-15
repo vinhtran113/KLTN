@@ -12,6 +12,8 @@ import 'package:fitness_workout_app/services/auth_services.dart';
 import '../setting/PrivacyPolicy_and_TermOfUse_View.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
 
+import 'choose_activity_level_view.dart';
+
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
 
@@ -111,6 +113,12 @@ class _SignUpViewState extends State<SignUpView> {
                 (route) => false,
           );
           break;
+
+        case "not-ActivityLevel":
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const ChooseActivityLevelView()),
+              (route) => false,
+        );
 
         case "not-activate":
           showDialog(
