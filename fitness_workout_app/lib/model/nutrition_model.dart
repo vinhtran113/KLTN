@@ -14,7 +14,7 @@ class Nutrition {
       'calories': 0.0,
       'protein': 0.0,
       'fat': 0.0,
-      'carbo': 0.0,
+      'carb': 0.0,
     },
   );
 
@@ -34,7 +34,7 @@ class Nutrition {
         return 'assets/img/egg.png';
       case 'protein':
         return 'assets/img/proteins.png';
-      case 'carbo':
+      case 'carb':
         return 'assets/img/carbo.png';
       default:
         return 'assets/img/no_image.png';
@@ -58,10 +58,9 @@ class Nutrition {
     switch (key.toLowerCase()) {
       case 'calories':
         return 'kCal';
-      case 'sugar':
       case 'fat':
       case 'protein':
-      case 'carbo':
+      case 'carb':
         return 'g';
       default:
         return '';

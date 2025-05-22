@@ -389,15 +389,19 @@ class _EditScheduleViewState extends State<EditScheduleView> {
               ),
             ]),
           ),
-          if (isLoading)
-            Positioned.fill(
+          AnimatedOpacity(
+            opacity: isLoading ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: IgnorePointer(
+              ignoring: !isLoading,
               child: Container(
                 color: Colors.black.withOpacity(0.5),
-                child: Center(
+                child: const Center(
                   child: CircularProgressIndicator(),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

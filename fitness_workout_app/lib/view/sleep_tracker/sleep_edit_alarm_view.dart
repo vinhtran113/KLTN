@@ -347,8 +347,11 @@ class _SleepEditAlarmViewState extends State<SleepEditAlarmView> {
             ]
             ),
           ),
-          if (isLoading)
-            Positioned.fill(
+          AnimatedOpacity(
+            opacity: isLoading ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: IgnorePointer(
+              ignoring: !isLoading,
               child: Container(
                 color: Colors.black.withOpacity(0.5),
                 child: const Center(
@@ -356,6 +359,7 @@ class _SleepEditAlarmViewState extends State<SleepEditAlarmView> {
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

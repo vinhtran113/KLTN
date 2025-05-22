@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
+import 'package:fitness_workout_app/common_widget/icon_title_next_row_2.dart';
 import 'package:fitness_workout_app/view/main_tab/main_tab_view.dart';
+import 'package:fitness_workout_app/view/profile/change_activity_level_view.dart';
+import 'package:fitness_workout_app/view/profile/change_body_fat_view.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -14,6 +17,7 @@ import '../../common_widget/round_textfield_2.dart';
 import '../../common_widget/selectDate.dart';
 import '../../model/user_model.dart';
 import '../../services/auth_services.dart';
+import 'change_goal_view.dart';
 import 'change_password_view.dart';
 import '../../main.dart';
 import '../../localization/app_localizations.dart';
@@ -34,11 +38,15 @@ class _EditProfileViewState extends State<EditProfileView> {
   final TextEditingController lnameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passController = TextEditingController();
+  final TextEditingController selectedGoal = TextEditingController();
+  final TextEditingController selectedActivityLevel = TextEditingController();
+  final TextEditingController selectedBodyFat = TextEditingController();
   String currentPic = '';
   final ImagePicker _picker = ImagePicker();
 
   bool isLoading = false;
   bool darkmode = darkModeNotifier.value;
+  late Map<String, String> initialData;
 
   @override
   void initState() {
@@ -51,7 +59,23 @@ class _EditProfileViewState extends State<EditProfileView> {
     selectedGender.text = widget.user.gender;
     emailController.text = widget.user.email;
     passController.text = widget.user.pass;
+    selectedGoal.text = widget.user.level;
+    selectedActivityLevel.text = widget.user.ActivityLevel;
+    selectedBodyFat.text = widget.user.body_fat;
     currentPic = widget.user.pic.isNotEmpty ? widget.user.pic : "assets/img/u2.png";
+
+    // Lưu dữ liệu gốc để so sánh sau
+    initialData = {
+      'fname': widget.user.fname,
+      'lname': widget.user.lname,
+      'weight': widget.user.weight,
+      'height': widget.user.height,
+      'dateOfBirth': widget.user.dateOfBirth,
+      'gender': widget.user.gender,
+      'level': widget.user.level,
+      'activityLevel': widget.user.ActivityLevel,
+      'body_fat': widget.user.body_fat,
+    };
   }
 
   @override
@@ -64,7 +88,22 @@ class _EditProfileViewState extends State<EditProfileView> {
     selectedGender.dispose();
     emailController.dispose();
     passController.dispose();
+    selectedGoal.dispose();
+    selectedActivityLevel.dispose();
+    selectedBodyFat.dispose();
     super.dispose();
+  }
+
+  bool hasUnsavedChanges() {
+    return fnameController.text != initialData['fname'] ||
+        lnameController.text != initialData['lname'] ||
+        selectWeight.text != initialData['weight'] ||
+        selectHeight.text != initialData['height'] ||
+        selectDate.text != initialData['dateOfBirth'] ||
+        selectedGender.text != initialData['gender'] ||
+        selectedGoal.text != initialData['level'] ||
+        selectedActivityLevel.text != initialData['activityLevel'] ||
+        selectedBodyFat.text != initialData['body_fat'];
   }
 
   void uploadImage() async {
@@ -75,7 +114,8 @@ class _EditProfileViewState extends State<EditProfileView> {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       try {
-        String filePath = 'profile_images/${widget.user.uid}.png';
+        String uid = widget.user.uid;
+        String filePath = 'users/$uid/profile_images/${widget.user.uid}.png';
         File file = File(image.path);
 
         // Upload ảnh lên Firebase
@@ -84,7 +124,6 @@ class _EditProfileViewState extends State<EditProfileView> {
         String downloadUrl = await snapshot.ref.getDownloadURL();
 
         // Gán ảnh trên Firebase vào người dùng
-        String uid = widget.user.uid;
         await AuthService().updateUserProfileImage(uid, downloadUrl);
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -116,13 +155,39 @@ class _EditProfileViewState extends State<EditProfileView> {
   }
 
   void getUserInfo() async {
+    // Kiểm tra nếu có thay đổi chưa lưu
+    if (hasUnsavedChanges()) {
+      bool? shouldSave = await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Chưa lưu thay đổi"),
+          content: Text("Bạn có muốn lưu thay đổi trước khi rời đi?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false), // Không lưu
+              child: Text("Không lưu"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true), // Lưu
+              child: Text("Lưu"),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldSave == true) {
+        // Nếu người dùng chọn "Lưu", thì lưu lại trước
+        await updateUserProfile();
+      }
+      // Nếu chọn "Không lưu", vẫn tiếp tục rời đi
+    }
+
     try {
-      // Lấy thông tin người dùng
+      // Lấy lại thông tin người dùng
       UserModel? user = await AuthService().getUserInfo(
           FirebaseAuth.instance.currentUser!.uid);
 
       if (user != null) {
-        // Điều hướng đến HomeView với user
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -141,7 +206,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     }
   }
 
-  void updateUserProfile() async {
+  Future<void> updateUserProfile() async {
     setState(() {
       isLoading = true;
     });
@@ -155,9 +220,23 @@ class _EditProfileViewState extends State<EditProfileView> {
       gender: selectedGender.text,
       weight: selectWeight.text,
       height: selectHeight.text,
+      level: selectedGoal.text,
+      ActivityLevel: selectedActivityLevel.text,
+      body_fat: selectedBodyFat.text,
     );
 
     if (res == "success") {
+      initialData = {
+        'fname': fnameController.text,
+        'lname': lnameController.text,
+        'weight': selectWeight.text,
+        'height': selectHeight.text,
+        'dateOfBirth': selectDate.text,
+        'gender': selectedGender.text,
+        'level': selectedGoal.text,
+        'activityLevel': selectedActivityLevel.text,
+        'body_fat': selectedBodyFat.text,
+      };
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Complete update your profile')),
       );
@@ -293,7 +372,6 @@ class _EditProfileViewState extends State<EditProfileView> {
                               ),
                             ),
                           ),
-
                           SizedBox(
                             height: media.width * 0.04,
                           ),
@@ -361,6 +439,69 @@ class _EditProfileViewState extends State<EditProfileView> {
                             ],
                           ),
                           SizedBox(
+                            height: media.width * 0.04,
+                          ),
+                          IconTitleNextRow2(
+                            icon: "assets/img/body_icon.png",
+                            title: AppLocalizations.of(context)?.translate("Body Fat(%)") ?? "Body Fat(%)",
+                            time: selectedBodyFat.text,
+                            color: TColor.lightGray,
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ChangeBodyFatView(value: selectedBodyFat.text)),
+                              );
+                              if (result != null && result is String) {
+                                setState(() {
+                                  selectedBodyFat.text = result;
+                                });
+                              }
+                            },
+                          ),
+                          SizedBox(
+                            height: media.width * 0.04,
+                          ),
+                          IconTitleNextRow2(
+                            icon: "assets/img/cup_icon.png",
+                            title: AppLocalizations.of(context)?.translate("Goal") ?? "Goal",
+                            time: selectedGoal.text,
+                            color: TColor.lightGray,
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ChangeGoalView(goal: selectedGoal.text)),
+                              );
+                              if (result != null && result is String) {
+                                setState(() {
+                                  selectedGoal.text = result;
+                                });
+                              }
+                            },
+                          ),
+                          SizedBox(
+                            height: media.width * 0.04,
+                          ),
+                          IconTitleNextRow2(
+                            icon: "assets/img/choose_workout.png",
+                            title: AppLocalizations.of(context)?.translate("Activity Level") ?? "Activity Level",
+                            time: selectedActivityLevel.text,
+                            color: TColor.lightGray,
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ChangeActivityLevelView(goal: selectedActivityLevel.text)),
+                              );
+                              if (result != null && result is String) {
+                                setState(() {
+                                  selectedActivityLevel.text = result;
+                                });
+                              }
+                            },
+                          ),
+                          SizedBox(
                             height: media.width * 0.06,
                           ),
                           RoundButton(
@@ -400,15 +541,19 @@ class _EditProfileViewState extends State<EditProfileView> {
             ),
           ),
 
-          if (isLoading)
-            Positioned.fill(
+          AnimatedOpacity(
+            opacity: isLoading ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: IgnorePointer(
+              ignoring: !isLoading,
               child: Container(
                 color: Colors.black.withOpacity(0.5),
-                child: Center(
+                child: const Center(
                   child: CircularProgressIndicator(),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

@@ -25,58 +25,48 @@ class _GenderDropdownState extends State<GenderDropdown> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: InputDecorator(
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      child: DropdownButtonFormField<String>(
+        value: widget.controller.text.isEmpty ? null : widget.controller.text,
+        items: widget.options.map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              AppLocalizations.of(context)?.translate(value) ?? value,
+              style: const TextStyle(
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          );
+        }).toList(),
+        onChanged: (value) {
+          setState(() {
+            widget.controller.text = value ?? '';
+          });
+        },
         decoration: InputDecoration(
+          prefixIcon: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Image.asset(
+              widget.icon,
+              width: 20,
+              height: 20,
+              fit: BoxFit.contain,
+              color: TColor.gray,
+            ),
+          ),
           labelText: widget.labelText,
           labelStyle: TextStyle(color: TColor.gray),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+          contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
         ),
-        child: Row(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              width: 35,
-              height: 20,
-              child: Image.asset(
-                widget.icon,
-                width: 20,
-                height: 20,
-                fit: BoxFit.contain,
-                color: TColor.gray,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: widget.controller.text.isEmpty ? null : widget.controller.text,
-                  items: widget.options.map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        AppLocalizations.of(context)?.translate(value) ?? value,
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      widget.controller.text = value ?? '';
-                    });
-                  },
-                  hint: Text(
-                    AppLocalizations.of(context)?.translate("Choose Gender") ?? "Choose Gender",
-                    style: TextStyle(color: TColor.gray),
-                  ),
-                  isExpanded: true,
-                  icon: Icon(Icons.arrow_drop_down, color: TColor.gray),
-                ),
-              ),
-            ),
-          ],
+        icon: Icon(Icons.arrow_drop_down, color: TColor.gray),
+        isExpanded: true,
+        hint: Text(
+          AppLocalizations.of(context)?.translate("Choose Gender") ?? "Choose Gender",
+          style: TextStyle(color: TColor.gray),
         ),
       ),
     );

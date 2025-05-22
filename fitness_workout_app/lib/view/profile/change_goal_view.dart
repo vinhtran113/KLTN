@@ -11,8 +11,8 @@ import '../../main.dart';
 import '../../localization/app_localizations.dart';
 
 class ChangeGoalView extends StatefulWidget {
-  final UserModel user;
-  const ChangeGoalView({super.key, required this.user});
+  final String goal;
+  const ChangeGoalView({super.key, required this.goal});
 
   @override
   State<ChangeGoalView> createState() => _ChangeGoalViewState();
@@ -52,42 +52,14 @@ class _ChangeGoalViewState extends State<ChangeGoalView> {
   ];
 
   void _loadData() async {
-    selectedGoal = widget.user.level;
-    print('${widget.user.level}');
-    if(widget.user.level == "Lose a Fat"){currentIndex = 2;}
-    if(widget.user.level == "Lean & Tone"){currentIndex = 1;}
-    print('$currentIndex');
+    selectedGoal = widget.goal;
+    if(widget.goal == "Lose a Fat"){currentIndex = 2;}
+    if(widget.goal == "Lean & Tone"){currentIndex = 1;}
   }
 
   void changeGoal() async {
     try {
-      await AuthService().updateUserLevel(FirebaseAuth.instance.currentUser!.uid, selectedGoal);
-      _getUserInfo();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi xảy ra: $e')),
-      );
-    }
-  }
-
-  void _getUserInfo() async {
-    try {
-      UserModel? user = await AuthService().getUserInfo(
-          FirebaseAuth.instance.currentUser!.uid);
-
-      if (user != null) {
-        // Điều hướng đến HomeView với user
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MainTabView(user: user, initialTab: 3),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Có lỗi xảy ra')),
-        );
-      }
+      Navigator.pop(context, selectedGoal);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi xảy ra: $e')),
@@ -101,6 +73,31 @@ class _ChangeGoalViewState extends State<ChangeGoalView> {
         .of(context)
         .size;
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+        elevation: 0,
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            height: 40,
+            width: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: TColor.lightGray,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Image.asset(
+              "assets/img/black_btn.png",
+              width: 15,
+              height: 15,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      ),
       body: SafeArea(
           child: Stack(
             children: [

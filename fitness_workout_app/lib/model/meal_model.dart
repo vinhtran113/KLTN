@@ -77,10 +77,6 @@ class Meal {
     }).toList();
   }
 
-  double getTotalCalories() {
-    return ingredients.fold(0, (sum, ing) => sum + (ing.amount * ing.caloriesPerUnit));
-  }
-
   factory Meal.empty() => Meal(
     description: '',
     image: '',

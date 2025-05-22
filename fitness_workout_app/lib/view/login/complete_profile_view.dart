@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
-import 'package:fitness_workout_app/view/login/what_your_goal_view.dart';
+import 'package:fitness_workout_app/view/login/what_your_body_fat_view.dart';
 import 'package:flutter/material.dart';
 
 import '../../common_widget/GenderDropdown.dart';
@@ -8,9 +8,7 @@ import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
 import '../../common_widget/selectDate.dart';
 import '../../services/auth_services.dart';
-import 'package:fitness_workout_app/model/user_model.dart';
 
-import 'activate_account.dart';
 
 class CompleteProfileView extends StatefulWidget {
   const CompleteProfileView({super.key});
@@ -53,7 +51,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const WhatYourGoalView(),
+          builder: (context) => const WhatYourBodyFatView(),
         ),
       );
       setState(() {
@@ -217,15 +215,19 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
               ),
             ),
           ),
-          if (isLoading)
-            Positioned.fill(
+          AnimatedOpacity(
+            opacity: isLoading ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: IgnorePointer(
+              ignoring: !isLoading,
               child: Container(
                 color: Colors.black.withOpacity(0.5),
-                child: Center(
+                child: const Center(
                   child: CircularProgressIndicator(),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

@@ -303,7 +303,7 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
                           amount: newAmount,
                           unit: selectedIngredient!.unit,
                           image: selectedIngredient!.image,
-                          caloriesPerUnit: selectedIngredient!.caloriesPerUnit,
+                          nutri: selectedIngredient!.nutri,
                         );
                       });
                     }
@@ -316,7 +316,7 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
                           amount: newAmount,
                           unit: selectedIngredient!.unit,
                           image: selectedIngredient!.image,
-                          caloriesPerUnit: selectedIngredient!.caloriesPerUnit,
+                          nutri: selectedIngredient!.nutri,
                         ),
                       );
                     });

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../common/colo_extension.dart';
+import '../../common/nutrition_calculator.dart';
 import '../../common_widget/icon_select_food_row.dart';
 import '../../common_widget/icon_title_next_row.dart';
 import '../../common_widget/round_button.dart';
@@ -15,6 +16,8 @@ import '../../main.dart';
 import '../../model/ingredient_model.dart';
 import '../../model/meal_model.dart';
 import '../../model/simple_meal_model.dart';
+import '../../model/user_model.dart';
+import '../../services/auth_services.dart';
 import '../../services/meal_services.dart';
 import '../../services/notification_services.dart';
 
@@ -46,9 +49,13 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
   File? selectedImage;
   bool darkmode = darkModeNotifier.value;
 
+  double tdee = 1;
+  double cals = 1;
+
   @override
   void initState() {
     super.initState();
+    _getUser();
 
     selectedMealType = TextEditingController(
       text: widget.initialMealType ?? '',
@@ -63,6 +70,29 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
   void dispose() {
     selectedMealType.dispose();
     super.dispose();
+  }
+
+  void _getUser() async {
+    try {
+      // Lấy thông tin người dùng
+      UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      double weight = double.parse(user!.weight);
+      double height = double.parse(user.height);
+      int age = user.getAge();
+      double bodyFatPercent = double.parse(user.body_fat);
+      String activityLevel = user.ActivityLevel;
+      String goal = user.level;
+
+      setState(() {
+        tdee = NutritionCalculator.calculateTDEE(weight: weight, height: height, age: age, activityLevel: activityLevel, bodyFatPercent: bodyFatPercent);
+        cals = NutritionCalculator.adjustCaloriesForGoal(tdee, goal);
+
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
   }
 
   Future<void> _selectTime(BuildContext context) async {
@@ -143,7 +173,7 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
 
     // Tính tổng calories của các món mới
     double newCalories = selectedFoods.fold(0.0, (sum, meal) {
-      return sum + meal.ingredients.fold(0.0, (s, ing) => s + (ing.amount * (ing.caloriesPerUnit ?? 0.0)));
+      return sum + meal.ingredients.fold(0.0, (s, ing) => s + (ing.amount * (ing.nutri.values['calories'] ?? 0.0)));
     });
 
     // Gọi dịch vụ kiểm tra tổng calories trong ngày
@@ -152,7 +182,7 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
       date: widget.date,
     );
 
-    double allowedCalories = 2000;
+    double allowedCalories = cals;
 
     if (totalCaloriesSoFar + newCalories > allowedCalories) {
       bool proceed = await showDialog(
@@ -219,8 +249,17 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
 
     final simpleMeals = await Future.wait(selectedFoods.map((meal) async {
       final totalCal = meal.ingredients.fold<double>(
-        0.0, (sum, ing) => sum + (ing.amount * (ing.caloriesPerUnit ?? 0.0)),
-      );
+        0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['calories'] ?? 0.0)));
+
+      final totalCarb = meal.ingredients.fold<double>(
+          0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['carb'] ?? 0.0)));
+
+      final totalFat = meal.ingredients.fold<double>(
+          0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['fat'] ?? 0.0)));
+
+      final totalProtein = meal.ingredients.fold<double>(
+          0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['protein'] ?? 0.0)));
+
       String id_notify = '0';
 
       if (isNotificationEnabled) {
@@ -250,6 +289,9 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
         name: meal.name,
         image: meal.image,
         totalCalories: totalCal,
+        totalCarb: totalCarb,
+        totalFat: totalFat,
+        totalProtein: totalProtein,
         time: selectedTime,
         notify: isNotificationEnabled,
         id_notify: id_notify,
@@ -484,7 +526,7 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                         amount: newAmount,
                         unit: oldIng.unit,
                         image: oldIng.image,
-                        caloriesPerUnit: oldIng.caloriesPerUnit,
+                        nutri: oldIng.nutri,
                       );
                     });
                   },
@@ -492,16 +534,6 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                 SizedBox(
                   height: media.width * 0.03,
                 ),
-                // RepetitionsRow(
-                //   icon: "assets/img/Repeat.png",
-                //   title: AppLocalizations.of(context)?.translate(
-                //       "Custom Repetitions") ?? "Custom Repetitions",
-                //   color: TColor.lightGray,
-                //   repetitionController: selectedRepetition,
-                // ),
-                // SizedBox(
-                //   height: media.width * 0.03,
-                // ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -568,11 +600,19 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
               ),
             ),
           ),
-          if (isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.4),
-              child: Center(child: CircularProgressIndicator()),
+          AnimatedOpacity(
+            opacity: isLoading ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: IgnorePointer(
+              ignoring: !isLoading,
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
             ),
+          ),
         ],
       ),
     );

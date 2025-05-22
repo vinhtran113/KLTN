@@ -1,11 +1,21 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_workout_app/view/photo_progress/gallery_view.dart';
+import 'package:fitness_workout_app/view/photo_progress/preprocess_photo_view.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
 import '../../main.dart';
+import '../../services/auth_services.dart';
 import 'comparison_view.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
 import '../../localization/app_localizations.dart';
+import 'edit_photo_view.dart';
 
 class PhotoProgressView extends StatefulWidget {
   final UserModel user;
@@ -17,28 +27,71 @@ class PhotoProgressView extends StatefulWidget {
 }
 
 class _PhotoProgressViewState extends State<PhotoProgressView> {
-  List photoArr = [
-    {
-      "time": "2 June",
-      "photo": [
-        "assets/img/pp_1.png",
-        "assets/img/pp_2.png",
-        "assets/img/pp_3.png",
-        "assets/img/pp_4.png",
-      ]
-    },
-    {
-      "time": "5 May",
-      "photo": [
-        "assets/img/pp_5.png",
-        "assets/img/pp_6.png",
-        "assets/img/pp_7.png",
-        "assets/img/pp_8.png",
-      ]
-    }
-  ];
-
+  String uid = FirebaseAuth.instance.currentUser!.uid;
   bool darkmode = darkModeNotifier.value;
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) =>
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text("Chụp ảnh"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo),
+                title: Text("Chọn từ thư viện"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: source);
+
+    if (image != null) {
+      final user = await AuthService().getUserInfo(uid);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PreprocessPhotoView(
+            imageFile: File(image.path),
+            userHeight: user!.height,
+            userWeight: user.weight,
+            userBodyFat: user.body_fat,
+          ),
+        ),
+      );
+    }
+  }
+
+  Stream<QuerySnapshot> _getTodayPhotos() {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('body_progress')
+        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .where('date', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
+        .orderBy('date', descending: true)
+        .snapshots();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +224,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                   ),
                 ),
                 SizedBox(
-                  height: media.width * 0.05,
+                  height: media.width * 0.03,
                 ),
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -214,76 +267,97 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                 ),
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         "Gallery",
                         style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.w700),
                       ),
                       TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push( context,
+                              MaterialPageRoute(
+                                builder: (context) => GalleryView(),
+                              ),
+                            );
+                          },
                           child: Text(
                             "See more",
                             style: TextStyle(color: TColor.gray, fontSize: 12),
-                          ))
+                          )
+                      )
                     ],
                   ),
                 ),
-                ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: photoArr.length,
-                    itemBuilder: ((context, index) {
-                      var pObj = photoArr[index] as Map? ?? {};
-                      var imaArr = pObj["photo"] as List? ?? [];
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
+                StreamBuilder<QuerySnapshot>(
+                  stream: _getTodayPhotos(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    final photos = snapshot.data!.docs;
+                    if (photos.isEmpty) {
+                      return Center(child: Text("You do not have a progress photo today"));
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 8),
+                          child: Text(
+                            "You saved ${photos.length} photos today",
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ),
+                        SizedBox(
+                          height: media.height * 0.5,
+                          child: GridView.builder(
+                            itemCount: photos.length,
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              pObj["time"].toString(),
-                              style:
-                              TextStyle(color: TColor.gray, fontSize: 12),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
                             ),
-                          ),
-                          SizedBox(
-                            height: 100,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: EdgeInsets.zero,
-                              itemCount: imaArr.length,
-                              itemBuilder: ((context, indexRow) {
-                                return Container(
-                                  margin:
-                                  const EdgeInsets.symmetric(horizontal: 4),
-                                  width: 100,
-                                  decoration: BoxDecoration(
-                                    color: TColor.lightGray,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.asset(
-                                      imaArr[indexRow] as String? ?? "",
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
+                            itemBuilder: (context, index) {
+                              final doc = photos[index];
+                              final imageUrl = doc['imageUrl'];
+                              final docId = doc.id;
+
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditPhotoView(
+                                        imageUrl: imageUrl,
+                                        docId: docId,
+                                        userHeight: doc['height'] ?? '',
+                                        userWeight: doc['weight'] ?? '',
+                                        userBodyFat: doc['bodyFat'] ?? '',
+                                      ),
                                     ),
+                                  );
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    fit: BoxFit.cover,
                                   ),
-                                );
-                              }),
-                            ),
+                                ),
+                              );
+                            },
                           ),
-                        ],
-                      );
-                    }))
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ],
             ),
             SizedBox(
@@ -293,16 +367,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
         ),
       ),
       floatingActionButton: InkWell(
-        onTap: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => SleepAddAlarmView(
-          //       date: _selectedDateAppBBar,
-          //     ),
-          //   ),
-          // );
-        },
+        onTap: _showImageSourceDialog,
         child: Container(
           width: 55,
           height: 55,

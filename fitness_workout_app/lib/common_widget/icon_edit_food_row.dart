@@ -202,7 +202,7 @@ class _IconEditFoodRowState extends State<IconEditFoodRow> {
                     amount: newAmount,
                     unit: selectedIngredient!.unit,
                     image: selectedIngredient!.image,
-                    caloriesPerUnit: selectedIngredient!.caloriesPerUnit,
+                    nutri: selectedIngredient!.nutri,
                   );
                 } else {
                   widget.selectedMeal.ingredients.add(
@@ -211,7 +211,7 @@ class _IconEditFoodRowState extends State<IconEditFoodRow> {
                       amount: newAmount,
                       unit: selectedIngredient!.unit,
                       image: selectedIngredient!.image,
-                      caloriesPerUnit: selectedIngredient!.caloriesPerUnit,
+                      nutri: selectedIngredient!.nutri,
                     ),
                   );
                 }

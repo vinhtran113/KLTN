@@ -62,7 +62,7 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
         .size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
         centerTitle: true,
         elevation: 0,
         leading: InkWell(
@@ -86,7 +86,8 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
           ),
         ),
         title: Text(
-          AppLocalizations.of(context)?.translate("Sleep Schedule") ?? "Sleep Schedule",
+          AppLocalizations.of(context)?.translate("Sleep Schedule") ??
+              "Sleep Schedule",
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
       ),
@@ -120,7 +121,8 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                                 height: 50,
                               ),
                               Text(
-                                AppLocalizations.of(context)?.translate("Ideal Sleep") ?? "Ideal Hours for Sleep",
+                                AppLocalizations.of(context)?.translate(
+                                    "Ideal Sleep") ?? "Ideal Hours for Sleep",
                                 style: TextStyle(
                                   fontSize: 14,
                                 ),
@@ -148,7 +150,8 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                   padding:
                   const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   child: Text(
-                      AppLocalizations.of(context)?.translate("Your Schedule") ?? "Your Schedule",
+                    AppLocalizations.of(context)?.translate("Your Schedule") ??
+                        "Your Schedule",
                     style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700),
@@ -181,8 +184,8 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                   // fullCalendar: false,
                   fullCalendarScroll: FullCalendarScroll.horizontal,
                   fullCalendarDay: WeekDay.short,
-                  selectedDateColor: darkmode? Colors.black : TColor.white,
-                  dateColor: darkmode? Colors.white : TColor.black,
+                  selectedDateColor: darkmode ? Colors.black : TColor.white,
+                  dateColor: darkmode ? Colors.white : TColor.black,
                   locale: 'en',
 
                   initialDate: DateTime.now(),
@@ -213,7 +216,8 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                     padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     child: Text(
-                      AppLocalizations.of(context)?.translate("not alarm") ?? "You have not scheduled an alarm!",
+                      AppLocalizations.of(context)?.translate("not alarm") ??
+                          "You have not scheduled an alarm!",
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700),
@@ -228,7 +232,8 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                     padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     child: Text(
-                      AppLocalizations.of(context)?.translate("Upcoming Alarm") ?? "Upcoming Alarm",
+                      AppLocalizations.of(context)?.translate(
+                          "Upcoming Alarm") ?? "Upcoming Alarm",
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700),
@@ -259,19 +264,27 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                             context: context,
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title: Text(AppLocalizations.of(context)?.translate("Confirm Delete") ?? "Confirm Delete"),
+                                title: Text(
+                                    AppLocalizations.of(context)?.translate(
+                                        "Confirm Delete") ?? "Confirm Delete"),
                                 content: Text(
-                                    AppLocalizations.of(context)?.translate("Confirm Delete des") ?? "Are you sure you want to delete this alarm schedule?"),
+                                    AppLocalizations.of(context)?.translate(
+                                        "Confirm Delete des") ??
+                                        "Are you sure you want to delete this alarm schedule?"),
                                 actions: [
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.of(context).pop(false),
-                                    child: Text(AppLocalizations.of(context)?.translate("Cancel") ?? "Cancel"),
+                                    child: Text(
+                                        AppLocalizations.of(context)?.translate(
+                                            "Cancel") ?? "Cancel"),
                                   ),
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.of(context).pop(true),
-                                    child: Text(AppLocalizations.of(context)?.translate("Delete") ?? "Delete"),
+                                    child: Text(
+                                        AppLocalizations.of(context)?.translate(
+                                            "Delete") ?? "Delete"),
                                   ),
                                 ],
                               );
@@ -310,7 +323,8 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => SleepAddAlarmView(date: _selectedDateAppBBar),
+              builder: (context) =>
+                  SleepAddAlarmView(date: _selectedDateAppBBar),
             ),
           );
           if (result == true) {

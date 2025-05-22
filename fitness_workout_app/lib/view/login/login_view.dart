@@ -5,6 +5,7 @@ import 'package:fitness_workout_app/common_widget/round_textfield.dart';
 import 'package:fitness_workout_app/view/login/reset_password_view.dart';
 import 'package:fitness_workout_app/view/login/signup_view.dart';
 import 'package:fitness_workout_app/view/login/welcome_view.dart';
+import 'package:fitness_workout_app/view/login/what_your_body_fat_view.dart';
 import 'package:fitness_workout_app/view/login/what_your_goal_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_workout_app/services/auth_services.dart';
@@ -53,6 +54,14 @@ class _LoginViewState extends State<LoginView> {
       }
 
       if (res == "not-profile") {
+        _showNeedCompleteProfileDialog(context);
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
+      if (res == "not-bodyfat") {
         _showNeedCompleteProfileDialog(context);
         setState(() {
           isLoading = false;
@@ -156,6 +165,31 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+  void _showNeedCompleteBodyFatDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Complete your body fat"),
+          content: const Text("Bạn chưa hoàn thành việc thiết lập tài khoản?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => const WhatYourBodyFatView(),
+                  ),
+                      (route) => false,
+                );
+              },
+              child: const Text("Xác nhận"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showNeedCompleteGoalDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -233,6 +267,12 @@ class _LoginViewState extends State<LoginView> {
                 (route) => false,
           );
           break;
+
+        case "not-bodyfat":
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const WhatYourBodyFatView()),
+              (route) => false,
+        );
 
         case "not-level":
           Navigator.of(context).pushAndRemoveUntil(
@@ -491,15 +531,19 @@ class _LoginViewState extends State<LoginView> {
               ),
             ),
           ),
-          if (isLoading)
-            Positioned.fill(
+          AnimatedOpacity(
+            opacity: isLoading ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: IgnorePointer(
+              ignoring: !isLoading,
               child: Container(
                 color: Colors.black.withOpacity(0.5),
-                child: Center(
+                child: const Center(
                   child: CircularProgressIndicator(),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

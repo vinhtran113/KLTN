@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../common/colo_extension.dart';
+import '../../common/nutrition_calculator.dart';
 import '../../common_widget/delete_button.dart';
 import '../../common_widget/icon_edit_food_row.dart';
 import '../../common_widget/icon_title_next_row.dart';
@@ -13,6 +14,8 @@ import '../../localization/app_localizations.dart';
 import '../../main.dart';
 import '../../model/meal_model.dart';
 import '../../model/simple_meal_model.dart';
+import '../../model/user_model.dart';
+import '../../services/auth_services.dart';
 import '../../services/meal_services.dart';
 import '../../services/notification_services.dart';
 
@@ -41,9 +44,13 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
   File? selectedImage;
   bool darkmode = darkModeNotifier.value;
 
+  double tdee = 1;
+  double cals = 1;
+
   @override
   void initState() {
     super.initState();
+    _getUser();
     // Kiểm tra nếu là String thì parse, còn nếu là DateTime thì gán trực tiếp
     final rawDate = widget.bObj['date'];
     if (rawDate is String) {
@@ -71,6 +78,29 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
     setState(() {
       selectedFood = loadMeal;
     });
+  }
+
+  void _getUser() async {
+    try {
+      // Lấy thông tin người dùng
+      UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      double weight = double.parse(user!.weight);
+      double height = double.parse(user.height);
+      int age = user.getAge();
+      double bodyFatPercent = double.parse(user.body_fat);
+      String activityLevel = user.ActivityLevel;
+      String goal = user.level;
+
+      setState(() {
+        tdee = NutritionCalculator.calculateTDEE(weight: weight, height: height, age: age, activityLevel: activityLevel, bodyFatPercent: bodyFatPercent);
+        cals = NutritionCalculator.adjustCaloriesForGoal(tdee, goal);
+
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
   }
 
   void _checkHideNotify() async {
@@ -109,7 +139,19 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
 
     // Tính calo mới
     double newCalories = selectedFood.ingredients.fold<double>(
-      0.0, (sum, ing) => sum + (ing.amount * (ing.caloriesPerUnit ?? 0.0)),
+      0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['calories'] ?? 0.0)),
+    );
+
+    double newCarb = selectedFood.ingredients.fold<double>(
+      0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['carb'] ?? 0.0)),
+    );
+
+    double newFat = selectedFood.ingredients.fold<double>(
+      0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['fat'] ?? 0.0)),
+    );
+
+    double newProtein = selectedFood.ingredients.fold<double>(
+      0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['protein'] ?? 0.0)),
     );
 
     // Lấy tổng calories trong ngày
@@ -122,7 +164,7 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
     double oldCalories = widget.bObj['totalCalories'].toDouble();
     double adjustedCalories = totalCaloriesSoFar - oldCalories + newCalories;
 
-    double allowedCalories = 2000;
+    double allowedCalories = cals;
 
     // Nếu vượt mức thì cảnh báo
     if (adjustedCalories > allowedCalories) {
@@ -182,6 +224,9 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
       name: selectedFood.name,
       image: selectedFood.image,
       totalCalories: newCalories,
+      totalCarb: newCarb,
+      totalFat: newFat,
+      totalProtein: newProtein,
       time: selectedTime,
       notify: isNotificationEnabled,
       id_notify: id_notify,
@@ -473,11 +518,19 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
               ),
             ),
           ),
-          if (isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.4),
-              child: Center(child: CircularProgressIndicator()),
+          AnimatedOpacity(
+            opacity: isLoading ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: IgnorePointer(
+              ignoring: !isLoading,
+              child: Container(
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
             ),
+          ),
         ],
       ),
     );

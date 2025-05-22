@@ -13,6 +13,7 @@ class UserModel {
   final String level;
   final String pass;
   final String ActivityLevel;
+  final String body_fat;
 
   UserModel({
     required this.uid,
@@ -27,6 +28,7 @@ class UserModel {
     required this.level,
     required this.pass,
     required this.ActivityLevel,
+    required this.body_fat,
   });
 
   // Tính tuổi người dùng từ ngày sinh
@@ -61,6 +63,7 @@ class UserModel {
       level: json['level'] ?? '',
       pass: json['password'] ?? '',
       ActivityLevel: json['ActivityLevel'] ?? '',
+      body_fat: json['body_fat'] ?? '',
     );
   }
 }

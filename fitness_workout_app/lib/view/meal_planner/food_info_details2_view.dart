@@ -169,11 +169,11 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                                     meal.name.toString(),
                                     style: TextStyle(
                                         color: TColor.black,
-                                        fontSize: 16,
+                                        fontSize: 22,
                                         fontWeight: FontWeight.w700),
                                   ),
                                   Text(
-                                    meal.size.toString(),
+                                    "${meal.size.toString()} | ${meal.time.toString()} min",
                                     style: TextStyle(
                                         color: TColor.gray, fontSize: 12),
                                   ),
@@ -184,7 +184,7 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                         ),
                       ),
                       SizedBox(
-                        height: media.width * 0.05,
+                        height: media.width * 0.01,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -243,7 +243,7 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                             }),
                       ),
                       SizedBox(
-                        height: media.width * 0.05,
+                        height: media.width * 0.01,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -255,8 +255,8 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                               fontWeight: FontWeight.w700),
                         ),
                       ),
-                      const SizedBox(
-                        height: 4,
+                      SizedBox(
+                        height: media.width * 0.01,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -275,8 +275,8 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                               fontSize: 12, fontWeight: FontWeight.w700),
                         ),
                       ),
-                      const SizedBox(
-                        height: 15,
+                      SizedBox(
+                        height: media.width * 0.01,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),

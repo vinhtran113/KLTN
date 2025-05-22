@@ -5,6 +5,7 @@ import 'package:fitness_workout_app/common_widget/round_textfield.dart';
 import 'package:fitness_workout_app/view/login/complete_profile_view.dart';
 import 'package:fitness_workout_app/view/login/login_view.dart';
 import 'package:fitness_workout_app/view/login/welcome_view.dart';
+import 'package:fitness_workout_app/view/login/what_your_body_fat_view.dart';
 import 'package:fitness_workout_app/view/login/what_your_goal_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -106,6 +107,12 @@ class _SignUpViewState extends State<SignUpView> {
                 (route) => false,
           );
           break;
+
+        case "not-bodyfat":
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const WhatYourBodyFatView()),
+              (route) => false,
+        );
 
         case "not-level":
           Navigator.of(context).pushAndRemoveUntil(
@@ -411,15 +418,19 @@ class _SignUpViewState extends State<SignUpView> {
               ),
             ),
           ),
-          if (isLoading)
-            Positioned.fill(
+          AnimatedOpacity(
+            opacity: isLoading ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: IgnorePointer(
+              ignoring: !isLoading,
               child: Container(
                 color: Colors.black.withOpacity(0.5),
-                child: Center(
+                child: const Center(
                   child: CircularProgressIndicator(),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

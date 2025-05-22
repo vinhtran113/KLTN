@@ -5,8 +5,11 @@ import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart
 
 import '../../common/colo_extension.dart';
 import '../../common/common.dart';
+import '../../common/nutrition_calculator.dart';
 import '../../common_widget/meal_food_schedule_row.dart';
 import '../../common_widget/nutritions_row.dart';
+import '../../model/user_model.dart';
+import '../../services/auth_services.dart';
 import '../../services/meal_services.dart';
 import '../../view/meal_planner/add_meal_schedule_view.dart';
 import 'edit_meal_schedule_view.dart';
@@ -39,10 +42,17 @@ class _MealScheduleViewState extends State<MealScheduleView> {
   double dinnerCalories = 0.0;
   double snacksCalories = 0.0;
 
+  double tdee = 1;
+  double cals = 1;
+  double carb = 1;
+  double protein = 1;
+  double fat = 1;
+
   @override
-  void initState() {
+  void initState(){
     super.initState();
     _selectedDateAppBBar = DateTime.now();
+    _getUser();
     _loadMealSchedule();
     _setDayMealList();
   }
@@ -54,6 +64,31 @@ class _MealScheduleViewState extends State<MealScheduleView> {
       mealEventArr = schedule;
     });
     _setDayMealList();
+  }
+
+  void _getUser() async {
+    try {
+      // Lấy thông tin người dùng
+      UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      double weight = double.parse(user!.weight);
+      double height = double.parse(user.height);
+      int age = user.getAge();
+      double bodyFatPercent = double.parse(user.body_fat);
+      String activityLevel = user.ActivityLevel;
+      String goal = user.level;
+
+      setState(() {
+        tdee = NutritionCalculator.calculateTDEE(weight: weight, height: height, age: age, activityLevel: activityLevel, bodyFatPercent: bodyFatPercent);
+        cals = NutritionCalculator.adjustCaloriesForGoal(tdee, goal);
+        carb = NutritionCalculator.calculateMaxCarb(cals, goal);
+        protein = NutritionCalculator.calculateMaxProtein(cals, goal);
+        fat = NutritionCalculator.calculateMaxFat(cals, goal);
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
   }
 
   void _setDayMealList() {
@@ -104,20 +139,17 @@ class _MealScheduleViewState extends State<MealScheduleView> {
       "calories": 0.0,
       "protein": 0.0,
       "fat": 0.0,
-      "carbo": 0.0,
+      "carb": 0.0,
     };
 
     for (var mealGroup in [breakfastArr, lunchArr, dinnerArr, snacksArr]) {
       for (var meal in mealGroup) {
         final nutri = Map<String, dynamic>.from(meal['nutri'] ?? {});
 
-        // Dùng totalCalories từ lịch thay vì nutri['calories']
-        final double calories = (meal['totalCalories'] ?? 0).toDouble();
-
-        dailyNutrition['calories'] = dailyNutrition['calories']! + calories;
-        dailyNutrition['protein'] = dailyNutrition['protein']! + (nutri['protein'] ?? 0).toDouble();
-        dailyNutrition['fat'] = dailyNutrition['fat']! + (nutri['fat'] ?? 0).toDouble();
-        dailyNutrition['carbo'] = dailyNutrition['carbo']! + (nutri['carbo'] ?? 0).toDouble();
+        dailyNutrition['calories'] = dailyNutrition['calories']! + (meal['totalCalories'] ?? 0).toDouble();
+        dailyNutrition['protein'] = dailyNutrition['protein']! + (meal['totalProtein'] ?? 0).toDouble();
+        dailyNutrition['fat'] = dailyNutrition['fat']! + (meal['totalFat'] ?? 0).toDouble();
+        dailyNutrition['carb'] = dailyNutrition['carb']! + (meal['totalCarb'] ?? 0).toDouble();
       }
     }
 
@@ -127,28 +159,28 @@ class _MealScheduleViewState extends State<MealScheduleView> {
         "image": "assets/img/burn.png",
         "unit_name": "kCal",
         "value": dailyNutrition["calories"]!.toStringAsFixed(0),
-        "max_value": "2000",
+        "max_value": cals.toStringAsFixed(0),
       },
       {
         "title": "Proteins",
         "image": "assets/img/proteins.png",
         "unit_name": "g",
         "value": dailyNutrition["protein"]!.toStringAsFixed(0),
-        "max_value": "1000",
+        "max_value": protein.toStringAsFixed(0),
       },
       {
         "title": "Fats",
         "image": "assets/img/egg.png",
         "unit_name": "g",
         "value": dailyNutrition["fat"]!.toStringAsFixed(0),
-        "max_value": "1000",
+        "max_value": fat.toStringAsFixed(0),
       },
       {
-        "title": "Carbo",
+        "title": "Carb",
         "image": "assets/img/carbo.png",
         "unit_name": "g",
-        "value": dailyNutrition["carbo"]!.toStringAsFixed(0),
-        "max_value": "1000",
+        "value": dailyNutrition["carb"]!.toStringAsFixed(0),
+        "max_value": carb.toStringAsFixed(0),
       },
     ];
 
@@ -509,7 +541,7 @@ class _MealScheduleViewState extends State<MealScheduleView> {
                           );
                         }),
                     SizedBox(
-                      height: media.width * 0.05,
+                      height: media.width * 0.12,
                     )
                   ],
                 ),

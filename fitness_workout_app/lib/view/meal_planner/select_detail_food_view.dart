@@ -101,8 +101,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                               fit: BoxFit.contain,
                             );
                           },
-                        )
-                            : Image.asset(
+                        ) : Image.asset(
                           "assets/img/no_image.png",
                           width: media.width * 0.50,
                           height: media.width * 0.50,
@@ -145,7 +144,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                         ],
                       ),
                       SizedBox(
-                        height: media.width * 0.05,
+                        height: media.width * 0.01,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -164,7 +163,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                                         fontWeight: FontWeight.w700),
                                   ),
                                   Text(
-                                    widget.dObj.size.toString(),
+                                    "${widget.dObj.size.toString()} | ${widget.dObj.time.toString()} min",
                                     style: TextStyle(
                                         color: TColor.gray, fontSize: 12),
                                   ),
@@ -175,7 +174,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                         ),
                       ),
                       SizedBox(
-                        height: media.width * 0.05,
+                        height: media.width * 0.01,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -234,7 +233,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                             }),
                       ),
                       SizedBox(
-                        height: media.width * 0.05,
+                        height: media.width * 0.01,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -266,8 +265,8 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                               fontSize: 12, fontWeight: FontWeight.w700),
                         ),
                       ),
-                      const SizedBox(
-                        height: 15,
+                      SizedBox(
+                        height: media.width * 0.01,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -402,22 +401,25 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                   ),
                 ),
                 SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: RoundButton(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          child: RoundButton(
                             title: "Add to Schedule",
-                          onPressed: () {
-                            widget.onSelect(widget.dObj);
-                            Navigator.pop(context, widget.dObj);
-                          },),
-                      ),
-                    ],
+                            onPressed: () {
+                              widget.onSelect(widget.dObj);
+                              Navigator.pop(context, widget.dObj);
+                            },),
+                        ),
+                      ],
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),

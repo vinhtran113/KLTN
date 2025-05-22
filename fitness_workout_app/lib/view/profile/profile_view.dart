@@ -22,6 +22,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../workout_tracker/all_history_workout_view.dart';
 import '../../localization/app_localizations.dart';
+import 'nutrition_summary_view.dart';
 
 class ProfileView extends StatefulWidget {
   final UserModel user;
@@ -238,6 +239,22 @@ class _ProfileViewState extends State<ProfileView> {
                       height: 8,
                     ),
                     SettingRow(
+                      icon: "assets/img/diet_icon.png",
+                      title: AppLocalizations.of(context)?.translate("Nutrition Summary") ?? "Nutrition Summary",
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (
+                                context) => NutritionSummaryView(user: widget.user),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    SettingRow(
                       icon: "assets/img/p_activity.png",
                       title: AppLocalizations.of(context)?.translate("Workout History") ?? "Workout History",
                       onPressed: () {
@@ -259,19 +276,6 @@ class _ProfileViewState extends State<ProfileView> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => StatisticsChartView(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    SettingRow(
-                      icon: "assets/img/p_workout.png",
-                      title: AppLocalizations.of(context)?.translate("Change Goal") ?? "Change Goal",
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChangeGoalView(user: widget.user),
                           ),
                         );
                       },

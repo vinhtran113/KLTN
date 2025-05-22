@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../model/ingredient_model.dart';
 import '../model/meal_model.dart';
+import '../model/nutrition_model.dart';
 import '../model/simple_meal_model.dart';
 import 'notification_services.dart';
 
@@ -60,7 +61,7 @@ class MealService {
             amount: ing.amount,
             unit: extra['unit'] ?? '',
             image: extra['image'] ?? '',
-            caloriesPerUnit: (extra['caloriesPerUnit'] as num?)?.toDouble() ?? 0.0,
+            nutri: Nutrition.fromMap(extra['nutri'] ?? {}),
           );
         }
       }
@@ -104,14 +105,13 @@ class MealService {
       for (var i = 0; i < meal.ingredients.length; i++) {
         final ing = meal.ingredients[i];
         final extra = ingredientsData[ing.name];
-        print("Gán: ${extra}");
         if (extra != null) {
           meal.ingredients[i] = Ingredient(
             name: ing.name,
             amount: ing.amount,
             unit: extra['unit'] ?? '',
             image: extra['image'] ?? '',
-            caloriesPerUnit: (extra['caloriesPerUnit'] as num?)?.toDouble() ?? 0.0,
+            nutri: Nutrition.fromMap(extra['nutri'] ?? {}),
           );
         }
       }
@@ -158,7 +158,7 @@ class MealService {
             amount: ing.amount,
             unit: extra['unit'] ?? '',
             image: extra['image'] ?? '',
-            caloriesPerUnit: (extra['caloriesPerUnit'] as num?)?.toDouble() ?? 0.0,
+            nutri: Nutrition.fromMap(extra['nutri'] ?? {}),
           );
 
         }
@@ -209,7 +209,7 @@ class MealService {
             amount: ing.amount,
             unit: extra['unit'] ?? '',
             image: extra['image'] ?? '',
-            caloriesPerUnit: (extra['caloriesPerUnit'] as num?)?.toDouble() ?? 0.0,
+            nutri: Nutrition.fromMap(extra['nutri'] ?? {}),
           );
         }
       }
@@ -226,7 +226,7 @@ class MealService {
         unit: data['unit'] ?? '',
         image: data['image'] ?? '',
         amount: 0,
-        caloriesPerUnit: (data['caloriesPerUnit'] as num?)?.toDouble() ?? 0.0,
+        nutri: Nutrition.fromMap(data['nutri'] ?? {}),
       );
     }).toList();
   }
@@ -434,6 +434,9 @@ class MealService {
           for (final m in meals) {
             final name = m['name'] ?? '';
             final calories = (m['totalCalories'] ?? 0.0) as num;
+            final carb = (m['totalCarb'] ?? 0.0) as num;
+            final fat = (m['totalFat'] ?? 0.0) as num;
+            final protein = (m['totalProtein'] ?? 0.0) as num;
             totalCalories += calories;
 
             // Lấy ingredients nếu có
@@ -461,6 +464,9 @@ class MealService {
               'mealType': type,
               'date': date,
               'totalCalories': calories,
+              'totalCarb': carb,
+              'totalFat': fat,
+              'totalProtein': protein,
               'id_notify': m['id_notify'] ?? '0',
               'notify': m['notify'] ?? true,
               'ingredients': ingredients,
@@ -557,9 +563,40 @@ class MealService {
     }
 
     final mealMap = snapshot.docs.first.data();
+    Meal meal = Meal.fromMap(mealMap);
 
-    // Parse Meal từ database và trả về
-    return Meal.fromMap(mealMap);
+    final ingredientNames = <String>{};
+    for (var ing in meal.ingredients) {
+      ingredientNames.add(ing.name);
+    }
+
+    final ingredientsData = <String, Map<String, dynamic>>{};
+    for (var name in ingredientNames) {
+      final doc = await FirebaseFirestore.instance
+          .collection('Ingredients')
+          .doc(name)
+          .get();
+      if (doc.exists) {
+        ingredientsData[name] = doc.data()!;
+      }
+    }
+
+    for (var i = 0; i < meal.ingredients.length; i++) {
+      final ing = meal.ingredients[i];
+      final extra = ingredientsData[ing.name];
+
+      if (extra != null) {
+        meal.ingredients[i] = Ingredient(
+          name: ing.name,
+          amount: ing.amount,
+          unit: extra['unit'] ?? '',
+          image: extra['image'] ?? '',
+          nutri: Nutrition.fromMap(extra['nutri'] ?? {}),
+        );
+      }
+    }
+
+    return meal;
   }
 
   Future<Meal> getMealWithScheduledIngredients(

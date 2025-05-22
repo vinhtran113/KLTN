@@ -124,6 +124,8 @@ class AuthService {
           'activate': true,
           'weight': "",
           'level': "",
+          'ActivityLevel': "",
+          'body_fat': "",
           'pic': user.photoURL,
         });
         return "not-profile"; // Điều hướng người dùng đi cập nhật hồ sơ
@@ -131,6 +133,7 @@ class AuthService {
         final data = userDoc.data() as Map<String, dynamic>;
         if (!data['activate']) return "not-activate";
         if (data['weight'] == "") return "not-profile";
+        if (data['body_fat'] == "") return "not-bodyfat";
         if (data['level'] == "") return "not-level";
         if (data['ActivityLevel'] == "") return "not-ActivityLevel";
       }
@@ -178,7 +181,7 @@ class AuthService {
       }
 
       String checkPass = userDoc['password'];
-      if((checkPass ?? "") == ""){
+      if(checkPass == ""){
         return "Email này đã được đăng ký bằng phương thức khác. Vui lòng đăng nhập bằng Google.";
       }
       else if(password != checkPass){
@@ -186,14 +189,13 @@ class AuthService {
       }
 
       String weight = userDoc['weight'];
-      if(weight == ""){
-        return "not-profile";
-      }
+      if(weight == "")return "not-profile";
+
+      String bodyFat = userDoc['body_fat'];
+      if(bodyFat == "") return "not-bodyfat";
 
       String level = userDoc['level'];
-      if(level == ""){
-        return "not-level";
-      }
+      if(level == "") return "not-level";
 
       if (userDoc['ActivityLevel'] == "") return "not-ActivityLevel";
 
@@ -243,8 +245,8 @@ class AuthService {
         height.isEmpty) {
       return "Vui lòng điền đầy đủ thông tin.";
     }
-    if(getAge(dateOfBirth) < 10){
-      return "Bạn phải đạt ít nhất 10 tuổi";
+    if(getAge(dateOfBirth) < 8){
+      return "Bạn phải đạt ít nhất 8 tuổi";
     }
     if (double.tryParse(weight) == null || double.parse(weight) <= 30) {
       return "Cân nặng phải là số và lớn hơn 30.";
@@ -318,6 +320,18 @@ class AuthService {
     }
   }
 
+  Future<String> updateUserBodyFat(String uid, String value) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'body_fat': value,
+      });
+      return "success";
+    } catch (e) {
+      print('Error updating user level: $e');
+      return e.toString();
+    }
+  }
+
   Future<String> updateUserActivityLevel(String uid, String level) async {
     try {
       await _firestore.collection('users').doc(uid).update({
@@ -338,6 +352,9 @@ class AuthService {
     required String height,
     required String fname,
     required String lname,
+    required String level,
+    required String ActivityLevel,
+    required String body_fat,
   }) async {
     String res = "Có lỗi gì đó xảy ra";
 
@@ -360,6 +377,9 @@ class AuthService {
         'gender': gender,
         'weight': weight,
         'height': height,
+        'level': level,
+        'ActivityLevel': ActivityLevel,
+        'body_fat': body_fat,
       });
       res = "success";
     } catch (e) {

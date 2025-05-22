@@ -34,7 +34,7 @@ class NutritionRow extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              "${nObj["value"].toString()} ${nObj["unit_name"].toString()}",
+              "${nObj["value"].toString()} / ${nObj["max_value"].toString()} ${nObj["unit_name"].toString()}",
               style: TextStyle(color: TColor.gray, fontSize: 11),
             ),
           ],
