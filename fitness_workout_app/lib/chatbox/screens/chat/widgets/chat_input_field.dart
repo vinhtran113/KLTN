@@ -9,12 +9,17 @@ class ChatInputField extends StatefulWidget {
   final Function(File?) onImageClear;
   final File? selectedImage;
 
+  // ✅ Thêm callback để xử lý ghi âm voice
+  final VoidCallback onVoiceRecord;
+
+
   const ChatInputField({
     Key? key,
     required this.controller,
     required this.onSend,
     required this.onImagePick,
     required this.onImageClear,
+    required this.onVoiceRecord,
     this.selectedImage,
   }) : super(key: key);
 
@@ -59,7 +64,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: const Icon(Icons.close, color: Colors.white, size: 20),
                     onPressed: () => widget.onImageClear(null),  // Xóa ảnh
                   ),
                 ],
@@ -77,6 +82,13 @@ class _ChatInputFieldState extends State<ChatInputField> {
                 icon: const Icon(Icons.camera_alt, color: Colors.white),
                 onPressed: () => widget.onImagePick(ImageSource.camera),
               ),
+
+              // ✅ Nút voice message
+              IconButton(
+                icon: const Icon(Icons.mic, color: Colors.white),
+                onPressed: widget.onVoiceRecord, // Gọi hàm xử lý voice
+              ),
+
               Expanded(
                 child: TextField(
                   controller: widget.controller,

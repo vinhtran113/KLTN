@@ -29,7 +29,7 @@ Future<void> main() async {
 
   try {
     await dotenv.load(fileName: ".env");
-    print("✅ .env loaded");
+    print("✅ .env loaded, API key: ${dotenv.env['OPENAI_API_KEY']}");
     await Firebase.initializeApp();
     await NotificationServices().initNotifications();
     print("✅ Notifications initialized");

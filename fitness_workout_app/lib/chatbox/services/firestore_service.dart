@@ -4,8 +4,16 @@ import '../models/message.dart';
 class FirestoreService {
   static final _firestore = FirebaseFirestore.instance;
 
-  // Tìm kiếm hoặc tạo mới một cuộc trò chuyện
+  static bool _isCreatingChat = false; // Thêm biến chặn
+
   static Future<String> getOrCreateCurrentChat(String userId) async {
+    // Nếu đang tạo thì chờ 1 chút để tránh đụng nhau
+    while (_isCreatingChat) {
+      await Future.delayed(Duration(milliseconds: 200));
+    }
+
+    _isCreatingChat = true;
+
     final chatsRef = _firestore.collection('chats');
     final userChat = await chatsRef
         .where('userId', isEqualTo: userId)
@@ -14,18 +22,21 @@ class FirestoreService {
         .get();
 
     if (userChat.docs.isNotEmpty) {
-      return userChat.docs.first.id; // Trả về ID chat nếu tìm thấy
+      _isCreatingChat = false;
+      return userChat.docs.first.id;
     }
 
-    // Nếu không tìm thấy, tạo một cuộc trò chuyện mới
+    // Nếu không có, tạo mới
     final newChat = await chatsRef.add({
       'userId': userId,
       'createdAt': FieldValue.serverTimestamp(),
       'lastUpdated': FieldValue.serverTimestamp(),
     });
 
-    return newChat.id; // Trả về ID của chat mới tạo
+    _isCreatingChat = false;
+    return newChat.id;
   }
+
 
   // Lưu tin nhắn vào Firestore
   static Future<void> saveMessage(String chatId, Message message) async {
@@ -88,4 +99,17 @@ class FirestoreService {
       'weight': 'không rõ',
     };
   }
+
+  static Future<void> deleteAllMessages(String chatId) async {
+    final chatRef = FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages');
+
+    final messages = await chatRef.get();
+    for (var doc in messages.docs) {
+      await doc.reference.delete();
+    }
+  }
+
 }

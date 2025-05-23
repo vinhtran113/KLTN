@@ -98,133 +98,116 @@ class ChatController extends StateNotifier<ChatState> {
   Future<String?> uploadImage(File file) async {
     final compressedFile = await compressImage(file);
     final fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    final storageRef = FirebaseStorage.instance.ref().child('chat_images/$fileName.jpg');
+    final storageRef =
+    FirebaseStorage.instance.ref().child('chat_images/$fileName.jpg');
     await storageRef.putFile(compressedFile);
     return await storageRef.getDownloadURL();
   }
 
-  // Thêm phương thức gửi tin nhắn hình ảnh
-  Future<void> sendImageMessage(File imageFile) async {
+  Future<void> sendChatMessage() async {
+    final text = state.inputController.text.trim();
+    final File? imageFile = state.selectedImage;
+
+    if (text.isEmpty && imageFile == null) return;
+
+    state = state.copyWith(isLoading: true);
+    final DateTime timestamp = DateTime.now();
+    String? imageUrl;
+
+    if (imageFile != null) {
+      try {
+        imageUrl = await uploadImage(imageFile);
+      } catch (e) {
+        print("❌ Lỗi upload ảnh: $e");
+      }
+    }
+
+    final userMessage = Message(
+      id: UniqueKey().toString(),
+      text: text.isNotEmpty ? text : '[Đã gửi ảnh]',
+      imageUrl: imageUrl,
+      isUser: true,
+      timestamp: timestamp,
+    );
+
     try {
-      final imageUrl = await uploadImage(imageFile);
-      if (imageUrl != null) {
-        final imageMessage = Message(
+      await FirestoreService.saveMessage(chatId, userMessage);
+    } catch (e) {
+      print("❌ Lỗi lưu message người dùng: $e");
+    }
+
+    // 👉 Thêm tin nhắn vào danh sách tạm để lấy lịch sử
+    final updatedMessages = [...state.messages, userMessage];
+    state = state.copyWith(messages: updatedMessages);
+
+    try {
+      final userInfo = await FirestoreService.getUserInfo(userId);
+
+      // 👉 Lấy 3 cặp user-assistant gần nhất
+      final history = _buildHistoryMessages(updatedMessages);
+
+      final botResponse = await ChatService.sendMessageToGPT(
+        userMessage: text,
+        imageUrl: imageUrl,
+        gender: userInfo['gender'] ?? '',
+        height: userInfo['height'] ?? '',
+        weight: userInfo['weight'] ?? '',
+        historyMessages: history, // 👈 truyền vào GPT
+      );
+
+      if (botResponse != null && botResponse.isNotEmpty) {
+        final botMessage = Message(
           id: UniqueKey().toString(),
-          text: '',  // Tin nhắn ảnh sẽ không có nội dung văn bản
-          imageUrl: imageUrl,
-          isUser: true,
+          text: botResponse,
+          imageUrl: null,
+          isUser: false,
           timestamp: DateTime.now(),
         );
 
-        // Lưu tin nhắn ảnh vào Firestore
-        await FirestoreService.saveMessage(chatId, imageMessage);
+        await FirestoreService.saveMessage(chatId, botMessage);
 
-        // Cập nhật lại state nếu tin nhắn ảnh đã được gửi thành công
         state = state.copyWith(
-          messages: List.from(state.messages)..add(imageMessage), // Dùng List.from để tránh thay đổi danh sách trực tiếp
+          messages: [...state.messages, botMessage],
         );
       }
     } catch (e) {
-      print("❌ Lỗi upload ảnh: $e");
+      print("❌ Lỗi xử lý GPT hoặc lấy user info: $e");
     } finally {
-      // Xóa ảnh đã chọn sau khi gửi
+      state.inputController.clear();
       clearImage();
+      state = state.copyWith(isLoading: false);
     }
   }
 
+  List<Message> _buildHistoryMessages(List<Message> fullList) {
+    final history = <Message>[];
+    int count = 0;
 
-  Future<void> sendMessage(String text) async {
-    if (text.trim().isEmpty && state.selectedImage == null) return;
-
-    // Danh sách tin nhắn mới (tạm thời lưu trữ tin nhắn cần thêm vào state)
-    final List<Message> newMessages = [];
-
-    // Gửi ảnh nếu có
-    if (state.selectedImage != null) {
-      try {
-        await sendImageMessage(state.selectedImage!);
-      } catch (e) {
-        print("❌ Lỗi gửi ảnh: $e");
-      } finally {
-        clearImage();
+    for (int i = fullList.length - 1; i >= 0 && count < 4; i--) {
+      final m = fullList[i];
+      if (m.text.isNotEmpty) {
+        history.insert(0, m);
+        count++;
+        print("chat: ${m.text}");
       }
     }
 
-    // Gửi text nếu có
-    if (text.trim().isNotEmpty) {
-      final userMessage = Message(
-        id: UniqueKey().toString(),
-        text: text,
-        isUser: true,
-        timestamp: DateTime.now(),
-      );
+    return history;
+  }
 
-      // Lưu tin nhắn người dùng vào Firestore
-      try {
-        await FirestoreService.saveMessage(chatId, userMessage);
-        // Chỉ thêm tin nhắn vào danh sách nếu lưu thành công
-        newMessages.add(userMessage);
-      } catch (e) {
-        print("❌ Lỗi lưu tin nhắn người dùng: $e");
-      }
-    }
 
-    // Nếu không có tin nhắn nào để gửi, thoát sớm
-    if (newMessages.isEmpty) return;
+  Future<void> deleteChatHistory() async {
+    state = state.copyWith(isLoading: true);
 
-    // Cập nhật state để hiển thị tin nhắn người dùng đã gửi
-    state = state.copyWith(
-      messages: [...state.messages, ...newMessages],
-      isLoading: true,
-    );
-
-    // Xử lý phản hồi từ chatbot
     try {
-      final lastUserMessage = newMessages.lastWhere(
-            (m) => m.text.isNotEmpty,
-        orElse: () => Message.empty(),
-      );
-
-      if (lastUserMessage.text.isNotEmpty) {
-        // Lấy thông tin người dùng (nếu cần)
-        final userInfo = await FirestoreService.getUserInfo(userId);
-
-        // Gửi tin nhắn đến GPT và nhận phản hồi
-        final botResponse = await ChatService.sendMessageToGPT(
-          userMessage: lastUserMessage.text,
-          gender: userInfo['gender'] ?? '',
-          height: userInfo['height'] ?? '',
-          weight: userInfo['weight'] ?? '',
-        );
-
-        if (botResponse != null) {
-          // Tạo tin nhắn phản hồi từ chatbot
-          final botMessage = Message(
-            id: UniqueKey().toString(),
-            text: botResponse,
-            isUser: false,
-            timestamp: DateTime.now(),
-          );
-
-          // Lưu tin nhắn chatbot vào Firestore
-          await FirestoreService.saveMessage(chatId, botMessage);
-
-          // Cập nhật state với tin nhắn phản hồi từ chatbot
-          state = state.copyWith(
-            messages: [...state.messages, botMessage],
-          );
-        }
-      }
+      await FirestoreService.deleteAllMessages(chatId);
+      state = state.copyWith(messages: []);
     } catch (e) {
-      print("❌ Error sending message: $e");
+      print("❌ Lỗi khi xoá lịch sử: $e");
     } finally {
-      // Dọn dẹp input sau khi xử lý xong
-      state.inputController.clear();
       state = state.copyWith(isLoading: false);
     }
   }
 
 
-
 }
-
