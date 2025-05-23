@@ -1,0 +1,2 @@
+C:/KLTN/fitness_workout_app/android/app/.cxx/Debug/21tqa4b3/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/KLTN/fitness_workout_app/android/app/.cxx/Debug/21tqa4b3/armeabi-v7a/CMakeFiles/rebuild_cache.dir
