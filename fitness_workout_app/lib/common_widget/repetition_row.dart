@@ -9,12 +9,12 @@ class RepetitionsRow extends StatefulWidget {
   final TextEditingController repetitionController;
 
   const RepetitionsRow({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     required this.color,
     required this.repetitionController,
-  }) : super(key: key);
+  });
 
   @override
   _RepetitionsRowState createState() => _RepetitionsRowState();
@@ -55,10 +55,10 @@ class _RepetitionsRowState extends State<RepetitionsRow> {
 
     if (repetition == "Everyday") {
       isEveryday = true;
-      selectedDays.updateAll((key, value) => true);  // Chọn tất cả các ngày
+      selectedDays.updateAll((key, value) => true); // Chọn tất cả các ngày
     } else if (repetition == "no") {
       isEveryday = false;
-      selectedDays.updateAll((key, value) => false);  // Hủy chọn tất cả các ngày
+      selectedDays.updateAll((key, value) => false); // Hủy chọn tất cả các ngày
     } else {
       isEveryday = false;
       // Nếu là chuỗi các ngày, tách và đánh dấu những ngày tương ứng
@@ -87,7 +87,9 @@ class _RepetitionsRowState extends State<RepetitionsRow> {
                   children: [
                     // Checkbox cho "Everyday"
                     CheckboxListTile(
-                      title: Text(AppLocalizations.of(context)?.translate("everyday") ?? "Everyday"),
+                      title: Text(
+                          AppLocalizations.of(context)?.translate("everyday") ??
+                              "Everyday"),
                       value: isEveryday,
                       onChanged: (bool? value) {
                         setState(() {
@@ -105,14 +107,17 @@ class _RepetitionsRowState extends State<RepetitionsRow> {
                     // Checkbox cho các ngày trong tuần
                     ...daysOfWeek.map((day) {
                       return CheckboxListTile(
-                        title: Text(AppLocalizations.of(context)?.translate(day.toLowerCase()) ?? day),
+                        title: Text(AppLocalizations.of(context)
+                                ?.translate(day.toLowerCase()) ??
+                            day),
                         value: selectedDays[day],
                         onChanged: (bool? value) {
                           setState(() {
                             selectedDays[day] = value ?? false;
 
                             // Kiểm tra nếu tất cả các ngày đều được chọn thì chọn "Everyday"
-                            if (selectedDays.values.every((isChecked) => isChecked)) {
+                            if (selectedDays.values
+                                .every((isChecked) => isChecked)) {
                               isEveryday = true;
                             } else {
                               isEveryday = false;
@@ -121,14 +126,16 @@ class _RepetitionsRowState extends State<RepetitionsRow> {
                           _updateRepetition();
                         },
                       );
-                    }).toList(),
+                    }),
 
                     // Nút Lưu
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Text(AppLocalizations.of(context)?.translate("Save") ?? "Save"),
+                      child: Text(
+                          AppLocalizations.of(context)?.translate("Save") ??
+                              "Save"),
                     ),
                   ],
                 ),

@@ -30,14 +30,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatId = await FirestoreService.getOrCreateCurrentChat(userId);
     final messages = await FirestoreService.loadMessages(chatId);
     ref.read(chatControllerProvider.notifier).setMessages(messages);
-    print('check uid: ${userId}');
+    print('check uid: $userId');
   }
 
   void _handleImagePick(ImageSource source) async {
     print('Picking image from source: $source');
     await ref.read(chatControllerProvider.notifier).pickImage(source);
     final image = ref.read(chatControllerProvider).selectedImage;
-    print('Selected image: ${image?.path}'); // In ra đường dẫn của ảnh được chọn
+    print(
+        'Selected image: ${image?.path}'); // In ra đường dẫn của ảnh được chọn
   }
 
   void _handleSendMessage(String text, File? image) async {
@@ -69,7 +70,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (!speechState.isAvailable) {
       print("❌ Micro không khả dụng trên thiết bị này.");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Micro không khả dụng trên thiết bị này.")),
+        const SnackBar(
+            content: Text("Micro không khả dụng trên thiết bị này.")),
       );
       return;
     }
@@ -90,9 +92,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       });
     }
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +140,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('Xác nhận xoá lịch sử'),
-                  content: const Text('Bạn có chắc muốn xoá toàn bộ lịch sử trò chuyện không?'),
+                  content: const Text(
+                      'Bạn có chắc muốn xoá toàn bộ lịch sử trò chuyện không?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
@@ -156,13 +156,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               );
 
               if (confirm == true) {
-                await ref.read(chatControllerProvider.notifier).deleteChatHistory();
+                await ref
+                    .read(chatControllerProvider.notifier)
+                    .deleteChatHistory();
               }
             },
           )
         ],
       ),
-
       body: SafeArea(
         child: Column(
           children: [
@@ -171,7 +172,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
             ChatInputField(
               controller: chatState.inputController,
-              selectedImage: chatState.selectedImage, // Giờ lấy trực tiếp từ state
+              selectedImage:
+                  chatState.selectedImage, // Giờ lấy trực tiếp từ state
               onSend: _handleSendMessage,
               onImagePick: _handleImagePick,
               onImageClear: _handleImageClear,

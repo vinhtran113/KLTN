@@ -15,14 +15,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'chatbox/firebase_options.dart';
 import 'model/user_model.dart';
 import 'localization/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 final darkModeNotifier = ValueNotifier<bool>(false); // Trạng thái dark mode
-ValueNotifier<Locale> localeNotifier = ValueNotifier<Locale>(const Locale('en', 'US'));
+ValueNotifier<Locale> localeNotifier =
+    ValueNotifier<Locale>(const Locale('en', 'US'));
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,18 +50,17 @@ Future<void> main() async {
   }
 
   runZonedGuarded(
-        () => runApp(
+    () => runApp(
       ProviderScope(
         child: const MyApp(),
       ),
     ),
-        (error, stackTrace) {
+    (error, stackTrace) {
       print('Uncaught error: $error');
       print(stackTrace);
     },
   );
 }
-
 
 // Hàm xin quyền người dùng
 Future<void> requestPermissions() async {
@@ -94,7 +93,8 @@ class MyApp extends StatelessWidget {
           valueListenable: darkModeNotifier,
           builder: (context, isDarkMode, child) {
             return MaterialApp(
-              title: AppLocalizations.of(context)?.translate("app_name") ?? "Fitness 3 in 1",
+              title: AppLocalizations.of(context)?.translate("app_name") ??
+                  "Fitness 3 in 1",
               debugShowCheckedModeBanner: false,
               navigatorKey: navigatorKey,
               theme: isDarkMode ? _darkTheme : _lightTheme,
@@ -136,9 +136,10 @@ class MyApp extends StatelessWidget {
   Future<Widget> _getInitialScreen() async {
     UserModel? user;
     if (FirebaseAuth.instance.currentUser != null) {
-      user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
     }
-    if (user?.gender == '') {
+    if (user?.weight == '') {
       return const CompleteProfileView();
     }
     if (user?.level == '') {
@@ -173,5 +174,3 @@ final ThemeData _darkTheme = ThemeData(
     bodyLarge: TextStyle(color: Colors.white),
   ),
 );
-
-

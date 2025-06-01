@@ -8,6 +8,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,15 +27,15 @@ class ExamplePage extends StatefulWidget {
 }
 
 class _ExamplePageState extends State<ExamplePage> {
-  CalendarAgendaController _calendarAgendaControllerAppBar =
-  CalendarAgendaController();
-  CalendarAgendaController _calendarAgendaControllerNotAppBar =
-  CalendarAgendaController();
+  final CalendarAgendaController _calendarAgendaControllerAppBar =
+      CalendarAgendaController();
+  final CalendarAgendaController _calendarAgendaControllerNotAppBar =
+      CalendarAgendaController();
 
   late DateTime _selectedDateAppBBar;
   late DateTime _selectedDateNotAppBBar;
 
-  Random random = new Random();
+  Random random = Random();
 
   @override
   void initState() {
@@ -73,7 +75,7 @@ class _ExamplePageState extends State<ExamplePage> {
         lastDate: DateTime.now().add(Duration(days: 60)),
         events: List.generate(
             100,
-                (index) => DateTime.now()
+            (index) => DateTime.now()
                 .subtract(Duration(days: index * random.nextInt(5)))),
         onDateSelected: (date) {
           setState(() {
@@ -84,10 +86,10 @@ class _ExamplePageState extends State<ExamplePage> {
           width: double.maxFinite,
           height: double.maxFinite,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-                colors: [ const Color(0xff9DCEFF), const Color(0xff92A3FD),
-
-                ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+            gradient: LinearGradient(colors: [
+              const Color(0xff9DCEFF),
+              const Color(0xff92A3FD),
+            ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
             borderRadius: BorderRadius.circular(10.0),
           ),
         ),

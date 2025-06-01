@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../common/colo_extension.dart';
 import '../../main.dart';
 
-
 class ChangeBodyFatView extends StatefulWidget {
   final String value;
   const ChangeBodyFatView({super.key, required this.value});
@@ -25,26 +24,30 @@ class _ChangeBodyFatViewState extends State<ChangeBodyFatView> {
     {'label': '34–37%', 'value': 35.5, 'asset': 'assets/img/bodyfat_34_37.png'},
     {'label': '38–42%', 'value': 40.0, 'asset': 'assets/img/bodyfat_38_42.jpg'},
     {'label': '43–49%', 'value': 46.0, 'asset': 'assets/img/bodyfat_43_49.jpg'},
-    {'label': '50% +', 'value': 52.0, 'asset': 'assets/img/bodyfat_50_plus.jpg'},
+    {
+      'label': '50% +',
+      'value': 52.0,
+      'asset': 'assets/img/bodyfat_50_plus.jpg'
+    },
   ];
 
   @override
   void initState() {
     super.initState();
-    double? passedValue = double.tryParse(widget.value); // Chuyển String -> double
+    double? passedValue =
+        double.tryParse(widget.value); // Chuyển String -> double
     if (passedValue != null) {
-      selectedIndex = bodyFatOptions.indexWhere((option) => option['value'] == passedValue);
+      selectedIndex =
+          bodyFatOptions.indexWhere((option) => option['value'] == passedValue);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
         elevation: 0,
         leading: InkWell(
           onTap: () {
@@ -73,9 +76,7 @@ class _ChangeBodyFatViewState extends State<ChangeBodyFatView> {
           Text(
             "What is your body fat level?",
             style: TextStyle(
-                color: TColor.black,
-                fontSize: 20,
-                fontWeight: FontWeight.w700),
+                color: TColor.black, fontSize: 20, fontWeight: FontWeight.w700),
           ),
           Text(
             "Use a visual assessment and don’t worry about being too precise",
@@ -120,7 +121,8 @@ class _ChangeBodyFatViewState extends State<ChangeBodyFatView> {
                           aspectRatio: 0.75, // Hình luôn vuông
                           child: Image.asset(
                             option['asset'],
-                            fit: BoxFit.cover, // Hiển thị đầy đủ, cắt viền nếu cần
+                            fit: BoxFit
+                                .cover, // Hiển thị đầy đủ, cắt viền nếu cần
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -144,10 +146,11 @@ class _ChangeBodyFatViewState extends State<ChangeBodyFatView> {
             child: ElevatedButton(
               onPressed: selectedIndex != null
                   ? () {
-                final selectedValue = bodyFatOptions[selectedIndex!]['value'];
-                Navigator.pop(context, selectedValue.toString());
-              } : null,
-              child: const Text("Confirm"),
+                      final selectedValue =
+                          bodyFatOptions[selectedIndex!]['value'];
+                      Navigator.pop(context, selectedValue.toString());
+                    }
+                  : null,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: selectedIndex != null
@@ -155,6 +158,7 @@ class _ChangeBodyFatViewState extends State<ChangeBodyFatView> {
                     : Colors.grey.shade400,
                 foregroundColor: Colors.white,
               ),
+              child: const Text("Confirm"),
             ),
           ),
         ],

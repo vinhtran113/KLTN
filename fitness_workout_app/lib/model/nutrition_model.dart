@@ -45,7 +45,7 @@ class Nutrition {
   List<Map<String, String>> toDisplayList() {
     return values.entries.map((entry) {
       final key = entry.key;
-      final value = entry.value;
+      final value = entry.value.toStringAsFixed(1);
       final displayTitle = '$value ${_getUnit(key)}';
       return {
         'title': displayTitle,

@@ -13,6 +13,8 @@ import '../main_tab/main_tab_view.dart';
 import 'edit_photo_view.dart';
 
 class GalleryView extends StatefulWidget {
+  const GalleryView({super.key});
+
   @override
   _GalleryViewState createState() => _GalleryViewState();
 }
@@ -84,7 +86,6 @@ class _GalleryViewState extends State<GalleryView> {
     );
   }
 
-
   String formatDateKey(DateTime date) {
     return DateFormat('dd MMMM, yyyy').format(date);
   }
@@ -116,7 +117,7 @@ class _GalleryViewState extends State<GalleryView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.black : Colors.white,
+        backgroundColor: darkmode ? Colors.black : Colors.white,
         centerTitle: true,
         elevation: 0,
         leading: InkWell(
@@ -139,11 +140,10 @@ class _GalleryViewState extends State<GalleryView> {
         ),
         title: const Text(
           "Gallery",
-          style: TextStyle(
-              fontSize: 22, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
         actions: [
-          if (selectionMode)
+          if (selectionMode && selectedIds.isNotEmpty)
             IconButton(
               icon: Icon(Icons.delete, color: Colors.redAccent),
               onPressed: _deleteSelected,
@@ -228,6 +228,8 @@ class _GalleryViewState extends State<GalleryView> {
                                   userHeight: doc['height'] ?? '',
                                   userWeight: doc['weight'] ?? '',
                                   userBodyFat: doc['bodyFat'] ?? '',
+                                  userStyle: doc['style'] ?? '',
+                                  date: doc['date'],
                                 ),
                               ),
                             );
@@ -251,7 +253,8 @@ class _GalleryViewState extends State<GalleryView> {
                                 child: CircleAvatar(
                                   backgroundColor: Colors.black54,
                                   radius: 12,
-                                  child: Icon(Icons.check, color: Colors.white, size: 16),
+                                  child: Icon(Icons.check,
+                                      color: Colors.white, size: 16),
                                 ),
                               ),
                           ],
@@ -269,4 +272,3 @@ class _GalleryViewState extends State<GalleryView> {
     );
   }
 }
-

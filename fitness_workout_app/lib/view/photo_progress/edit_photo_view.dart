@@ -8,15 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../common/colo_extension.dart';
+import '../../common_widget/GenderDropdown.dart';
 import '../../common_widget/icon_title_next_row_2.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
+import '../../common_widget/selectDate.dart';
 import '../../localization/app_localizations.dart';
 import '../../main.dart';
-import '../../model/user_model.dart';
-import '../../services/auth_services.dart';
 import '../../services/photo_service.dart';
-import '../main_tab/main_tab_view.dart';
 import '../profile/change_body_fat_view.dart';
 
 class EditPhotoView extends StatefulWidget {
@@ -25,13 +24,17 @@ class EditPhotoView extends StatefulWidget {
   final String userBodyFat;
   final String docId;
   final String imageUrl;
+  final String userStyle;
+  final Timestamp date;
 
   const EditPhotoView({super.key,
     required this.userHeight,
     required this.userWeight,
     required this.userBodyFat,
     required this.docId,
-    required this.imageUrl});
+    required this.imageUrl,
+    required this.userStyle,
+    required this.date,});
 
   @override
   State<EditPhotoView> createState() => _EditPhotoViewState();
@@ -44,6 +47,9 @@ class _EditPhotoViewState extends State<EditPhotoView> {
   bool darkmode = darkModeNotifier.value;
   bool isLoading = false;
   File? newImageFile;
+  final TextEditingController selectedStyle = TextEditingController();
+  TextEditingController selectDateController = TextEditingController();
+  Timestamp? selectedDate;
 
   @override
   void initState() {
@@ -51,6 +57,9 @@ class _EditPhotoViewState extends State<EditPhotoView> {
     heightController = TextEditingController(text: widget.userHeight.toString());
     weightController = TextEditingController(text: widget.userWeight.toString());
     bodyFatController = TextEditingController(text: widget.userBodyFat.toString());
+    selectedStyle.text = widget.userStyle.toString();
+    selectedDate = widget.date;
+    selectDateController.text = "${widget.date.toDate().day}/${widget.date.toDate().month}/${widget.date.toDate().year}";
   }
 
   @override
@@ -58,6 +67,8 @@ class _EditPhotoViewState extends State<EditPhotoView> {
     heightController.dispose();
     weightController.dispose();
     bodyFatController.dispose();
+    selectedStyle.dispose();
+    selectDateController.dispose();
     super.dispose();
   }
 
@@ -161,6 +172,9 @@ class _EditPhotoViewState extends State<EditPhotoView> {
       weight: weightController.text,
       height: heightController.text,
       bodyFat: bodyFatController.text,
+      style: selectedStyle.text,
+      context: context,
+      date: selectedDate!,
     );
 
     setState(() {
@@ -222,6 +236,32 @@ class _EditPhotoViewState extends State<EditPhotoView> {
             child: Column(
               children: [
                 _buildImage(),
+                SizedBox(height: media.width * 0.05),
+                InkWell(
+                  onTap: () async {
+                    final pickedTimestamp =
+                    await DatePickerHelper.selectDate2(context, selectDateController);
+                    if (pickedTimestamp != null) {
+                      setState(() {
+                        selectedDate = pickedTimestamp; // dùng biến này để lưu vào Firestore
+                      });
+                    }
+                  },
+                  child: IgnorePointer(
+                    child: RoundTextField(
+                      controller: selectDateController,
+                      labelText: "Date",
+                      icon: "assets/img/date.png",
+                    ),
+                  ),
+                ),
+                SizedBox(height: media.width * 0.05),
+                GenderDropdown(
+                  icon: "assets/img/difficulity.png",
+                  labelText:"Choose Style",
+                  options: ["Front Facing", "Back Facing", "Left Facing", "Right Facing"],
+                  controller: selectedStyle,
+                ),
                 SizedBox(height: media.width * 0.05),
                 Row(
                   children: [

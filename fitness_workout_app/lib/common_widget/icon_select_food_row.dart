@@ -86,120 +86,141 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
             ),
           ),
           const SizedBox(height: 8),
-          widget.selectedMeals.isEmpty ? Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              "No food selected",
-              style: TextStyle(color: TColor.gray, fontSize: 12),
-            ),
-          )
-              : Column(
-            children: List.generate(widget.selectedMeals.length, (mealIndex) {
-              final meal = widget.selectedMeals[mealIndex];
-              return Container(
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: TColor.gray, width: 1),
-                ),
-                child: ExpansionTile(
-                  tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                  expandedAlignment: Alignment.centerLeft,
-                  title: Text(
-                    meal.name,
-                    style: TextStyle(color: TColor.black, fontSize: 13),
+          widget.selectedMeals.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    "No food selected",
+                    style: TextStyle(color: TColor.gray, fontSize: 12),
                   ),
-                  children: [
-                    ...meal.ingredients.asMap().entries.map((entry) {
-                      final ingIndex = entry.key;
-                      final ingredient = entry.value;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              flex: 4,
-                              child: Text(
-                                ingredient.name,
-                                style: TextStyle(color: TColor.gray, fontSize: 12),
+                )
+              : Column(
+                  children:
+                      List.generate(widget.selectedMeals.length, (mealIndex) {
+                    final meal = widget.selectedMeals[mealIndex];
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: TColor.gray, width: 1),
+                      ),
+                      child: ExpansionTile(
+                        tilePadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        childrenPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                        expandedAlignment: Alignment.centerLeft,
+                        title: Text(
+                          meal.name,
+                          style: TextStyle(color: TColor.black, fontSize: 13),
+                        ),
+                        children: [
+                          ...meal.ingredients.asMap().entries.map((entry) {
+                            final ingIndex = entry.key;
+                            final ingredient = entry.value;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    flex: 4,
+                                    child: Text(
+                                      ingredient.name,
+                                      style: TextStyle(
+                                          color: TColor.gray, fontSize: 12),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: TextFormField(
+                                      initialValue:
+                                          ingredient.amount.toString(),
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                              decimal: true),
+                                      style: const TextStyle(fontSize: 12),
+                                      decoration: const InputDecoration(
+                                        isDense: true,
+                                        contentPadding: EdgeInsets.symmetric(
+                                            vertical: 4, horizontal: 8),
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      onChanged: (val) {
+                                        double? newAmount =
+                                            double.tryParse(val);
+                                        if (newAmount != null) {
+                                          widget.onIngredientAmountChanged(
+                                              mealIndex, ingIndex, newAmount);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      ingredient.unit.isNotEmpty
+                                          ? ingredient.unit
+                                          : "-", // luôn hiện đơn vị
+                                      style: TextStyle(
+                                          color: TColor.gray, fontSize: 12),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                        Icons.remove_circle_outline,
+                                        size: 20,
+                                        color: Colors.red),
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.selectedMeals[mealIndex]
+                                            .ingredients
+                                            .removeAt(ingIndex);
+                                      });
+                                    },
+                                  ),
+                                ],
                               ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: TextFormField(
-                                initialValue: ingredient.amount.toString(),
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                style: const TextStyle(fontSize: 12),
-                                decoration: const InputDecoration(
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                                  border: OutlineInputBorder(),
-                                ),
-                                onChanged: (val) {
-                                  double? newAmount = double.tryParse(val);
-                                  if (newAmount != null) {
-                                    widget.onIngredientAmountChanged(mealIndex, ingIndex, newAmount);
-                                  }
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                ingredient.unit.isNotEmpty ? ingredient.unit : "-", // luôn hiện đơn vị
-                                style: TextStyle(color: TColor.gray, fontSize: 12),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.remove_circle_outline, size: 20, color: Colors.red),
+                            );
+                          }),
+
+                          // Thêm ingredient mới
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
                               onPressed: () {
-                                setState(() {
-                                  widget.selectedMeals[mealIndex].ingredients.removeAt(ingIndex);
-                                });
+                                _showAddIngredientDialog(context, mealIndex);
                               },
+                              icon: const Icon(Icons.add, size: 18),
+                              label: const Text(
+                                "Add Ingredient",
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                          ),
 
-                    // Thêm ingredient mới
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: () {
-                          _showAddIngredientDialog(context, mealIndex);
-                        },
-                        icon: const Icon(Icons.add, size: 18),
-                        label: const Text(
-                          "Add Ingredient",
-                          style: TextStyle(fontSize: 12),
-                        ),
+                          // Xóa nguyên món ăn
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton.icon(
+                              onPressed: () => widget.onRemove(mealIndex),
+                              icon: const Icon(Icons.delete,
+                                  size: 18, color: Colors.red),
+                              label: const Text(
+                                "Remove",
+                                style:
+                                    TextStyle(color: Colors.red, fontSize: 12),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-
-                    // Xóa nguyên món ăn
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () => widget.onRemove(mealIndex),
-                        icon: const Icon(Icons.delete, size: 18, color: Colors.red),
-                        label: const Text(
-                          "Remove",
-                          style: TextStyle(color: Colors.red, fontSize: 12),
-                        ),
-                      ),
-                    ),
-                  ],
+                    );
+                  }),
                 ),
-              );
-            }),
-          ),
         ],
       ),
     );
@@ -242,7 +263,8 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
                       children: [
                         const Text(
                           "Unit: ",
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w500),
                         ),
                         Text(
                           selectedIngredient!.unit,
@@ -253,7 +275,8 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
                   const SizedBox(height: 12),
                   TextField(
                     decoration: const InputDecoration(labelText: "Amount"),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (val) {
                       newAmount = double.tryParse(val) ?? 0;
                     },
@@ -271,8 +294,9 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
               child: const Text("Add"),
               onPressed: () async {
                 if (selectedIngredient != null && newAmount > 0) {
-                  final existingIndex = widget.selectedMeals[mealIndex].ingredients.indexWhere(
-                        (ing) => ing.name == selectedIngredient!.name,
+                  final existingIndex =
+                      widget.selectedMeals[mealIndex].ingredients.indexWhere(
+                    (ing) => ing.name == selectedIngredient!.name,
                   );
 
                   if (existingIndex != -1) {
@@ -281,7 +305,8 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text("Ingredient Already Exists"),
-                        content: const Text("This ingredient already exists. Do you want to replace it?"),
+                        content: const Text(
+                            "This ingredient already exists. Do you want to replace it?"),
                         actions: [
                           TextButton(
                             child: const Text("No"),
@@ -296,9 +321,11 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
                     );
 
                     if (shouldReplace == true) {
-                      Navigator.pop(context); // Đóng Add Ingredient Dialog trước
+                      Navigator.pop(
+                          context); // Đóng Add Ingredient Dialog trước
                       setState(() {
-                        widget.selectedMeals[mealIndex].ingredients[existingIndex] = Ingredient(
+                        widget.selectedMeals[mealIndex]
+                            .ingredients[existingIndex] = Ingredient(
                           name: selectedIngredient!.name,
                           amount: newAmount,
                           unit: selectedIngredient!.unit,

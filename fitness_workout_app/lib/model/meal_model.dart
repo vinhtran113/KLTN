@@ -14,6 +14,7 @@ class Meal {
   final String size;
   final double time;
   final String name;
+  final String id;
 
   Meal({
     required this.description,
@@ -26,7 +27,8 @@ class Meal {
     required this.nutri,
     required this.size,
     required this.time,
-    required this.name
+    required this.name,
+    required this.id,
   });
 
   factory Meal.fromMap(Map<String, dynamic> map) {
@@ -37,17 +39,21 @@ class Meal {
       level: List<String>.from(map['level'] ?? []),
       recipe: (map['recipe'] as Map<String, dynamic>?)?.map(
             (key, value) {
-          return MapEntry(int.parse(key), Recipe.fromJson(Map<String, dynamic>.from(value)));
-        },
-      ) ?? {},
+              return MapEntry(int.parse(key),
+                  Recipe.fromJson(Map<String, dynamic>.from(value)));
+            },
+          ) ??
+          {},
       recommend: List<String>.from(map['recommend'] ?? []),
       ingredients: (map['ingredients'] as List<dynamic>?)
-          ?.map((e) => Ingredient.fromMap(e))
-          .toList() ?? [],
+              ?.map((e) => Ingredient.fromMap(e))
+              .toList() ??
+          [],
       nutri: Nutrition.fromMap(map['nutri'] ?? {}),
       name: map['name'] ?? '',
       size: map['size'] ?? '',
       time: (map['time'] as num?)?.toDouble() ?? 0.0,
+      id: map['id'] ?? '',
     );
   }
 
@@ -57,13 +63,15 @@ class Meal {
       'image': image,
       'category': category,
       'level': level,
-      'recipe': recipe.map((key, value) => MapEntry(key.toString(), value.toFirestore())),
+      'recipe': recipe
+          .map((key, value) => MapEntry(key.toString(), value.toFirestore())),
       'recommend': recommend,
       'ingredients': ingredients.map((e) => e.toMap()).toList(),
       'nutri': nutri.toMap(),
       'size': size,
-      'time' : time,
-      'name' : name
+      'time': time,
+      'name': name,
+      'id': id
     };
   }
 
@@ -78,17 +86,17 @@ class Meal {
   }
 
   factory Meal.empty() => Meal(
-    description: '',
-    image: '',
-    category: [],
-    level: [],
-    recipe: {},
-    recommend: [],
-    ingredients: [],
-    nutri: Nutrition.empty(),  // bạn cũng cần tạo hàm empty() trong Nutrition
-    name: '',
-    size: '',
-    time: 0,
-  );
-
+        description: '',
+        image: '',
+        category: [],
+        level: [],
+        recipe: {},
+        recommend: [],
+        ingredients: [],
+        nutri: Nutrition.empty(),
+        name: '',
+        size: '',
+        time: 0,
+        id: '',
+      );
 }

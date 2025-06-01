@@ -16,8 +16,9 @@ class _AllWorkoutViewState extends State<AllWorkoutView> {
   final WorkoutService _workoutService = WorkoutService();
   List<Map<String, dynamic>> whatArr = [];
   List<Map<String, dynamic>> filteredArr = [];
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   bool darkmode = darkModeNotifier.value;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -33,10 +34,15 @@ class _AllWorkoutViewState extends State<AllWorkoutView> {
   }
 
   Future<void> _loadCategoryWorkouts() async {
-    List<Map<String, dynamic>> workouts = await _workoutService.fetchWorkoutList();
+    setState(() {
+      isLoading = true;
+    });
+    List<Map<String, dynamic>> workouts =
+        await _workoutService.fetchWorkoutList();
     setState(() {
       whatArr = workouts;
       filteredArr = workouts; // Hiển thị tất cả ban đầu
+      isLoading = false;
     });
   }
 
@@ -45,7 +51,9 @@ class _AllWorkoutViewState extends State<AllWorkoutView> {
     setState(() {
       filteredArr = whatArr.where((workout) {
         // Tìm kiếm dựa trên tên hoặc các thuộc tính khác
-        return workout["title"].toLowerCase().contains(query); // Giả sử mỗi phần tử có trường 'name'
+        return workout["title"]
+            .toLowerCase()
+            .contains(query); // Giả sử mỗi phần tử có trường 'name'
       }).toList();
     });
   }
@@ -54,7 +62,8 @@ class _AllWorkoutViewState extends State<AllWorkoutView> {
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
     return Container(
-      decoration: BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
+      decoration:
+          BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -84,7 +93,8 @@ class _AllWorkoutViewState extends State<AllWorkoutView> {
                 ),
               ),
               title: Text(
-                AppLocalizations.of(context)?.translate("Workout List") ?? "Workout List",
+                AppLocalizations.of(context)?.translate("Workout List") ??
+                    "Workout List",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
               ),
             ),
@@ -93,8 +103,9 @@ class _AllWorkoutViewState extends State<AllWorkoutView> {
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            color: darkmode? Colors.blueGrey[900] : TColor.white,
-            borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+            color: darkmode ? Colors.blueGrey[900] : TColor.white,
+            borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(25), topRight: Radius.circular(25)),
           ),
           child: Scaffold(
             backgroundColor: Colors.transparent,
@@ -104,45 +115,57 @@ class _AllWorkoutViewState extends State<AllWorkoutView> {
                   const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Container(
+                    child: SizedBox(
                       width: double.infinity,
                       child: TextField(
                         controller: _searchController,
-                        style: TextStyle(color: darkmode? TColor.white : TColor.black),
+                        style: TextStyle(
+                            color: darkmode ? TColor.white : TColor.black),
                         decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)?.translate("Search...") ?? "Search...",
-                          hintStyle: TextStyle(color: darkmode? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7)),
+                          hintText: AppLocalizations.of(context)
+                                  ?.translate("Search...") ??
+                              "Search...",
+                          hintStyle: TextStyle(
+                              color: darkmode
+                                  ? Colors.white.withOpacity(0.7)
+                                  : Colors.black.withOpacity(0.7)),
                           filled: true,
-                          fillColor: darkmode? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                          fillColor: darkmode
+                              ? Colors.white.withOpacity(0.1)
+                              : Colors.grey.withOpacity(0.1),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 10),
                         ),
                       ),
                     ),
                   ),
-                  filteredArr.isEmpty ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
+                  if (isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (filteredArr.isNotEmpty) ...[
+                    ListView.builder(
+                      padding: EdgeInsets.zero,
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: filteredArr.length,
+                      itemBuilder: (context, index) {
+                        var wObj = filteredArr[index] as Map? ?? {};
+                        return InkWell(
+                          child: WhatTrainRow(wObj: wObj),
+                        );
+                      },
+                    ),
+                  ] else
+                    Center(
                       child: Text(
-                        "Not Found",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                        AppLocalizations.of(context)?.translate("Not Found") ??
+                            "Not Found",
+                        style: const TextStyle(color: Colors.grey),
                       ),
                     ),
-                  ) : ListView.builder(
-                    padding: EdgeInsets.zero,
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: filteredArr.length,
-                    itemBuilder: (context, index) {
-                      var wObj = filteredArr[index] as Map? ?? {};
-                      return InkWell(
-                        child: WhatTrainRow(wObj: wObj),
-                      );
-                    },
-                  ),
                   SizedBox(height: media.width * 0.1),
                 ],
               ),

@@ -18,6 +18,7 @@ class _AllHistoryWorkoutViewState extends State<AllHistoryWorkoutView> {
   final WorkoutService _workoutService = WorkoutService();
   List<Map<String, dynamic>> lastWorkoutArr = [];
   bool darkmode = darkModeNotifier.value;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -26,10 +27,14 @@ class _AllHistoryWorkoutViewState extends State<AllHistoryWorkoutView> {
   }
 
   void _loadHistoryWorkout() async {
-    List<Map<String, dynamic>> lastWorkout = await _workoutService.fetchWorkoutHistory(
-        uid:FirebaseAuth.instance.currentUser!.uid);
+    setState(() {
+      isLoading = true;
+    });
+    List<Map<String, dynamic>> lastWorkout = await _workoutService
+        .fetchWorkoutHistory(uid: FirebaseAuth.instance.currentUser!.uid);
     setState(() {
       lastWorkoutArr = lastWorkout;
+      isLoading = false;
     });
   }
 
@@ -38,7 +43,7 @@ class _AllHistoryWorkoutViewState extends State<AllHistoryWorkoutView> {
     var media = MediaQuery.of(context).size;
     return Container(
       decoration:
-      BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
+          BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -68,10 +73,9 @@ class _AllHistoryWorkoutViewState extends State<AllHistoryWorkoutView> {
                 ),
               ),
               title: Text(
-                AppLocalizations.of(context)?.translate("Workout History") ?? "Workout History",
-                style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700),
+                AppLocalizations.of(context)?.translate("Workout History") ??
+                    "Workout History",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
               ),
             ),
           ];
@@ -79,7 +83,7 @@ class _AllHistoryWorkoutViewState extends State<AllHistoryWorkoutView> {
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-              color: darkmode? Colors.blueGrey[900] : TColor.white,
+              color: darkmode ? Colors.blueGrey[900] : TColor.white,
               borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(25), topRight: Radius.circular(25))),
           child: Scaffold(
@@ -90,24 +94,26 @@ class _AllHistoryWorkoutViewState extends State<AllHistoryWorkoutView> {
                   const SizedBox(
                     height: 10,
                   ),
-                  lastWorkoutArr.isEmpty ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
+                  if (isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (lastWorkoutArr.isNotEmpty) ...[
+                    ListView.builder(
+                        padding: EdgeInsets.zero,
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: lastWorkoutArr.length,
+                        itemBuilder: (context, index) {
+                          var wObj = lastWorkoutArr[index] as Map? ?? {};
+                          return InkWell(child: WorkoutRow(wObj: wObj));
+                        }),
+                  ] else
+                    Center(
                       child: Text(
-                        "Not Found",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                        AppLocalizations.of(context)?.translate("Not Found") ??
+                            "Not Found",
+                        style: const TextStyle(color: Colors.grey),
                       ),
                     ),
-                  ) : ListView.builder(
-                      padding: EdgeInsets.zero,
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: lastWorkoutArr.length,
-                      itemBuilder: (context, index) {
-                        var wObj = lastWorkoutArr[index] as Map? ?? {};
-                        return InkWell(
-                            child: WorkoutRow(wObj: wObj));
-                      }),
                   SizedBox(
                     height: media.width * 0.1,
                   ),

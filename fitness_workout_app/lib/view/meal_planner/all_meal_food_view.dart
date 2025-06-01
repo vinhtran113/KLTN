@@ -19,8 +19,9 @@ class _AllMealFoodViewState extends State<AllMealFoodView> {
   final MealService _mealService = MealService();
   List<Meal> allMealByCateArr = [];
   List<Meal> filteredMeals = [];
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   bool darkmode = darkModeNotifier.value;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -43,25 +44,33 @@ class _AllMealFoodViewState extends State<AllMealFoodView> {
         // Trở lại danh sách được recommend
         filteredMeals = allMealByCateArr;
       } else {
-        filteredMeals = allMealByCateArr.where((meal) =>
-            meal.name.toLowerCase().contains(keyword)).toList();
+        filteredMeals = allMealByCateArr
+            .where((meal) => meal.name.toLowerCase().contains(keyword))
+            .toList();
       }
     });
   }
 
   void _loadAllMealsByRecommend() async {
     try {
+      setState(() {
+        isLoading = true;
+      });
       List<Meal> meals = await _mealService.fetchMealsWithRecommend(
         recommend: widget.mObj["name"],
       );
       setState(() {
         allMealByCateArr = meals;
         filteredMeals = meals;
+        isLoading = false;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi: $e')),
       );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -69,7 +78,8 @@ class _AllMealFoodViewState extends State<AllMealFoodView> {
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
     return Container(
-      decoration: BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
+      decoration:
+          BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -99,7 +109,9 @@ class _AllMealFoodViewState extends State<AllMealFoodView> {
                 ),
               ),
               title: Text(
-                AppLocalizations.of(context)?.translate("Food Of ${widget.mObj["name"]}") ?? "Food Of ${widget.mObj["name"]}",
+                AppLocalizations.of(context)
+                        ?.translate("Food Of ${widget.mObj["name"]}") ??
+                    "Food Of ${widget.mObj["name"]}",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
               ),
             ),
@@ -108,8 +120,9 @@ class _AllMealFoodViewState extends State<AllMealFoodView> {
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            color: darkmode? Colors.blueGrey[900] : TColor.white,
-            borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+            color: darkmode ? Colors.blueGrey[900] : TColor.white,
+            borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(25), topRight: Radius.circular(25)),
           ),
           child: Scaffold(
             backgroundColor: Colors.transparent,
@@ -119,64 +132,72 @@ class _AllMealFoodViewState extends State<AllMealFoodView> {
                   const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Container(
+                    child: SizedBox(
                       width: double.infinity,
                       child: TextField(
                         controller: _searchController,
-                        style: TextStyle(color: darkmode? TColor.white : TColor.black),
+                        style: TextStyle(
+                            color: darkmode ? TColor.white : TColor.black),
                         decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)?.translate("Search...") ?? "Search...",
-                          hintStyle: TextStyle(color: darkmode? Colors.white.withOpacity(0.7) : Colors.black.withOpacity(0.7)),
+                          hintText: AppLocalizations.of(context)
+                                  ?.translate("Search...") ??
+                              "Search...",
+                          hintStyle: TextStyle(
+                              color: darkmode
+                                  ? Colors.white.withOpacity(0.7)
+                                  : Colors.black.withOpacity(0.7)),
                           filled: true,
-                          fillColor: darkmode? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                          fillColor: darkmode
+                              ? Colors.white.withOpacity(0.1)
+                              : Colors.grey.withOpacity(0.1),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 10),
                         ),
                       ),
                     ),
                   ),
-                  // Hiển thị danh sách
-                  filteredMeals.isEmpty ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Text(
-                        "Not Found",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ) : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: filteredMeals.length,
-                    itemBuilder: (context, index) {
-                      Meal fObj = filteredMeals[index];
-                      return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FoodInfoDetailsView(
-                                dObj: fObj,
-                                mObj: widget.mObj,
+                  if (isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (filteredMeals.isNotEmpty) ...[
+                    ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: filteredMeals.length,
+                      itemBuilder: (context, index) {
+                        Meal fObj = filteredMeals[index];
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FoodInfoDetailsView(
+                                  dObj: fObj,
+                                  mObj: widget.mObj,
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                        child: SearchAllMealRow(
-                          mObj: fObj,
-                          dObj: widget.mObj,
-                        ),
-                      );
-                    },
-                  ),
+                            );
+                          },
+                          child: SearchAllMealRow(
+                            mObj: fObj,
+                            dObj: widget.mObj,
+                          ),
+                        );
+                      },
+                    ),
+                  ] else
+                    Center(
+                      child: Text(
+                        AppLocalizations.of(context)?.translate("Not Found") ??
+                            "Not Found",
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    ),
                   SizedBox(height: media.width * 0.1),
                 ],
               ),

@@ -9,7 +9,7 @@ import '../../localization/app_localizations.dart';
 
 class FinishedWorkoutView extends StatefulWidget {
   final String historyId;
-  const FinishedWorkoutView({Key? key, required this.historyId}) : super(key: key);
+  const FinishedWorkoutView({super.key, required this.historyId});
 
   @override
   State<FinishedWorkoutView> createState() => _FinishedWorkoutViewState();
@@ -27,8 +27,9 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
     _getData();
   }
 
-  void _getData() async{
-    final historyData = await _workoutService.getWorkoutHistory(historyId: widget.historyId);
+  void _getData() async {
+    final historyData =
+        await _workoutService.getWorkoutHistory(historyId: widget.historyId);
     setState(() {
       caloriesBurned = historyData['caloriesBurned']!;
       duration = (historyData['duration']! / 60);
@@ -40,43 +41,42 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
     var media = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+      backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               Image.asset(
                 "assets/img/complete_workout.png",
                 height: media.width * 0.8,
                 fit: BoxFit.fitHeight,
               ),
-
               const SizedBox(
                 height: 30,
               ),
-
               Text(
-                AppLocalizations.of(context)?.translate("Congratulations, You Have Finished Your Workout") ?? "Congratulations, You Have Finished Your Workout",
+                AppLocalizations.of(context)?.translate(
+                        "Congratulations, You Have Finished Your Workout") ??
+                    "Congratulations, You Have Finished Your Workout",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-
               const SizedBox(
                 height: 35,
               ),
-
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: darkmode? Colors.blueGrey[900] : TColor.white,
+                  color: darkmode ? Colors.blueGrey[900] : TColor.white,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -93,7 +93,8 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
                     // Thống kê KCal
                     Column(
                       children: [
-                        Icon(Icons.local_fire_department, color: Colors.redAccent, size: 40),
+                        Icon(Icons.local_fire_department,
+                            color: Colors.redAccent, size: 40),
                         const SizedBox(height: 10),
                         Text(
                           caloriesBurned.toString(),
@@ -130,7 +131,8 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
                           ),
                         ),
                         Text(
-                          AppLocalizations.of(context)?.translate("Minutes") ?? "Minutes",
+                          AppLocalizations.of(context)?.translate("Minutes") ??
+                              "Minutes",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -142,19 +144,19 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
                   ],
                 ),
               ),
-
               const Spacer(),
               RoundButton(
-                  title: AppLocalizations.of(context)?.translate("Back To Home") ?? "Back To Home",
+                  title:
+                      AppLocalizations.of(context)?.translate("Back To Home") ??
+                          "Back To Home",
                   onPressed: () {
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
                         builder: (context) => const WorkoutTrackerView(),
                       ),
-                          (route) => false,
+                      (route) => false,
                     );
                   }),
-
               const SizedBox(
                 height: 50,
               ),

@@ -30,9 +30,11 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   List<Map<String, dynamic>> whatArr = [];
   List<WorkoutSchedule> latestArr = [];
   List<Map<String, dynamic>> lastWorkoutArr = [];
-  List<FlSpot> calorieSpots= [];
-  List<FlSpot> durationSpots= [];
+  List<FlSpot> calorieSpots = [];
+  List<FlSpot> durationSpots = [];
   bool darkmode = darkModeNotifier.value;
+  bool isLoading = true;
+  bool isLoading1 = true;
 
   @override
   void initState() {
@@ -44,14 +46,18 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   }
 
   void _loadCategoryWorkoutsWithLevel() async {
-    UserModel? user = await AuthService().getUserInfo(
-        FirebaseAuth.instance.currentUser!.uid);
+    setState(() {
+      isLoading1 = true;
+    });
+    UserModel? user =
+        await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
     if (user != null) {
       String level = user.level;
       List<Map<String, dynamic>> workouts =
-      await _workoutService.fetchWorkoutsByLevel(level: level);
+          await _workoutService.fetchWorkoutsByLevel(level: level);
       setState(() {
         whatArr = workouts;
+        isLoading1 = false;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,25 +68,28 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
   void _loadHistoryWorkout() async {
     List<Map<String, dynamic>> lastWorkout = await _workoutService
-        .fetchWorkoutHistory(
-        uid: FirebaseAuth.instance.currentUser!.uid);
+        .fetchWorkoutHistory(uid: FirebaseAuth.instance.currentUser!.uid);
     setState(() {
       lastWorkoutArr = lastWorkout;
     });
   }
 
   void _loadClosestWorkoutSchedules() async {
-    List<WorkoutSchedule> list = await _workoutService
-        .getClosestWorkoutSchedules(
-        uid: FirebaseAuth.instance.currentUser!.uid);
+    setState(() {
+      isLoading = true;
+    });
+    List<WorkoutSchedule> list =
+        await _workoutService.getClosestWorkoutSchedules(
+            uid: FirebaseAuth.instance.currentUser!.uid);
     setState(() {
       latestArr = list;
+      isLoading = false;
     });
   }
 
   void _loadFLSpot() async {
     Map<String, List<FlSpot>> data = await _workoutService.generateWeeklyData(
-    uid: FirebaseAuth.instance.currentUser!.uid);
+        uid: FirebaseAuth.instance.currentUser!.uid);
     setState(() {
       calorieSpots = data['calories']!;
       durationSpots = data['duration']!;
@@ -90,8 +99,8 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   void getUserInfo() async {
     try {
       // Lấy thông tin người dùng
-      UserModel? user = await AuthService().getUserInfo(
-          FirebaseAuth.instance.currentUser!.uid);
+      UserModel? user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
 
       if (user != null) {
         // Điều hướng đến HomeView với user
@@ -114,27 +123,25 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   }
 
   void _confirmDeleteSchedule(String Id) async {
-      String res = await _workoutService.deleteWorkoutSchedule(scheduleId: Id);
-      if (res == "success") {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Workout schedule deleted successfully')));
+    String res = await _workoutService.deleteWorkoutSchedule(scheduleId: Id);
+    if (res == "success") {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Workout schedule deleted successfully')));
 
-        _loadClosestWorkoutSchedules();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$res')),
-        );
-      }
+      _loadClosestWorkoutSchedules();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(res)),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Container(
       decoration:
-      BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
+          BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -161,10 +168,9 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                 ),
               ),
               title: Text(
-                AppLocalizations.of(context)?.translate("Workout Tracker") ?? "Workout Tracker",
-                style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700),
+                AppLocalizations.of(context)?.translate("Workout Tracker") ??
+                    "Workout Tracker",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
               ),
             ),
             SliverAppBar(
@@ -194,13 +200,15 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                             // Nếu là calo
                             if (spot.barIndex == 0) {
                               valueSuffix = 'KCal';
-                              valueLabel = 'Calo: ${spot.y.toStringAsFixed(2)} $valueSuffix';
+                              valueLabel =
+                                  'Calo: ${spot.y.toStringAsFixed(2)} $valueSuffix';
                             }
                             // Nếu là thời gian, chia cho 60 để có phút
                             else {
                               valueSuffix = 'Mins';
                               double minutes = spot.y / 60;
-                              valueLabel = 'Time: ${minutes.toStringAsFixed(2)} $valueSuffix';
+                              valueLabel =
+                                  'Time: ${minutes.toStringAsFixed(2)} $valueSuffix';
                             }
 
                             return LineTooltipItem(
@@ -255,7 +263,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-              color: darkmode? Colors.blueGrey[900] : TColor.white,
+              color: darkmode ? Colors.blueGrey[900] : TColor.white,
               borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(25), topRight: Radius.circular(25))),
           child: Scaffold(
@@ -287,16 +295,19 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                        AppLocalizations.of(context)?.translate("Daily Workout Schedule") ?? "Daily Workout Schedule",
+                          AppLocalizations.of(context)
+                                  ?.translate("Daily Workout Schedule") ??
+                              "Daily Workout Schedule",
                           style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700),
+                              fontSize: 14, fontWeight: FontWeight.w700),
                         ),
                         SizedBox(
                           width: 80,
                           height: 30,
                           child: RoundButton(
-                            title: AppLocalizations.of(context)?.translate("Check") ?? "Check",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Check") ??
+                                "Check",
                             type: RoundButtonType.bgGradient,
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
@@ -305,7 +316,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                  const WorkoutScheduleView(),
+                                      const WorkoutScheduleView(),
                                 ),
                               );
                             },
@@ -315,23 +326,26 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                     ),
                   ),
                   SizedBox(
-                      height: media.width * 0.03,
+                    height: media.width * 0.03,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        AppLocalizations.of(context)?.translate("Upcoming Workout") ?? "Upcoming Workout",
+                        AppLocalizations.of(context)
+                                ?.translate("Upcoming Workout") ??
+                            "Upcoming Workout",
                         style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 16, fontWeight: FontWeight.w700),
                       ),
                     ],
                   ),
                   SizedBox(
                     height: media.width * 0.03,
                   ),
-                  if (latestArr.isNotEmpty) ...[
+                  if (isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (latestArr.isNotEmpty) ...[
                     ListView.builder(
                       padding: EdgeInsets.zero,
                       physics: const NeverScrollableScrollPhysics(),
@@ -341,12 +355,14 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                         WorkoutSchedule wObj = latestArr[index];
                         return Dismissible(
                           key: Key(wObj.id), // Mỗi mục cần một key duy nhất
-                          direction: DismissDirection.endToStart, // Chỉ kéo sang trái
+                          direction:
+                              DismissDirection.endToStart, // Chỉ kéo sang trái
                           background: Container(
                             color: Colors.red,
                             alignment: Alignment.centerRight,
                             padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: const Icon(Icons.delete, color: Colors.white),
+                            child:
+                                const Icon(Icons.delete, color: Colors.white),
                           ),
                           confirmDismiss: (direction) async {
                             // Hiển thị hộp thoại xác nhận trước khi xoá
@@ -354,18 +370,26 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: Text(AppLocalizations.of(context)?.translate("Confirm Delete") ?? "Confirm Delete"),
-                                  content: Text(
-                                      AppLocalizations.of(context)?.translate("Confirm Delete des") ?? "Are you sure you want to delete this workout schedule?"
-                                  ),
+                                  title: Text(AppLocalizations.of(context)
+                                          ?.translate("Confirm Delete") ??
+                                      "Confirm Delete"),
+                                  content: Text(AppLocalizations.of(context)
+                                          ?.translate("Confirm Delete des") ??
+                                      "Are you sure you want to delete this workout schedule?"),
                                   actions: [
                                     TextButton(
-                                      onPressed: () => Navigator.of(context).pop(false),
-                                      child: Text(AppLocalizations.of(context)?.translate("Cancel") ?? "Cancel"),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: Text(AppLocalizations.of(context)
+                                              ?.translate("Cancel") ??
+                                          "Cancel"),
                                     ),
                                     TextButton(
-                                      onPressed: () => Navigator.of(context).pop(true),
-                                      child: Text(AppLocalizations.of(context)?.translate("Delete") ?? "Delete"),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
+                                      child: Text(AppLocalizations.of(context)
+                                              ?.translate("Delete") ??
+                                          "Delete"),
                                     ),
                                   ],
                                 );
@@ -387,9 +411,12 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                         );
                       },
                     ),
-                  ] else const Center(
-                        child: Text(
-                        "Not Scheduled",
+                  ] else
+                    Center(
+                      child: Text(
+                        AppLocalizations.of(context)
+                                ?.translate("Not Scheduled") ??
+                            "Not Scheduled",
                         style: TextStyle(color: Colors.grey),
                       ),
                     ),
@@ -401,7 +428,9 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          AppLocalizations.of(context)?.translate("Latest Workout") ?? "Latest Workout",
+                          AppLocalizations.of(context)
+                                  ?.translate("Latest Workout") ??
+                              "Latest Workout",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -412,13 +441,15 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (
-                                    context) => const AllHistoryWorkoutView(),
+                                builder: (context) =>
+                                    const AllHistoryWorkoutView(),
                               ),
                             );
                           },
                           child: Text(
-                            AppLocalizations.of(context)?.translate("See More") ?? "See More",
+                            AppLocalizations.of(context)
+                                    ?.translate("See More") ??
+                                "See More",
                             style: TextStyle(
                               color: TColor.gray,
                               fontSize: 14,
@@ -449,23 +480,25 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        AppLocalizations.of(context)?.translate("Recommended for you") ?? "Recommended for you",
+                        AppLocalizations.of(context)
+                                ?.translate("Recommended for you") ??
+                            "Recommended for you",
                         style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 16, fontWeight: FontWeight.w700),
                       ),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                              const AllWorkoutView(),
+                              builder: (context) => const AllWorkoutView(),
                             ),
                           );
                         },
                         child: Text(
-                          AppLocalizations.of(context)?.translate("See Full Exercise") ?? "See Full Exercise",
+                          AppLocalizations.of(context)
+                                  ?.translate("See Full Exercise") ??
+                              "See Full Exercise",
                           style: TextStyle(
                               color: TColor.gray,
                               fontSize: 14,
@@ -474,16 +507,26 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                       )
                     ],
                   ),
-                  ListView.builder(
-                      padding: EdgeInsets.zero,
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: whatArr.length,
-                      itemBuilder: (context, index) {
-                        var wObj = whatArr[index] as Map? ?? {};
-                        return InkWell(
-                            child: WhatTrainRow(wObj: wObj));
-                      }),
+                  if (isLoading1)
+                    const Center(child: CircularProgressIndicator())
+                  else if (whatArr.isNotEmpty) ...[
+                    ListView.builder(
+                        padding: EdgeInsets.zero,
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: whatArr.length,
+                        itemBuilder: (context, index) {
+                          var wObj = whatArr[index] as Map? ?? {};
+                          return InkWell(child: WhatTrainRow(wObj: wObj));
+                        }),
+                  ] else
+                    Center(
+                      child: Text(
+                        AppLocalizations.of(context)?.translate("Not Found") ??
+                            "Not Found",
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ),
                   SizedBox(
                     height: media.width * 0.1,
                   ),
@@ -501,44 +544,32 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     return days[x.toInt() - 1];
   }
 
-  LineTouchData get lineTouchData1 =>
-      LineTouchData(
-        handleBuiltInTouches: true,
-        touchTooltipData: LineTouchTooltipData(
-          getTooltipColor: (touchedBarSpot) => Colors.blueGrey.withOpacity(0.8),
-        ),
-      );
-
-  List<LineChartBarData> get lineBarsData1 =>
-      [
+  List<LineChartBarData> get lineBarsData1 => [
         lineChartBarData1_1,
         lineChartBarData1_2,
       ];
 
-  LineChartBarData get lineChartBarData1_1 =>
-      LineChartBarData(
-        isCurved: true,
-        color: TColor.white,
-        barWidth: 4,
-        isStrokeCapRound: true,
-        dotData: FlDotData(show: true),
-        belowBarData: BarAreaData(show: false),
-        spots: calorieSpots
-      );
+  LineChartBarData get lineChartBarData1_1 => LineChartBarData(
+      isCurved: true,
+      color: TColor.white,
+      barWidth: 4,
+      isStrokeCapRound: true,
+      dotData: FlDotData(show: true),
+      belowBarData: BarAreaData(show: false),
+      spots: calorieSpots);
 
-  LineChartBarData get lineChartBarData1_2 =>
-      LineChartBarData(
-        isCurved: true,
-        color: TColor.white.withOpacity(0.5),
-        barWidth: 2,
-        isStrokeCapRound: true,
-        dotData: FlDotData(show: true),
-        belowBarData: BarAreaData(show: false,),
-        spots: durationSpots
-      );
+  LineChartBarData get lineChartBarData1_2 => LineChartBarData(
+      isCurved: true,
+      color: TColor.white.withOpacity(0.5),
+      barWidth: 2,
+      isStrokeCapRound: true,
+      dotData: FlDotData(show: true),
+      belowBarData: BarAreaData(
+        show: false,
+      ),
+      spots: durationSpots);
 
-  SideTitles get rightTitles =>
-      SideTitles(
+  SideTitles get rightTitles => SideTitles(
         getTitlesWidget: rightTitleWidgets,
         showTitles: true,
         interval: 20,
@@ -581,8 +612,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         textAlign: TextAlign.center);
   }
 
-  SideTitles get bottomTitles =>
-      SideTitles(
+  SideTitles get bottomTitles => SideTitles(
         showTitles: true,
         reservedSize: 32,
         interval: 1,
@@ -597,25 +627,32 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     Widget text;
     switch (value.toInt()) {
       case 1:
-        text = Text(AppLocalizations.of(context)?.translate("Mon") ?? "Mon", style: style);
+        text = Text(AppLocalizations.of(context)?.translate("Mon") ?? "Mon",
+            style: style);
         break;
       case 2:
-        text = Text(AppLocalizations.of(context)?.translate("Tue") ?? "Tue", style: style);
+        text = Text(AppLocalizations.of(context)?.translate("Tue") ?? "Tue",
+            style: style);
         break;
       case 3:
-        text = Text(AppLocalizations.of(context)?.translate("Wed") ?? "Wed", style: style);
+        text = Text(AppLocalizations.of(context)?.translate("Wed") ?? "Wed",
+            style: style);
         break;
       case 4:
-        text = Text(AppLocalizations.of(context)?.translate("Thu") ?? "Thu", style: style);
+        text = Text(AppLocalizations.of(context)?.translate("Thu") ?? "Thu",
+            style: style);
         break;
       case 5:
-        text = Text(AppLocalizations.of(context)?.translate("Fri") ?? "Fri", style: style);
+        text = Text(AppLocalizations.of(context)?.translate("Fri") ?? "Fri",
+            style: style);
         break;
       case 6:
-        text = Text(AppLocalizations.of(context)?.translate("Sat") ?? "Sat", style: style);
+        text = Text(AppLocalizations.of(context)?.translate("Sat") ?? "Sat",
+            style: style);
         break;
       case 7:
-        text = Text(AppLocalizations.of(context)?.translate("Sun") ?? "Sun", style: style);
+        text = Text(AppLocalizations.of(context)?.translate("Sun") ?? "Sun",
+            style: style);
         break;
       default:
         text = const Text('');

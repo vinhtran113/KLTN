@@ -58,7 +58,8 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
       builder: (BuildContext context, Widget? child) {
         return Localizations.override(
           context: context,
-          locale: const Locale('en', 'US'), // Ép buộc sử dụng định dạng 12 giờ kiểu Anh
+          locale: const Locale(
+              'en', 'US'), // Ép buộc sử dụng định dạng 12 giờ kiểu Anh
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
             child: child!,
@@ -72,7 +73,8 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
 
       // Format lại giờ theo 12-hour format chuẩn AM/PM
       final formattedTime = DateFormat('hh:mm a').format(
-        DateTime(now.year, now.month, now.day, pickedTime.hour, pickedTime.minute),
+        DateTime(
+            now.year, now.month, now.day, pickedTime.hour, pickedTime.minute),
       );
 
       setState(() {
@@ -85,7 +87,8 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
     // Chuyển selectedTimeBed (String) thành TimeOfDay
     TimeOfDay initialTime = TimeOfDay.now();
     if (selectedTimeWakeup.isNotEmpty) {
-      final DateTime parsedTime = DateFormat('hh:mm a').parse(selectedTimeWakeup);
+      final DateTime parsedTime =
+          DateFormat('hh:mm a').parse(selectedTimeWakeup);
       initialTime = TimeOfDay(hour: parsedTime.hour, minute: parsedTime.minute);
     }
 
@@ -95,7 +98,8 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
       builder: (BuildContext context, Widget? child) {
         return Localizations.override(
           context: context,
-          locale: const Locale('en', 'US'), // Ép buộc sử dụng định dạng 12 giờ kiểu Anh
+          locale: const Locale(
+              'en', 'US'), // Ép buộc sử dụng định dạng 12 giờ kiểu Anh
           child: MediaQuery(
             data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
             child: child!,
@@ -109,7 +113,8 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
 
       // Format lại giờ theo 12-hour format chuẩn AM/PM
       final formattedTime = DateFormat('hh:mm a').format(
-        DateTime(now.year, now.month, now.day, pickedTime.hour, pickedTime.minute),
+        DateTime(
+            now.year, now.month, now.day, pickedTime.hour, pickedTime.minute),
       );
 
       setState(() {
@@ -131,7 +136,8 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
         notify_Bed: isBedEnabled,
         notify_Wakeup: isWakeupEnabled,
         repeatInterval: selectedRepetition.text.trim(),
-        uid: uid,);
+        uid: uid,
+      );
 
       if (res == "success") {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +148,8 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$res')),);
+          SnackBar(content: Text(res)),
+        );
         setState(() {
           isLoading = false;
         });
@@ -162,7 +169,7 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
     var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
         centerTitle: true,
         elevation: 0,
         leading: InkWell(
@@ -186,7 +193,7 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
           ),
         ),
         title: Text(
-            AppLocalizations.of(context)?.translate("Add Alarm") ?? "Add Alarm",
+          AppLocalizations.of(context)?.translate("Add Alarm") ?? "Add Alarm",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
@@ -194,8 +201,8 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const SizedBox(
                 height: 8,
               ),
@@ -220,7 +227,10 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
               ),
               IconTitleNextRow(
                 icon: "assets/img/Bed_Add.png",
-                title: AppLocalizations.of(context)?.translate("Bed Time",) ?? "Bed Time",
+                title: AppLocalizations.of(context)?.translate(
+                      "Bed Time",
+                    ) ??
+                    "Bed Time",
                 time: selectedTimeBed,
                 color: TColor.lightGray,
                 onPressed: () => _selectTimeBed(context),
@@ -230,7 +240,9 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
               ),
               IconTitleNextRow(
                   icon: "assets/img/HoursTime.png",
-                  title: AppLocalizations.of(context)?.translate("Wake Up Time") ?? "Wake Up Time",
+                  title:
+                      AppLocalizations.of(context)?.translate("Wake Up Time") ??
+                          "Wake Up Time",
                   time: selectedTimeWakeup,
                   color: TColor.lightGray,
                   onPressed: () => _selectTimeWakeup(context)),
@@ -239,16 +251,21 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
               ),
               RepetitionsRow(
                 icon: "assets/img/Repeat.png",
-                title: AppLocalizations.of(context)?.translate("Custom Repetitions") ?? "Custom Repetitions",
+                title: AppLocalizations.of(context)
+                        ?.translate("Custom Repetitions") ??
+                    "Custom Repetitions",
                 color: TColor.lightGray,
                 repetitionController: selectedRepetition,
               ),
-              const SizedBox(height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                  AppLocalizations.of(context)?.translate("Enable Bedtime") ?? "Enable Notifications Bedtime",
+                    AppLocalizations.of(context)?.translate("Enable Bedtime") ??
+                        "Enable Notifications Bedtime",
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.normal,
@@ -270,7 +287,8 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                  AppLocalizations.of(context)?.translate("Enable Wakeup") ?? "Enable Notifications Wakeup",
+                    AppLocalizations.of(context)?.translate("Enable Wakeup") ??
+                        "Enable Notifications Wakeup",
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.normal,
@@ -288,13 +306,14 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
                 ],
               ),
               const Spacer(),
-              RoundButton(title: AppLocalizations.of(context)?.translate("Add") ?? "Add",
+              RoundButton(
+                  title:
+                      AppLocalizations.of(context)?.translate("Add") ?? "Add",
                   onPressed: _handleAddAlarmSchedule),
               const SizedBox(
                 height: 20,
               ),
-            ]
-            ),
+            ]),
           ),
           AnimatedOpacity(
             opacity: isLoading ? 1.0 : 0.0,

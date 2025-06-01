@@ -14,16 +14,22 @@ class ReadyView extends StatelessWidget {
   final int index;
   final String diff;
 
-  const ReadyView({Key? key, required this.exercises, required this.historyId, required this.index, required this.diff}) : super(key: key);
+  const ReadyView(
+      {super.key,
+      required this.exercises,
+      required this.historyId,
+      required this.index,
+      required this.diff});
 
   @override
   Widget build(BuildContext context) {
     bool darkmode = darkModeNotifier.value;
 
     return ChangeNotifierProvider<TimerModel>(
-      create: (context) => TimerModel(context, exercises, historyId, index, diff),
+      create: (context) =>
+          TimerModel(context, exercises, historyId, index, diff),
       child: Scaffold(
-        backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
         body: Center(
           child: Container(
             child: Column(
@@ -32,7 +38,8 @@ class ReadyView extends StatelessWidget {
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height / 2 - 100),
                 Text(
-                  AppLocalizations.of(context)?.translate("ARE YOU READY?") ?? "ARE YOU READY?",
+                  AppLocalizations.of(context)?.translate("ARE YOU READY?") ??
+                      "ARE YOU READY?",
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 40),
@@ -49,11 +56,13 @@ class ReadyView extends StatelessWidget {
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 15),
                     child: Text(
-                        "${AppLocalizations.of(context)?.translate("Next:") ?? "Next:"} "
-                            "${exercises.isNotEmpty ? exercises[index].name : (AppLocalizations.of(context)?.translate("No Exercise") ?? "No Exercise")}",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      "${AppLocalizations.of(context)?.translate("Next:") ?? "Next:"} "
+                      "${exercises.isNotEmpty ? exercises[index].name : (AppLocalizations.of(context)?.translate("No Exercise") ?? "No Exercise")}",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -89,7 +98,7 @@ class TimerModel with ChangeNotifier {
               exercises: exercises, // Truyền danh sách exercises
               index: index,
               historyId: historyId,
-              diff: diff,// Truyền chỉ số ban đầu
+              diff: diff, // Truyền chỉ số ban đầu
             ),
           ),
         );

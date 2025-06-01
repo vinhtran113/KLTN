@@ -23,7 +23,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "C:\\Users\\Admin\\AppData\\Local\\Android\\Sdk\\ndk\\27.0.12077973"
+			"value" : "C:\\Users\\Admin\\AppData\\Local\\Android\\sdk\\ndk\\27.0.12077973"
 		},
 		{
 			"name" : "ANDROID_PLATFORM",
@@ -75,7 +75,7 @@
 				}
 			],
 			"type" : "UNINITIALIZED",
-			"value" : "C:\\Users\\Admin\\AppData\\Local\\Android\\Sdk\\ndk\\27.0.12077973"
+			"value" : "C:\\Users\\Admin\\AppData\\Local\\Android\\sdk\\ndk\\27.0.12077973"
 		},
 		{
 			"name" : "CMAKE_AR",

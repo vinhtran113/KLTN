@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/common_widget/round_button.dart';
+import 'package:fitness_workout_app/view/meal_planner/food_review_view.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 
@@ -10,7 +12,8 @@ import 'meal_schedule_view.dart';
 class SelectDetailFoodView extends StatefulWidget {
   final Function(Meal) onSelect;
   final Meal dObj;
-  const SelectDetailFoodView({super.key, required this.dObj, required this.onSelect});
+  const SelectDetailFoodView(
+      {super.key, required this.dObj, required this.onSelect});
 
   @override
   State<SelectDetailFoodView> createState() => _SelectDetailFoodViewState();
@@ -20,6 +23,10 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
   List<Map<String, String>> nutritionArr = [];
   List<Map<String, String>> ingredientsArr = [];
 
+  // Thêm các biến cho review
+  double avgRating = 0;
+  int totalReviews = 0;
+
   @override
   void initState() {
     super.initState();
@@ -27,12 +34,36 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
     ingredientsArr = widget.dObj.getIngredientDisplayList();
   }
 
+  Future<void> _loadReviewInfo() async {
+    final foodId = widget.dObj.id;
+    final snapshot = await FirebaseFirestore.instance
+        .collection('Meals')
+        .doc(foodId)
+        .collection('Reviews')
+        .get();
+
+    double total = 0;
+    int count = 0;
+
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      if (data['rating'] != null) {
+        total += (data['rating'] as num).toDouble();
+        count++;
+      }
+    }
+    setState(() {
+      avgRating = count > 0 ? total / count : 0;
+      totalReviews = count;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
     return Container(
       decoration:
-      BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
+          BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -80,7 +111,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                         decoration: BoxDecoration(
                           color: Colors.white24,
                           borderRadius:
-                          BorderRadius.circular(media.width * 0.275),
+                              BorderRadius.circular(media.width * 0.275),
                         ),
                       ),
                     ),
@@ -88,25 +119,27 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                       scale: 1.25,
                       child: Align(
                         alignment: Alignment.bottomCenter,
-                        child: (widget.dObj.image != null && widget.dObj.image.toString().isNotEmpty) ? Image.network(
-                          widget.dObj.image.toString(),
-                          width: media.width * 0.50,
-                          height: media.width * 0.50,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              "assets/img/no_image.png",
-                              width: media.width * 0.50,
-                              height: media.width * 0.50,
-                              fit: BoxFit.contain,
-                            );
-                          },
-                        ) : Image.asset(
-                          "assets/img/no_image.png",
-                          width: media.width * 0.50,
-                          height: media.width * 0.50,
-                          fit: BoxFit.contain,
-                        ),
+                        child: (widget.dObj.image.toString().isNotEmpty)
+                            ? Image.network(
+                                widget.dObj.image.toString(),
+                                width: media.width * 0.50,
+                                height: media.width * 0.50,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                    "assets/img/no_image.png",
+                                    width: media.width * 0.50,
+                                    height: media.width * 0.50,
+                                    fit: BoxFit.contain,
+                                  );
+                                },
+                              )
+                            : Image.asset(
+                                "assets/img/no_image.png",
+                                width: media.width * 0.50,
+                                height: media.width * 0.50,
+                                fit: BoxFit.contain,
+                              ),
                       ),
                     ),
                   ],
@@ -167,14 +200,52 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                                     style: TextStyle(
                                         color: TColor.gray, fontSize: 12),
                                   ),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.star,
+                                          color: Colors.amber, size: 18),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        avgRating.toStringAsFixed(1),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(width: 12),
+                                      Icon(Icons.comment,
+                                          color: Colors.grey, size: 18),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        '$totalReviews comments',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                      Spacer(),
+                                      TextButton(
+                                        onPressed: () async {
+                                          final result = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  FoodReviewView(
+                                                foodId: widget.dObj.id,
+                                              ),
+                                            ),
+                                          );
+                                          if (result == true) {
+                                            _loadReviewInfo();
+                                          }
+                                        },
+                                        child: Text('See All',
+                                            style: TextStyle(
+                                                color: TColor.gray,
+                                                fontSize: 12)),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      SizedBox(
-                        height: media.width * 0.01,
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -199,7 +270,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                                   margin: const EdgeInsets.symmetric(
                                       vertical: 8, horizontal: 4),
                                   padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
+                                      const EdgeInsets.symmetric(horizontal: 8),
                                   decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [
@@ -211,7 +282,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.center,
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Image.asset(
                                         nObj["image"]!,
@@ -285,7 +356,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                               child: Text(
                                 "${widget.dObj.ingredients.length} Items",
                                 style:
-                                TextStyle(color: TColor.gray, fontSize: 12),
+                                    TextStyle(color: TColor.gray, fontSize: 12),
                               ),
                             )
                           ],
@@ -316,38 +387,43 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                                     ),
                                     alignment: Alignment.center,
                                     child: (nObj["image"] != null &&
-                                        nObj["image"].toString().startsWith("http"))
+                                            nObj["image"]
+                                                .toString()
+                                                .startsWith("http"))
                                         ? Image.network(
-                                      nObj["image"].toString(),
-                                      width: 45,
-                                      height: 45,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Image.asset(
-                                          "assets/img/no_image.png",
-                                          width: 45,
-                                          height: 45,
-                                          fit: BoxFit.contain,
-                                        );
-                                      },
-                                    )
+                                            nObj["image"].toString(),
+                                            width: 80,
+                                            height: 80,
+                                            fit: BoxFit.contain,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return Image.asset(
+                                                "assets/img/no_image.png",
+                                                width: 45,
+                                                height: 45,
+                                                fit: BoxFit.contain,
+                                              );
+                                            },
+                                          )
                                         : Image.asset(
-                                      "assets/img/no_image.png",
-                                      width: 45,
-                                      height: 45,
-                                      fit: BoxFit.contain,
-                                    ),
+                                            "assets/img/no_image.png",
+                                            width: 45,
+                                            height: 45,
+                                            fit: BoxFit.contain,
+                                          ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     nObj["title"].toString(),
-                                    style: TextStyle(color: TColor.black, fontSize: 12),
+                                    style: TextStyle(
+                                        color: TColor.black, fontSize: 12),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
                                     nObj["value"].toString(),
-                                    style: TextStyle(color: TColor.gray, fontSize: 10),
+                                    style: TextStyle(
+                                        color: TColor.gray, fontSize: 10),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -374,7 +450,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                               child: Text(
                                 "${widget.dObj.recipe.length} Steps",
                                 style:
-                                TextStyle(color: TColor.gray, fontSize: 12),
+                                    TextStyle(color: TColor.gray, fontSize: 12),
                               ),
                             )
                           ],
@@ -390,7 +466,7 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                           return FoodStepDetailRow(
                             sObj: sObj,
                             index: index,
-                            isLast: widget.dObj.recipe.length == index + 1 ,
+                            isLast: widget.dObj.recipe.length == index + 1,
                           );
                         }),
                       ),
@@ -414,7 +490,8 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                             onPressed: () {
                               widget.onSelect(widget.dObj);
                               Navigator.pop(context, widget.dObj);
-                            },),
+                            },
+                          ),
                         ),
                       ],
                     ),

@@ -1,5 +1,4 @@
 import 'package:fitness_workout_app/view/login/login_view.dart';
-import 'package:fitness_workout_app/view/profile/change_goal_view.dart';
 import 'package:fitness_workout_app/view/profile/edit_profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,7 +34,8 @@ class _ProfileViewState extends State<ProfileView> {
   bool positive = true;
   bool darkmode = darkModeNotifier.value;
 
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
 
   void _toggleNotifications(bool value) {
     setState(() {
@@ -53,7 +53,7 @@ class _ProfileViewState extends State<ProfileView> {
     // Yêu cầu quyền gửi thông báo nếu cần
     await NotificationServices().initNotifications();
     String res = await NotificationServices().loadAllNotifications();
-    if(res != "success"){
+    if (res != "success") {
       print(res);
     }
     print("Notifications enabled");
@@ -97,7 +97,7 @@ class _ProfileViewState extends State<ProfileView> {
                   MaterialPageRoute(
                     builder: (context) => const LoginView(),
                   ),
-                      (route) => false, // Xóa toàn bộ route cũ
+                  (route) => false, // Xóa toàn bộ route cũ
                 );
               },
               child: const Text("Có"),
@@ -112,15 +112,14 @@ class _ProfileViewState extends State<ProfileView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : Colors.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : Colors.white,
         centerTitle: true,
         elevation: 0,
         leadingWidth: 0,
         leading: const SizedBox(),
         title: Text(
           AppLocalizations.of(context)?.translate("Profile") ?? "Profile",
-          style: TextStyle(
-              fontSize: 22, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
       ),
       body: SingleChildScrollView(
@@ -135,17 +134,17 @@ class _ProfileViewState extends State<ProfileView> {
                     borderRadius: BorderRadius.circular(30),
                     child: widget.user.pic.isNotEmpty
                         ? Image.network(
-                      widget.user.pic,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                    )
+                            widget.user.pic,
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          )
                         : Image.asset(
-                      "assets/img/u2.png",
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                    ),
+                            "assets/img/u2.png",
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   const SizedBox(
                     width: 15,
@@ -168,7 +167,8 @@ class _ProfileViewState extends State<ProfileView> {
                     width: 70,
                     height: 25,
                     child: RoundButton(
-                      title: AppLocalizations.of(context)?.translate("Edit") ?? "Edit",
+                      title: AppLocalizations.of(context)?.translate("Edit") ??
+                          "Edit",
                       type: RoundButtonType.bgGradient,
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
@@ -176,7 +176,8 @@ class _ProfileViewState extends State<ProfileView> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => EditProfileView(user: widget.user)));
+                                builder: (context) =>
+                                    EditProfileView(user: widget.user)));
                       },
                     ),
                   )
@@ -190,7 +191,9 @@ class _ProfileViewState extends State<ProfileView> {
                   Expanded(
                     child: TitleSubtitleCell(
                       title: "${widget.user.height}cm",
-                      subtitle: AppLocalizations.of(context)?.translate("Height") ?? "Height",
+                      subtitle:
+                          AppLocalizations.of(context)?.translate("Height") ??
+                              "Height",
                     ),
                   ),
                   const SizedBox(
@@ -199,7 +202,9 @@ class _ProfileViewState extends State<ProfileView> {
                   Expanded(
                     child: TitleSubtitleCell(
                       title: "${widget.user.weight}kg",
-                      subtitle: AppLocalizations.of(context)?.translate("Weight") ?? "Weight",
+                      subtitle:
+                          AppLocalizations.of(context)?.translate("Weight") ??
+                              "Weight",
                     ),
                   ),
                   const SizedBox(
@@ -208,7 +213,9 @@ class _ProfileViewState extends State<ProfileView> {
                   Expanded(
                     child: TitleSubtitleCell(
                       title: "${widget.user.getAge()}yo",
-                      subtitle: AppLocalizations.of(context)?.translate("Age") ?? "Age",
+                      subtitle:
+                          AppLocalizations.of(context)?.translate("Age") ??
+                              "Age",
                     ),
                   ),
                 ],
@@ -218,18 +225,21 @@ class _ProfileViewState extends State<ProfileView> {
               ),
               Container(
                 padding:
-                const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                 decoration: BoxDecoration(
-                    color: darkmode? Colors.black : Colors.white,
+                    color: darkmode ? Colors.black : Colors.white,
                     borderRadius: BorderRadius.circular(15),
-                    boxShadow:  [
-                      BoxShadow(color: darkmode? Colors.white12 : Colors.black12, blurRadius: 2)
+                    boxShadow: [
+                      BoxShadow(
+                          color: darkmode ? Colors.white12 : Colors.black12,
+                          blurRadius: 2)
                     ]),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context)?.translate("Account") ?? "Account",
+                      AppLocalizations.of(context)?.translate("Account") ??
+                          "Account",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -240,13 +250,15 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     SettingRow(
                       icon: "assets/img/diet_icon.png",
-                      title: AppLocalizations.of(context)?.translate("Nutrition Summary") ?? "Nutrition Summary",
+                      title: AppLocalizations.of(context)
+                              ?.translate("Nutrition Summary") ??
+                          "Nutrition Summary",
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (
-                                context) => NutritionSummaryView(user: widget.user),
+                            builder: (context) =>
+                                NutritionSummaryView(user: widget.user),
                           ),
                         );
                       },
@@ -256,13 +268,14 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     SettingRow(
                       icon: "assets/img/p_activity.png",
-                      title: AppLocalizations.of(context)?.translate("Workout History") ?? "Workout History",
+                      title: AppLocalizations.of(context)
+                              ?.translate("Workout History") ??
+                          "Workout History",
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (
-                                context) => const AllHistoryWorkoutView(),
+                            builder: (context) => const AllHistoryWorkoutView(),
                           ),
                         );
                       },
@@ -270,7 +283,9 @@ class _ProfileViewState extends State<ProfileView> {
                     const SizedBox(height: 8),
                     SettingRow(
                       icon: "assets/img/p_workout.png",
-                      title: AppLocalizations.of(context)?.translate("Workout Progress") ?? "Workout Progress",
+                      title: AppLocalizations.of(context)
+                              ?.translate("Workout Progress") ??
+                          "Workout Progress",
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -288,18 +303,21 @@ class _ProfileViewState extends State<ProfileView> {
               ),
               Container(
                 padding:
-                const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                 decoration: BoxDecoration(
-                    color: darkmode? Colors.black : Colors.white,
+                    color: darkmode ? Colors.black : Colors.white,
                     borderRadius: BorderRadius.circular(15),
-                    boxShadow:[
-                      BoxShadow(color: darkmode? Colors.white12 : Colors.black12, blurRadius: 2)
+                    boxShadow: [
+                      BoxShadow(
+                          color: darkmode ? Colors.white12 : Colors.black12,
+                          blurRadius: 2)
                     ]),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context)?.translate("Setting") ?? "Setting",
+                      AppLocalizations.of(context)?.translate("Setting") ??
+                          "Setting",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -320,7 +338,9 @@ class _ProfileViewState extends State<ProfileView> {
                             ),
                             Expanded(
                               child: Text(
-                                AppLocalizations.of(context)?.translate("Notification") ?? "Notification",
+                                AppLocalizations.of(context)
+                                        ?.translate("Notification") ??
+                                    "Notification",
                                 style: TextStyle(
                                   fontSize: 12,
                                 ),
@@ -330,9 +350,11 @@ class _ProfileViewState extends State<ProfileView> {
                               current: positive,
                               values: [false, true],
                               indicatorSize: Size.square(30.0),
-                              animationDuration: const Duration(milliseconds: 200),
+                              animationDuration:
+                                  const Duration(milliseconds: 200),
                               animationCurve: Curves.linear,
-                              onChanged: _toggleNotifications,  // Gọi hàm _toggleNotifications khi thay đổi trạng thái
+                              onChanged:
+                                  _toggleNotifications, // Gọi hàm _toggleNotifications khi thay đổi trạng thái
                               iconBuilder: (context, local, global) {
                                 return const SizedBox();
                               },
@@ -347,8 +369,10 @@ class _ProfileViewState extends State<ProfileView> {
                                       height: 30.0,
                                       child: DecoratedBox(
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(colors: TColor.thirdG),
-                                          borderRadius: const BorderRadius.all(Radius.circular(50.0)),
+                                          gradient: LinearGradient(
+                                              colors: TColor.thirdG),
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(50.0)),
                                         ),
                                       ),
                                     ),
@@ -362,7 +386,8 @@ class _ProfileViewState extends State<ProfileView> {
                                   child: DecoratedBox(
                                     decoration: BoxDecoration(
                                       color: TColor.white,
-                                      borderRadius: const BorderRadius.all(Radius.circular(50.0)),
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(50.0)),
                                       boxShadow: const [
                                         BoxShadow(
                                             color: Colors.black38,
@@ -392,7 +417,9 @@ class _ProfileViewState extends State<ProfileView> {
                           ),
                           Expanded(
                             child: Text(
-                              AppLocalizations.of(context)?.translate("Dark Mode") ?? "Dark Mode",
+                              AppLocalizations.of(context)
+                                      ?.translate("Dark Mode") ??
+                                  "Dark Mode",
                               style: TextStyle(
                                 fontSize: 12,
                               ),
@@ -405,13 +432,15 @@ class _ProfileViewState extends State<ProfileView> {
                                 current: darkMode,
                                 values: [false, true],
                                 indicatorSize: Size.square(30.0),
-                                animationDuration: const Duration(milliseconds: 200),
+                                animationDuration:
+                                    const Duration(milliseconds: 200),
                                 animationCurve: Curves.linear,
                                 onChanged: (bool value) {
-                                  darkModeNotifier.value = value; // Cập nhật trạng thái
+                                  darkModeNotifier.value =
+                                      value; // Cập nhật trạng thái
                                   //_saveDarkModePreference(value); // Lưu trạng thái
                                   setState(() {
-                                     darkmode = value;
+                                    darkmode = value;
                                   });
                                 },
                                 iconBuilder: (context, local, global) {
@@ -430,8 +459,9 @@ class _ProfileViewState extends State<ProfileView> {
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
                                                 colors: TColor.thirdG),
-                                            borderRadius: const BorderRadius.all(
-                                                Radius.circular(50.0)),
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                                    Radius.circular(50.0)),
                                           ),
                                         ),
                                       ),
@@ -469,13 +499,15 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     SettingRow(
                       icon: "assets/img/language.png",
-                      title: AppLocalizations.of(context)?.translate("language") ?? "Language",
+                      title:
+                          AppLocalizations.of(context)?.translate("language") ??
+                              "Language",
                       onPressed: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                const SelectLanguageView()));
+                                    const SelectLanguageView()));
                       },
                     ),
                   ],
@@ -486,18 +518,21 @@ class _ProfileViewState extends State<ProfileView> {
               ),
               Container(
                 padding:
-                const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                 decoration: BoxDecoration(
-                    color: darkmode? Colors.black : Colors.white,
+                    color: darkmode ? Colors.black : Colors.white,
                     borderRadius: BorderRadius.circular(15),
-                    boxShadow:[
-                      BoxShadow(color: darkmode? Colors.white12 : Colors.black12, blurRadius: 2)
+                    boxShadow: [
+                      BoxShadow(
+                          color: darkmode ? Colors.white12 : Colors.black12,
+                          blurRadius: 2)
                     ]),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context)?.translate("Other") ?? "Other",
+                      AppLocalizations.of(context)?.translate("Other") ??
+                          "Other",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -508,25 +543,28 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     SettingRow(
                       icon: "assets/img/p_contact.png",
-                      title: AppLocalizations.of(context)?.translate("Contact Us") ?? "Contact Us",
+                      title: AppLocalizations.of(context)
+                              ?.translate("Contact Us") ??
+                          "Contact Us",
                       onPressed: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                const ContactUsView()));
+                                builder: (context) => const ContactUsView()));
                       },
                     ),
                     const SizedBox(height: 8),
                     SettingRow(
                       icon: "assets/img/p_privacy.png",
-                      title: AppLocalizations.of(context)?.translate("Privacy Policy") ?? "Privacy Policy",
+                      title: AppLocalizations.of(context)
+                              ?.translate("Privacy Policy") ??
+                          "Privacy Policy",
                       onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                  const PrivacyPolicyandTermOfUseView()));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const PrivacyPolicyandTermOfUseView()));
                       },
                     ),
                     const SizedBox(
@@ -534,7 +572,9 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     SettingRow(
                       icon: "assets/img/logout.png",
-                      title: AppLocalizations.of(context)?.translate("Logout") ?? "Logout",
+                      title:
+                          AppLocalizations.of(context)?.translate("Logout") ??
+                              "Logout",
                       onPressed: () {
                         _showLogoutDialog(context);
                       },

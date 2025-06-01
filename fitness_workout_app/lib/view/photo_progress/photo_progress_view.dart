@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/view/photo_progress/gallery_view.dart';
 import 'package:fitness_workout_app/view/photo_progress/preprocess_photo_view.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
@@ -27,34 +27,33 @@ class PhotoProgressView extends StatefulWidget {
 }
 
 class _PhotoProgressViewState extends State<PhotoProgressView> {
-  String uid = FirebaseAuth.instance.currentUser!.uid;
   bool darkmode = darkModeNotifier.value;
+  bool _showReminder = true;
 
   void _showImageSourceDialog() {
     showModalBottomSheet(
       context: context,
-      builder: (_) =>
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.camera_alt),
-                title: Text("Chụp ảnh"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.photo),
-                title: Text("Chọn từ thư viện"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-            ],
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(Icons.camera_alt),
+            title: Text("Chụp ảnh"),
+            onTap: () {
+              Navigator.pop(context);
+              _pickImage(ImageSource.camera);
+            },
           ),
+          ListTile(
+            leading: Icon(Icons.photo),
+            title: Text("Chọn từ thư viện"),
+            onTap: () {
+              Navigator.pop(context);
+              _pickImage(ImageSource.gallery);
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -63,7 +62,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
     final image = await picker.pickImage(source: source);
 
     if (image != null) {
-      final user = await AuthService().getUserInfo(uid);
+      final user = await AuthService().getUserInfo(widget.user.uid);
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -85,7 +84,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
 
     return FirebaseFirestore.instance
         .collection('users')
-        .doc(uid)
+        .doc(widget.user.uid)
         .collection('body_progress')
         .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
         .where('date', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
@@ -98,15 +97,15 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
     var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : Colors.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : Colors.white,
         centerTitle: true,
         elevation: 0,
         leadingWidth: 0,
         leading: const SizedBox(),
         title: Text(
-          AppLocalizations.of(context)?.translate("Progress Photo") ?? "Progress Photo",
-          style: TextStyle(
-              fontSize: 22, fontWeight: FontWeight.w700),
+          AppLocalizations.of(context)?.translate("Progress Photo") ??
+              "Progress Photo",
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
       ),
       body: SingleChildScrollView(
@@ -116,70 +115,88 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                  child: Container(
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                        color: const Color(0xffFFE5E5),
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                              color: TColor.white,
-                              borderRadius: BorderRadius.circular(30)),
-                          width: 50,
-                          height: 50,
-                          alignment: Alignment.center,
-                          child: Image.asset(
-                            "assets/img/date_notifi.png",
-                            width: 30,
-                            height: 30,
-                          ),
+                StreamBuilder<QuerySnapshot>(
+                  stream: _getTodayPhotos(),
+                  builder: (context, snapshot) {
+                    final hasPhotoToday =
+                        snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+                    if (!_showReminder) return SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 20),
+                      child: Container(
+                        width: double.maxFinite,
+                        padding: const EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                            color: const Color(0xffFFE5E5),
+                            borderRadius: BorderRadius.circular(20)),
+                        child: Row(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: TColor.white,
+                                  borderRadius: BorderRadius.circular(30)),
+                              width: 50,
+                              height: 50,
+                              alignment: Alignment.center,
+                              child: Image.asset(
+                                "assets/img/date_notifi.png",
+                                width: 30,
+                                height: 30,
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            Expanded(
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      hasPhotoToday
+                                          ? "Great job!"
+                                          : "Reminder!",
+                                      style: TextStyle(
+                                          color: hasPhotoToday
+                                              ? Colors.green
+                                              : Colors.red,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      hasPhotoToday
+                                          ? "You have uploaded a photo today"
+                                          : "Don't forget to upload your progress photo today!",
+                                      style: TextStyle(
+                                          color: TColor.black,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ]),
+                            ),
+                            Container(
+                                height: 60,
+                                alignment: Alignment.topRight,
+                                child: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _showReminder = false;
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.close,
+                                      color: TColor.gray,
+                                      size: 15,
+                                    )))
+                          ],
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  "Reminder!",
-                                  style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                                Text(
-                                  "Next Photos Fall On July 08",
-                                  style: TextStyle(
-                                      color: TColor.black,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                              ]),
-                        ),
-                        Container(
-                            height: 60,
-                            alignment: Alignment.topRight,
-                            child: IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.close,
-                                  color: TColor.gray,
-                                  size: 15,
-                                )))
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   child: Container(
                     width: double.maxFinite,
                     padding: const EdgeInsets.all(20),
@@ -200,7 +217,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                                 height: 15,
                               ),
                               const Text(
-                                "Track Your Progress Each\nMonth With Photo",
+                                "How To Take The Perfect\nProgress Photo",
                                 style: TextStyle(
                                   fontSize: 12,
                                 ),
@@ -210,9 +227,18 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                                 width: 110,
                                 height: 35,
                                 child: RoundButton(
-                                    title: "Learn More",
-                                    fontSize: 12,
-                                    onPressed: () {}),
+                                  title: "Learn More",
+                                  fontSize: 12,
+                                  onPressed: () async {
+                                    final url = Uri.parse(
+                                        'https://youtu.be/76599RVF6H4?si=WS-G2uQNNkUVc-dB');
+                                    if (!await launchUrl(url,
+                                        mode: LaunchMode.externalApplication)) {
+                                      // Nếu không mở được, thử mở bằng launchUrl đơn giản
+                                      await launchUrl(url);
+                                    }
+                                  },
+                                ),
                               )
                             ]),
                         Image.asset(
@@ -229,7 +255,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   padding:
-                  const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                      const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                   decoration: BoxDecoration(
                     color: TColor.primaryColor2.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(15),
@@ -240,8 +266,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                       const Text(
                         "Compare my Photo",
                         style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500),
+                            fontSize: 14, fontWeight: FontWeight.w500),
                       ),
                       SizedBox(
                         width: 100,
@@ -256,7 +281,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                const ComparisonView(),
+                                    ComparisonView(user: widget.user),
                               ),
                             );
                           },
@@ -267,19 +292,19 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                 ),
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         "Gallery",
                         style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 18, fontWeight: FontWeight.w700),
                       ),
                       TextButton(
                           onPressed: () {
-                            Navigator.push( context,
+                            Navigator.push(
+                              context,
                               MaterialPageRoute(
                                 builder: (context) => GalleryView(),
                               ),
@@ -288,8 +313,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                           child: Text(
                             "See more",
                             style: TextStyle(color: TColor.gray, fontSize: 12),
-                          )
-                      )
+                          ))
                     ],
                   ),
                 ),
@@ -301,27 +325,31 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                     }
                     final photos = snapshot.data!.docs;
                     if (photos.isEmpty) {
-                      return Center(child: Text("You do not have a progress photo today"));
+                      return Center(
+                          child:
+                              Text("You do not have a progress photo today"));
                     }
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 8),
+                          padding: const EdgeInsets.only(
+                              left: 20, right: 20, bottom: 8),
                           child: Text(
-                            "You saved ${photos.length} photos today",
+                            "You saved ${photos.length}/4 photos today",
                             style: TextStyle(fontSize: 14),
                           ),
                         ),
                         SizedBox(
-                          height: media.height * 0.5,
+                          height: media.height * 0.4,
                           child: GridView.builder(
                             itemCount: photos.length,
-                            padding: const EdgeInsets.all(8.0),
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
+                            padding: const EdgeInsets.all(6.0),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 5,
+                              mainAxisSpacing: 5,
                             ),
                             itemBuilder: (context, index) {
                               final doc = photos[index];
@@ -339,6 +367,8 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                                         userHeight: doc['height'] ?? '',
                                         userWeight: doc['weight'] ?? '',
                                         userBodyFat: doc['bodyFat'] ?? '',
+                                        userStyle: doc['style'] ?? '',
+                                        date: doc['date'],
                                       ),
                                     ),
                                   );

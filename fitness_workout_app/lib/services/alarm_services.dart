@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
 import '../model/alarm_model.dart';
 import 'notification_services.dart';
 
-class AlarmService{
+class AlarmService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final NotificationServices notificationServices = NotificationServices();
 
@@ -48,7 +47,8 @@ class AlarmService{
         return "Error: The selected date and time cannot be in the past.";
       }
       if (selectedDateTimeWakeup.isBefore(selectedDateTimeBed)) {
-        selectedDateTimeWakeup = selectedDateTimeWakeup.add(const Duration(days: 1));
+        selectedDateTimeWakeup =
+            selectedDateTimeWakeup.add(const Duration(days: 1));
       }
       CollectionReference alarmRef = _firestore.collection('Alarm');
       Map<String, dynamic> alarmData = {
@@ -65,26 +65,25 @@ class AlarmService{
       await docRef.update({
         'id': docRef.id,
       });
-      if(notify_Bed) {
+      if (notify_Bed) {
         // Đặt lịch thông báo
-        String id_notify = await notificationServices
-            .scheduleBedtimeNotification(
+        String idNotify =
+            await notificationServices.scheduleBedtimeNotification(
           id: docRef.id,
           bedtime: selectedDateTimeBed,
           repeatInterval: repeatInterval,
         );
         await docRef.update({
-          'id_notify': id_notify,
+          'id_notify': idNotify,
         });
       }
-      if(notify_Wakeup) {
-        String id_notify = await notificationServices.scheduleWakeUpNotification(
+      if (notify_Wakeup) {
+        String idNotify = await notificationServices.scheduleWakeUpNotification(
             id: docRef.id,
             wakeUpTime: selectedDateTimeWakeup,
-            repeatInterval: repeatInterval
-        );
+            repeatInterval: repeatInterval);
         await docRef.update({
-          'id_notify': id_notify,
+          'id_notify': idNotify,
         });
       }
       res = "success";
@@ -126,7 +125,8 @@ class AlarmService{
           selectedHour.minute,
         );
         // Lọc các lịch có repeat_interval là "no" và ngày đã qua
-        if (data['repeat_interval'] == "no" && selectedDateTimeBed.isBefore(DateTime.now())) {
+        if (data['repeat_interval'] == "no" &&
+            selectedDateTimeBed.isBefore(DateTime.now())) {
           continue; // Bỏ qua lịch này
         }
 
@@ -154,17 +154,17 @@ class AlarmService{
 
   Future<String> deleteAlarmSchedule({required String alarmId}) async {
     try {
-
       QuerySnapshot snapshot = await _firestore
           .collection('Alarm')
           .where('id', isEqualTo: alarmId)
           .get();
 
       var doc = snapshot.docs.first;
-      String id_notify = doc['id_notify'];
+      String idNotify = doc['id_notify'];
 
-      await notificationServices.cancelNotificationById(int.parse(id_notify));
-      await notificationServices.cancelNotificationById(int.parse(id_notify)+1);
+      await notificationServices.cancelNotificationById(int.parse(idNotify));
+      await notificationServices
+          .cancelNotificationById(int.parse(idNotify) + 1);
 
       await FirebaseFirestore.instance
           .collection('Alarm')
@@ -189,7 +189,7 @@ class AlarmService{
     required String id_notify,
   }) async {
     String res = "Có lỗi gì đó xảy ra";
-    String newid_notify = id_notify;
+    String newidNotify = id_notify;
     try {
       // Chuyển đổi chuỗi ngày và giờ thành DateTime
       final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
@@ -215,25 +215,26 @@ class AlarmService{
       );
 
       if (selectedDateTimeWakeup.isBefore(selectedDateTimeBed)) {
-        selectedDateTimeWakeup = selectedDateTimeWakeup.add(const Duration(days: 1));
+        selectedDateTimeWakeup =
+            selectedDateTimeWakeup.add(const Duration(days: 1));
       }
       await notificationServices.cancelNotificationById(int.parse(id_notify));
-      await notificationServices.cancelNotificationById(int.parse(id_notify)+1);
+      await notificationServices
+          .cancelNotificationById(int.parse(id_notify) + 1);
 
-      if(notify_Bed) {
+      if (notify_Bed) {
         // Đặt lịch thông báo
-        newid_notify = await notificationServices.scheduleBedtimeNotification(
+        newidNotify = await notificationServices.scheduleBedtimeNotification(
           id: id,
           bedtime: selectedDateTimeBed,
           repeatInterval: repeatInterval,
         );
       }
-      if(notify_Wakeup) {
-        newid_notify = await notificationServices.scheduleWakeUpNotification(
+      if (notify_Wakeup) {
+        newidNotify = await notificationServices.scheduleWakeUpNotification(
             id: id,
             wakeUpTime: selectedDateTimeWakeup,
-            repeatInterval: repeatInterval
-        );
+            repeatInterval: repeatInterval);
       }
 
       // Cập nhật lại tài liệu với ID của tài liệu vào trường 'id'
@@ -243,7 +244,7 @@ class AlarmService{
         'repeat_interval': repeatInterval,
         'notify_Bed': notify_Bed,
         'notify_Wakeup': notify_Wakeup,
-        'id_notify': newid_notify,
+        'id_notify': newidNotify,
       });
 
       res = ("success");
@@ -253,12 +254,14 @@ class AlarmService{
     return res;
   }
 
-  Future<List<AlarmSchedule>> fetchTodayAlarmSchedules({required String uid}) async {
+  Future<List<AlarmSchedule>> fetchTodayAlarmSchedules(
+      {required String uid}) async {
     List<AlarmSchedule> alarmSchedules = [];
     final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
     final String today = dateFormat.format(DateTime.now());
     final String currentDayOfWeek = DateFormat('EEEE').format(DateTime.now());
-    final DateFormat hourFormat = DateFormat('hh:mm a');// Lấy tên ngày hiện tại (e.g., Monday)
+    final DateFormat hourFormat =
+        DateFormat('hh:mm a'); // Lấy tên ngày hiện tại (e.g., Monday)
 
     try {
       // Lấy dữ liệu từ Firebase Collection
@@ -292,7 +295,9 @@ class AlarmService{
         bool isInRepeatInterval = repeatInterval.contains(currentDayOfWeek);
 
         // Lọc chỉ lấy ngày hợp lệ
-        if (!selectedDateTimeBed.isBefore(DateTime.now()) || repeatInterval == "Everyday" ||  isInRepeatInterval) {
+        if (!selectedDateTimeBed.isBefore(DateTime.now()) ||
+            repeatInterval == "Everyday" ||
+            isInRepeatInterval) {
           AlarmSchedule alarmSchedule = AlarmSchedule(
             day: data['day'],
             hourBed: data['hourBed'],
@@ -319,8 +324,10 @@ class AlarmService{
     final DateFormat hourFormat = DateFormat('hh:mm a');
 
     // Xác định ngày hôm qua
-    final DateTime yesterdayDate = DateTime.now().subtract(const Duration(days: 1));
-    final DateTime yesterdayMidnight = DateTime(yesterdayDate.year, yesterdayDate.month, yesterdayDate.day);
+    final DateTime yesterdayDate =
+        DateTime.now().subtract(const Duration(days: 1));
+    final DateTime yesterdayMidnight =
+        DateTime(yesterdayDate.year, yesterdayDate.month, yesterdayDate.day);
     final String currentDayOfWeek = DateFormat('EEEE').format(yesterdayDate);
 
     try {
@@ -347,7 +354,8 @@ class AlarmService{
           print('Invalid day format: $day');
           continue;
         }
-        final DateTime selectedDayMidnight = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+        final DateTime selectedDayMidnight =
+            DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
 
         // Chuyển đổi giờ thành DateTime
         DateTime selectedHourBed = hourFormat.parse(hourBed);
@@ -372,17 +380,24 @@ class AlarmService{
 
         // Xử lý trường hợp giờ dậy là ngày tiếp theo
         if (selectedDateTimeWakeup.isBefore(selectedDateTimeBed)) {
-          selectedDateTimeWakeup = selectedDateTimeWakeup.add(const Duration(days: 1));
+          selectedDateTimeWakeup =
+              selectedDateTimeWakeup.add(const Duration(days: 1));
         }
 
         // Kiểm tra nếu ngày hợp lệ
-        bool isSameDay = selectedDayMidnight.isAtSameMomentAs(yesterdayMidnight);
+        bool isSameDay =
+            selectedDayMidnight.isAtSameMomentAs(yesterdayMidnight);
         bool isInRepeatInterval = repeatInterval.contains(currentDayOfWeek);
 
-        if (isSameDay || repeatInterval == "Everyday" && !selectedDay.isAfter(yesterdayMidnight) || isInRepeatInterval) {
+        if (isSameDay ||
+            repeatInterval == "Everyday" &&
+                !selectedDay.isAfter(yesterdayMidnight) ||
+            isInRepeatInterval) {
           // Tính tổng thời gian ngủ
-          final int sleepDuration = selectedDateTimeWakeup.difference(selectedDateTimeBed).inMinutes;
-          totalSleepMinutes += sleepDuration >= 0 ? sleepDuration : (sleepDuration + 24 * 60);
+          final int sleepDuration =
+              selectedDateTimeWakeup.difference(selectedDateTimeBed).inMinutes;
+          totalSleepMinutes +=
+              sleepDuration >= 0 ? sleepDuration : (sleepDuration + 24 * 60);
         }
       }
     } catch (e) {
@@ -391,5 +406,4 @@ class AlarmService{
 
     return totalSleepMinutes;
   }
-
 }

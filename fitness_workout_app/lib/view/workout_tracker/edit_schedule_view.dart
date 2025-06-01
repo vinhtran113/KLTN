@@ -83,7 +83,8 @@ class _EditScheduleViewState extends State<EditScheduleView> {
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$res')),);
+          SnackBar(content: Text(res)),
+        );
         setState(() {
           isLoading = false;
         });
@@ -102,7 +103,6 @@ class _EditScheduleViewState extends State<EditScheduleView> {
     setState(() {
       // Lấy giờ và phút từ DateTime và định dạng lại
       hour = DateFormat('h:mm a').format(newDate);
-      ;
     });
   }
 
@@ -117,8 +117,11 @@ class _EditScheduleViewState extends State<EditScheduleView> {
             children: ["Beginner", "Normal", "Professional"].map((difficulty) {
               return ListTile(
                 title: Text(
-                  AppLocalizations.of(context)?.translate(difficulty) ?? difficulty,
-                  style: TextStyle(color: darkmode? TColor.white : TColor.black, fontSize: 14),
+                  AppLocalizations.of(context)?.translate(difficulty) ??
+                      difficulty,
+                  style: TextStyle(
+                      color: darkmode ? TColor.white : TColor.black,
+                      fontSize: 14),
                 ),
                 onTap: () {
                   setState(() {
@@ -141,8 +144,8 @@ class _EditScheduleViewState extends State<EditScheduleView> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirm Delete'),
-          content: Text(
-              'Are you sure you want to delete this workout schedule?'),
+          content:
+              Text('Are you sure you want to delete this workout schedule?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -158,7 +161,8 @@ class _EditScheduleViewState extends State<EditScheduleView> {
     );
     // Nếu người dùng xác nhận, gọi hàm xoá lịch bài tập
     if (confirm == true) {
-      String res = await _workoutService.deleteWorkoutSchedule(scheduleId:  widget.schedule.id);
+      String res = await _workoutService.deleteWorkoutSchedule(
+          scheduleId: widget.schedule.id);
       if (res == "success") {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Workout schedule deleted successfully')));
@@ -166,20 +170,19 @@ class _EditScheduleViewState extends State<EditScheduleView> {
         Navigator.pop(context, true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$res')),);
+          SnackBar(content: Text(res)),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
         centerTitle: true,
         elevation: 0,
         leading: InkWell(
@@ -203,7 +206,8 @@ class _EditScheduleViewState extends State<EditScheduleView> {
           ),
         ),
         title: Text(
-          AppLocalizations.of(context)?.translate("Edit Schedule") ?? "Edit Schedule",
+          AppLocalizations.of(context)?.translate("Edit Schedule") ??
+              "Edit Schedule",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
@@ -211,8 +215,8 @@ class _EditScheduleViewState extends State<EditScheduleView> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(
                 children: [
                   Image.asset(
@@ -224,19 +228,18 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                     width: 12,
                   ),
                   Text(
-                    dateToString(parsedDay as DateTime, formatStr: "E, dd MMMM yyyy"),
+                    dateToString(parsedDay as DateTime,
+                        formatStr: "E, dd MMMM yyyy"),
                     style: TextStyle(color: TColor.gray, fontSize: 15),
                   ),
                 ],
               ),
               SizedBox(
-                  height: media.width * 0.04,
+                height: media.width * 0.04,
               ),
               Text(
                 AppLocalizations.of(context)?.translate("Time") ?? "Time",
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
               ),
               SizedBox(
                 height: media.width * 0.35,
@@ -249,20 +252,21 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                 ),
               ),
               SizedBox(
-                  height: media.width * 0.06,
+                height: media.width * 0.06,
               ),
               Text(
-                AppLocalizations.of(context)?.translate("Details Workout") ?? "Details Workout",
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500),
+                AppLocalizations.of(context)?.translate("Details Workout") ??
+                    "Details Workout",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
               ),
               SizedBox(
-                  height: media.width * 0.03,
+                height: media.width * 0.03,
               ),
               IconTitleNextRow(
                 icon: "assets/img/choose_workout.png",
-                title: AppLocalizations.of(context)?.translate("Choose Workout") ?? "Choose Workout",
+                title:
+                    AppLocalizations.of(context)?.translate("Choose Workout") ??
+                        "Choose Workout",
                 time: selectedWorkout.text,
                 color: TColor.lightGray,
                 onPressed: () async {
@@ -279,16 +283,14 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                   }
                 },
               ),
-              SizedBox(
-                  height: media.width * 0.03
-              ),
+              SizedBox(height: media.width * 0.03),
               InkWell(
                 onTap: () {
                   _showDifficultySelector(context);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8, horizontal: 15),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
                   decoration: BoxDecoration(
                     color: TColor.lightGray,
                     borderRadius: BorderRadius.circular(15),
@@ -307,15 +309,15 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                           fit: BoxFit.contain,
                         ),
                       ),
-
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          AppLocalizations.of(context)?.translate("Difficulty") ?? "Difficulty",
+                          AppLocalizations.of(context)
+                                  ?.translate("Difficulty") ??
+                              "Difficulty",
                           style: TextStyle(color: TColor.gray, fontSize: 12),
                         ),
                       ),
-
                       SizedBox(
                         width: 120,
                         child: Text(
@@ -324,7 +326,6 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                           style: TextStyle(color: TColor.gray, fontSize: 12),
                         ),
                       ),
-
                       Container(
                         width: 25,
                         height: 25,
@@ -340,13 +341,14 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                   ),
                 ),
               ),
-
               SizedBox(
                 height: media.width * 0.03,
               ),
               RepetitionsRow(
                 icon: "assets/img/Repeat.png",
-                title: AppLocalizations.of(context)?.translate("Custom Repetitions") ?? "Custom Repetitions",
+                title: AppLocalizations.of(context)
+                        ?.translate("Custom Repetitions") ??
+                    "Custom Repetitions",
                 color: TColor.lightGray,
                 repetitionController: selectedRepetition,
               ),
@@ -357,7 +359,9 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    AppLocalizations.of(context)?.translate("Enable Notifications") ?? "Enable Notifications",
+                    AppLocalizations.of(context)
+                            ?.translate("Enable Notifications") ??
+                        "Enable Notifications",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -376,14 +380,16 @@ class _EditScheduleViewState extends State<EditScheduleView> {
               ),
               Spacer(),
               RoundButton(
-                  title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
+                  title:
+                      AppLocalizations.of(context)?.translate("Save") ?? "Save",
                   onPressed: _handleUpdateSchedule),
               SizedBox(
                 height: media.width * 0.03,
               ),
               DeleteButton(
-                title: AppLocalizations.of(context)?.translate("Delete") ?? "Delete",
-                onPressed: _confirmDeleteSchedule),
+                  title: AppLocalizations.of(context)?.translate("Delete") ??
+                      "Delete",
+                  onPressed: _confirmDeleteSchedule),
               const SizedBox(
                 height: 20,
               ),

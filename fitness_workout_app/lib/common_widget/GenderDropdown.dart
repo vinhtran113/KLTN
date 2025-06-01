@@ -65,7 +65,7 @@ class _GenderDropdownState extends State<GenderDropdown> {
         icon: Icon(Icons.arrow_drop_down, color: TColor.gray),
         isExpanded: true,
         hint: Text(
-          AppLocalizations.of(context)?.translate("Choose Gender") ?? "Choose Gender",
+          AppLocalizations.of(context)?.translate("Choose Option") ?? "Choose Option",
           style: TextStyle(color: TColor.gray),
         ),
       ),

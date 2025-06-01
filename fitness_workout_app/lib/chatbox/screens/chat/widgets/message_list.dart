@@ -5,7 +5,7 @@ import 'package:fitness_workout_app/chatbox/models/message.dart';
 class MessageList extends StatefulWidget {
   final List<Message> messages;
 
-  const MessageList({Key? key, required this.messages}) : super(key: key);
+  const MessageList({super.key, required this.messages});
 
   @override
   State<MessageList> createState() => _MessageListState();
@@ -60,7 +60,8 @@ class _MessageListState extends State<MessageList> {
           child: Container(
             margin: const EdgeInsets.symmetric(vertical: 6),
             padding: const EdgeInsets.all(14),
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.85),
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.85),
             decoration: BoxDecoration(
               color: isUser ? const Color(0xFF343541) : const Color(0xFF444654),
               borderRadius: BorderRadius.circular(12),
@@ -68,16 +69,17 @@ class _MessageListState extends State<MessageList> {
             child: msg.imageUrl != null && msg.imageUrl!.isNotEmpty
                 ? Image.network(msg.imageUrl!)
                 : MarkdownBody(
-              data: msg.text,
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                p: const TextStyle(color: Colors.white, fontSize: 15),
-                code: const TextStyle(
-                  backgroundColor: Color(0xFF3C3C3C),
-                  color: Colors.greenAccent,
-                  fontFamily: 'monospace',
-                ),
-              ),
-            ),
+                    data: msg.text,
+                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
+                        .copyWith(
+                      p: const TextStyle(color: Colors.white, fontSize: 15),
+                      code: const TextStyle(
+                        backgroundColor: Color(0xFF3C3C3C),
+                        color: Colors.greenAccent,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ),
           ),
         );
       },

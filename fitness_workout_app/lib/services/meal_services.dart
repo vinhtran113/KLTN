@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../model/ingredient_model.dart';
 import '../model/meal_model.dart';
@@ -11,8 +12,8 @@ class MealService {
   final NotificationServices notificationServices = NotificationServices();
 
   Future<int> countMealsByRecommend(String mealType) async {
-
-    final querySnapshot = await _firestore.collection('Meals')
+    final querySnapshot = await _firestore
+        .collection('Meals')
         .where('recommend', arrayContains: mealType.toLowerCase())
         .get();
 
@@ -69,10 +70,9 @@ class MealService {
     return meals;
   }
 
-  Future<List<Meal>> fetchMealsWithRecommend({
-    required String recommend
-  }) async {
-  // Lấy danh sách meals trước
+  Future<List<Meal>> fetchMealsWithRecommend(
+      {required String recommend}) async {
+    // Lấy danh sách meals trước
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('Meals')
         .where('recommend', arrayContains: recommend.toLowerCase())
@@ -120,10 +120,9 @@ class MealService {
   }
 
   Future<List<Meal>> fetchAllMeals() async {
-  // Lấy danh sách meals trước
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('Meals')
-        .get();
+    // Lấy danh sách meals trước
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('Meals').get();
     List<Meal> meals = snapshot.docs
         .map((doc) => Meal.fromMap(doc.data() as Map<String, dynamic>))
         .toList();
@@ -160,7 +159,6 @@ class MealService {
             image: extra['image'] ?? '',
             nutri: Nutrition.fromMap(extra['nutri'] ?? {}),
           );
-
         }
       }
     }
@@ -168,9 +166,7 @@ class MealService {
     return meals;
   }
 
-  Future<List<Meal>> fetchAllMealsByCate({
-    required String cate
-  }) async {
+  Future<List<Meal>> fetchAllMealsByCate({required String cate}) async {
     // Lấy danh sách meals trước
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('Meals')
@@ -218,7 +214,8 @@ class MealService {
   }
 
   Future<List<Ingredient>> fetchAvailableIngredients() async {
-    final snapshot = await FirebaseFirestore.instance.collection('Ingredients').get();
+    final snapshot =
+        await FirebaseFirestore.instance.collection('Ingredients').get();
     return snapshot.docs.map((doc) {
       final data = doc.data();
       return Ingredient(
@@ -249,13 +246,15 @@ class MealService {
       return "fail";
     }
 
-    if (date.year == now.year && date.month == now.month && date.day == now.day) {
-        final time = _parseTime(hour);
-        final fullMealDateTime = DateTime(
-            date.year, date.month, date.day, time.hour, time.minute);
-        if (fullMealDateTime.isBefore(now)) {
-          return "fail";
-        }
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
+      final time = _parseTime(hour);
+      final fullMealDateTime =
+          DateTime(date.year, date.month, date.day, time.hour, time.minute);
+      if (fullMealDateTime.isBefore(now)) {
+        return "fail";
+      }
     }
 
     return 'pass';
@@ -267,7 +266,9 @@ class MealService {
     required String mealType, // breakfast, lunch, dinner, snack
     required List<SimpleMeal> meals,
   }) async {
-    final docRef = FirebaseFirestore.instance.collection('MealSchedules').doc('${uid}_${DateFormat('yyyy-MM-dd').format(date)}');
+    final docRef = FirebaseFirestore.instance
+        .collection('MealSchedules')
+        .doc('${uid}_${DateFormat('yyyy-MM-dd').format(date)}');
 
     final snapshot = await docRef.get();
     Map<String, dynamic> existingData = {};
@@ -283,7 +284,8 @@ class MealService {
       }
     }
 
-    final updatedMeals = (existingData[mealType] ?? []) + meals.map((m) => m.toMap()).toList();
+    final updatedMeals =
+        (existingData[mealType] ?? []) + meals.map((m) => m.toMap()).toList();
 
     await docRef.set({
       'uid': uid,
@@ -360,7 +362,6 @@ class MealService {
     return null;
   }
 
-
   DateTime _parseTime(String timeStr) {
     try {
       final format = DateFormat('hh:mm a');
@@ -392,7 +393,8 @@ class MealService {
     required DateTime date,
   }) async {
     final docId = '${uid}_${DateFormat('yyyy-MM-dd').format(date)}';
-    final docRef = FirebaseFirestore.instance.collection('MealSchedules').doc(docId);
+    final docRef =
+        FirebaseFirestore.instance.collection('MealSchedules').doc(docId);
     final snapshot = await docRef.get();
 
     if (!snapshot.exists) return 0.0;
@@ -441,8 +443,8 @@ class MealService {
 
             // Lấy ingredients nếu có
             final ingredients = (m['ingredients'] as List<dynamic>?)
-                ?.map((i) => Map<String, dynamic>.from(i))
-                .toList() ??
+                    ?.map((i) => Map<String, dynamic>.from(i))
+                    .toList() ??
                 [];
 
             // 🔹 Truy vấn thêm dữ liệu `nutri` từ bảng Meals
@@ -486,9 +488,11 @@ class MealService {
     return result;
   }
 
-  Future<List<Map<String, dynamic>>> fetchMealScheduleForDate(String uid, DateTime date) async {
+  Future<List<Map<String, dynamic>>> fetchMealScheduleForDate(
+      String uid, DateTime date) async {
     final docId = '${uid}_${DateFormat('yyyy-MM-dd').format(date)}';
-    final docRef = FirebaseFirestore.instance.collection('MealSchedules').doc(docId);
+    final docRef =
+        FirebaseFirestore.instance.collection('MealSchedules').doc(docId);
     final doc = await docRef.get();
 
     final List<Map<String, dynamic>> result = [];
@@ -510,8 +514,9 @@ class MealService {
           totalCalories += calories;
 
           final ingredients = (m['ingredients'] as List<dynamic>?)
-              ?.map((i) => Map<String, dynamic>.from(i))
-              .toList() ?? [];
+                  ?.map((i) => Map<String, dynamic>.from(i))
+                  .toList() ??
+              [];
 
           // Truy vấn thêm nutrition
           final mealQuery = await FirebaseFirestore.instance
@@ -600,9 +605,9 @@ class MealService {
   }
 
   Future<Meal> getMealWithScheduledIngredients(
-      String name,
-      List<dynamic> scheduledIngredientsRaw,
-      ) async {
+    String name,
+    List<dynamic> scheduledIngredientsRaw,
+  ) async {
     final snapshot = await FirebaseFirestore.instance
         .collection('Meals')
         .where('name', isEqualTo: name)
@@ -636,9 +641,80 @@ class MealService {
       nutri: originalMeal.nutri,
       size: originalMeal.size,
       time: originalMeal.time,
+      id: originalMeal.id,
     );
 
     return updatedMeal;
   }
 
+  Future<Map<String, List<FlSpot>>> generateWeeklyMealData({
+    required String uid,
+  }) async {
+    DateTime now = DateTime.now();
+    DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
+
+    Map<int, double> caloriesByDay = {for (int i = 1; i <= 7; i++) i: 0};
+    Map<int, double> carbByDay = {for (int i = 1; i <= 7; i++) i: 0};
+    Map<int, double> fatByDay = {for (int i = 1; i <= 7; i++) i: 0};
+    Map<int, double> proteinByDay = {for (int i = 1; i <= 7; i++) i: 0};
+
+    QuerySnapshot mealSnapshot = await FirebaseFirestore.instance
+        .collection('MealSchedules')
+        .where('uid', isEqualTo: uid)
+        .where('date',
+            isGreaterThanOrEqualTo:
+                DateFormat('yyyy-MM-dd').format(startOfWeek))
+        .where('date',
+            isLessThanOrEqualTo: DateFormat('yyyy-MM-dd').format(endOfWeek))
+        .get();
+
+    for (var doc in mealSnapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+
+      DateTime date = DateTime.parse(data['date']);
+      int weekday = date.weekday;
+
+      // Danh sách bữa ăn trong ngày
+      List<String> meals = ['breakfast', 'lunch', 'dinner', 'snacks'];
+
+      for (var meal in meals) {
+        if (data.containsKey(meal)) {
+          List<dynamic> mealList = data[meal];
+
+          for (var mealItem in mealList) {
+            final totalCalories = (mealItem['totalCalories'] ?? 0).toDouble();
+            final totalCarb = (mealItem['totalCarb'] ?? 0).toDouble();
+            final totalFat = (mealItem['totalFat'] ?? 0).toDouble();
+            final totalProtein = (mealItem['totalProtein'] ?? 0).toDouble();
+
+            caloriesByDay[weekday] = caloriesByDay[weekday]! + totalCalories;
+            carbByDay[weekday] = carbByDay[weekday]! + totalCarb;
+            fatByDay[weekday] = fatByDay[weekday]! + totalFat;
+            proteinByDay[weekday] = proteinByDay[weekday]! + totalProtein;
+          }
+        }
+      }
+    }
+
+    // Chuyển về List<FlSpot> để vẽ biểu đồ
+    List<FlSpot> calorieSpots = [];
+    List<FlSpot> carbSpots = [];
+    List<FlSpot> fatSpots = [];
+    List<FlSpot> proteinSpots = [];
+
+    for (int i = 1; i <= 7; i++) {
+      calorieSpots.add(FlSpot(i.toDouble(), caloriesByDay[i]!));
+      carbSpots.add(FlSpot(i.toDouble(), carbByDay[i]!));
+      fatSpots.add(FlSpot(i.toDouble(), fatByDay[i]!));
+      proteinSpots.add(FlSpot(i.toDouble(), proteinByDay[i]!));
+    }
+
+    return {
+      'calories': calorieSpots,
+      'carb': carbSpots,
+      'fat': fatSpots,
+      'protein': proteinSpots,
+    };
+  }
 }

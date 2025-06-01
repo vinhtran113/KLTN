@@ -25,7 +25,8 @@ class WorkoutScheduleView extends StatefulWidget {
 }
 
 class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
-  CalendarAgendaController _calendarAgendaControllerAppBar = CalendarAgendaController();
+  final CalendarAgendaController _calendarAgendaControllerAppBar =
+      CalendarAgendaController();
   late DateTime _selectedDateAppBBar;
   final WorkoutService _workoutService = WorkoutService();
   List<Map<String, dynamic>> eventArr = [];
@@ -42,8 +43,8 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
 
   void _loadWorkOutSchedule() async {
     String uid = FirebaseAuth.instance.currentUser!.uid;
-    List<Map<String, dynamic>> schedule = await _workoutService
-        .fetchWorkoutSchedule(userId: uid);
+    List<Map<String, dynamic>> schedule =
+        await _workoutService.fetchWorkoutSchedule(userId: uid);
     setState(() {
       eventArr = schedule;
     });
@@ -76,8 +77,8 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirm Delete'),
-          content: Text(
-              'Are you sure you want to delete this workout schedule?'),
+          content:
+              Text('Are you sure you want to delete this workout schedule?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -103,19 +104,18 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$res')),);
+          SnackBar(content: Text(res)),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
         centerTitle: true,
         elevation: 0,
         leading: InkWell(
@@ -144,9 +144,9 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
           ),
         ),
         title: Text(
-          AppLocalizations.of(context)?.translate("Workout Schedule") ?? "Workout Schedule",
-          style: TextStyle(
-              fontSize: 16, fontWeight: FontWeight.w700),
+          AppLocalizations.of(context)?.translate("Workout Schedule") ??
+              "Workout Schedule",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
       body: Column(
@@ -179,8 +179,8 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
             // fullCalendar: false,
             fullCalendarScroll: FullCalendarScroll.horizontal,
             fullCalendarDay: WeekDay.short,
-            selectedDateColor: darkmode? Colors.black : TColor.white,
-            dateColor: darkmode? Colors.white : TColor.black,
+            selectedDateColor: darkmode ? Colors.black : TColor.white,
+            dateColor: darkmode ? Colors.white : TColor.black,
             locale: 'en',
 
             initialDate: DateTime.now(),
@@ -229,7 +229,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                             child: Text(
                               getTime(index * 60),
                               style: TextStyle(
-                                color: darkmode? Colors.white : TColor.black,
+                                color: darkmode ? Colors.white : TColor.black,
                                 fontSize: 12,
                               ),
                             ),
@@ -245,8 +245,8 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
 
                                   // Kiểm tra nếu ngày đã qua
                                   DateTime eventDate = sObj["date"] as DateTime;
-                                  bool isEventPast = eventDate.isBefore(
-                                      DateTime.now());
+                                  bool isEventPast =
+                                      eventDate.isBefore(DateTime.now());
 
                                   // Kiểm tra điều kiện để vô hiệu hóa nút và gạch ngang
                                   bool shouldStrikethrough = isEventPast;
@@ -260,27 +260,31 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                             context: context,
                                             builder: (context) {
                                               return AlertDialog(
-                                                backgroundColor: Colors
-                                                    .transparent,
+                                                backgroundColor:
+                                                    Colors.transparent,
                                                 contentPadding: EdgeInsets.zero,
                                                 content: Container(
                                                   padding: const EdgeInsets
-                                                      .symmetric(vertical: 15,
+                                                      .symmetric(
+                                                      vertical: 15,
                                                       horizontal: 20),
                                                   decoration: BoxDecoration(
                                                     color: TColor.white,
-                                                    borderRadius: BorderRadius
-                                                        .circular(20),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
                                                   ),
                                                   child: Column(
-                                                    mainAxisSize: MainAxisSize
-                                                        .min,
-                                                    crossAxisAlignment: CrossAxisAlignment
-                                                        .start,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Row(
-                                                        mainAxisAlignment: MainAxisAlignment
-                                                            .spaceBetween,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
                                                         children: [
                                                           InkWell(
                                                             onTap: () {
@@ -288,21 +292,25 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                                   context);
                                                             },
                                                             child: Container(
-                                                              margin: const EdgeInsets
-                                                                  .all(8),
+                                                              margin:
+                                                                  const EdgeInsets
+                                                                      .all(8),
                                                               height: 40,
                                                               width: 40,
-                                                              alignment: Alignment
-                                                                  .center,
-                                                              decoration: BoxDecoration(
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              decoration:
+                                                                  BoxDecoration(
                                                                 color: TColor
                                                                     .lightGray,
-                                                                borderRadius: BorderRadius
-                                                                    .circular(
-                                                                    10),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10),
                                                               ),
-                                                              child: Image
-                                                                  .asset(
+                                                              child:
+                                                                  Image.asset(
                                                                 "assets/img/closed_btn.png",
                                                                 width: 15,
                                                                 height: 15,
@@ -312,25 +320,41 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                             ),
                                                           ),
                                                           Text(
-                                                            AppLocalizations.of(context)?.translate("Workout Schedule") ?? "Workout Schedule",
+                                                            AppLocalizations.of(
+                                                                        context)
+                                                                    ?.translate(
+                                                                        "Workout Schedule") ??
+                                                                "Workout Schedule",
                                                             style: TextStyle(
                                                                 color: TColor
                                                                     .black,
                                                                 fontSize: 16,
-                                                                fontWeight: FontWeight
-                                                                    .w700),),
-
-                                                          PopupMenuButton<String>(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700),
+                                                          ),
+                                                          PopupMenuButton<
+                                                              String>(
                                                             icon: Container(
-                                                              margin: const EdgeInsets.all(8),
+                                                              margin:
+                                                                  const EdgeInsets
+                                                                      .all(8),
                                                               height: 40,
                                                               width: 40,
-                                                              alignment: Alignment.center,
-                                                              decoration: BoxDecoration(
-                                                                color: TColor.lightGray,
-                                                                borderRadius: BorderRadius.circular(10),
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: TColor
+                                                                    .lightGray,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10),
                                                               ),
-                                                              child: Image.asset(
+                                                              child:
+                                                                  Image.asset(
                                                                 "assets/img/more_btn.png",
                                                                 width: 15,
                                                                 height: 15,
@@ -338,34 +362,63 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                                     .contain,
                                                               ),
                                                             ),
-                                                            onSelected: (value) async {
-                                                              if (value == 'edit') {
-                                                                WorkoutSchedule schedule = await _workoutService
-                                                                    .getWorkoutScheduleById(scheduleId: sObj["id"]);
-                                                                final result = await Navigator.push(
+                                                            onSelected:
+                                                                (value) async {
+                                                              if (value ==
+                                                                  'edit') {
+                                                                WorkoutSchedule
+                                                                    schedule =
+                                                                    await _workoutService.getWorkoutScheduleById(
+                                                                        scheduleId:
+                                                                            sObj["id"]);
+                                                                final result =
+                                                                    await Navigator
+                                                                        .push(
                                                                   context,
                                                                   MaterialPageRoute(
-                                                                    builder: (context) => EditScheduleView(schedule: schedule,),
+                                                                    builder:
+                                                                        (context) =>
+                                                                            EditScheduleView(
+                                                                      schedule:
+                                                                          schedule,
+                                                                    ),
                                                                   ),
                                                                 );
-                                                                if (result == true) {
+                                                                if (result ==
+                                                                    true) {
                                                                   _loadWorkOutSchedule();
-                                                                  Navigator.pop(context);
+                                                                  Navigator.pop(
+                                                                      context);
                                                                 }
-                                                              } else
-                                                              if (value == 'delete') {
-                                                                print('Remove clicked');
-                                                                _confirmDeleteSchedule(sObj["id"]);
+                                                              } else if (value ==
+                                                                  'delete') {
+                                                                print(
+                                                                    'Remove clicked');
+                                                                _confirmDeleteSchedule(
+                                                                    sObj["id"]);
                                                               }
                                                             },
-                                                            itemBuilder: (BuildContext context) =>
-                                                            <PopupMenuEntry<String>>[PopupMenuItem<String>(
+                                                            itemBuilder: (BuildContext
+                                                                    context) =>
+                                                                <PopupMenuEntry<
+                                                                    String>>[
+                                                              PopupMenuItem<
+                                                                  String>(
                                                                 value: 'edit',
-                                                                child: Text(AppLocalizations.of(context)?.translate("Edit") ?? "Edit"),
+                                                                child: Text(AppLocalizations.of(
+                                                                            context)
+                                                                        ?.translate(
+                                                                            "Edit") ??
+                                                                    "Edit"),
                                                               ),
-                                                              PopupMenuItem<String>(
+                                                              PopupMenuItem<
+                                                                  String>(
                                                                 value: 'delete',
-                                                                child: Text(AppLocalizations.of(context)?.translate("Delete") ?? "Delete"),
+                                                                child: Text(AppLocalizations.of(
+                                                                            context)
+                                                                        ?.translate(
+                                                                            "Delete") ??
+                                                                    "Delete"),
                                                               ),
                                                             ],
                                                           )
@@ -378,8 +431,9 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                         style: TextStyle(
                                                             color: TColor.black,
                                                             fontSize: 14,
-                                                            fontWeight: FontWeight
-                                                                .w700),
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w700),
                                                       ),
                                                       const SizedBox(height: 4),
                                                       Row(
@@ -392,10 +446,10 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                           const SizedBox(
                                                               width: 8),
                                                           Text(
-                                                            "${getDayTitle(context, sObj["start_time"].toString())} | ${getStringDateToOtherFormate(
-                                                                sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
+                                                            "${getDayTitle(context, sObj["start_time"].toString())} | ${getStringDateToOtherFormate(sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
                                                             style: TextStyle(
-                                                                color: TColor.gray,
+                                                                color:
+                                                                    TColor.gray,
                                                                 fontSize: 12),
                                                           )
                                                         ],
@@ -411,17 +465,17 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                       child: Container(
                                         height: 35,
                                         width: availWidth * 0.55,
-                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8),
                                         alignment: Alignment.centerLeft,
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(colors: TColor.secondaryG),
-                                          borderRadius: BorderRadius.circular(17.5),
+                                          gradient: LinearGradient(
+                                              colors: TColor.secondaryG),
+                                          borderRadius:
+                                              BorderRadius.circular(17.5),
                                         ),
                                         child: Text(
-                                          "${sObj["name"]
-                                              .toString()}, ${getStringDateToOtherFormate(
-                                              sObj["start_time"].toString(),
-                                              outFormatStr: "h:mm aa")}",
+                                          "${sObj["name"].toString()}, ${getStringDateToOtherFormate(sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
                                           maxLines: 1,
                                           style: TextStyle(
                                             color: TColor.white,
@@ -452,7 +506,6 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
               ),
             ),
           )
-
         ],
       ),
       floatingActionButton: InkWell(
@@ -486,8 +539,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
               boxShadow: const [
                 BoxShadow(
                     color: Colors.black12, blurRadius: 5, offset: Offset(0, 2))
-              ]
-          ),
+              ]),
           alignment: Alignment.center,
           child: Icon(
             Icons.add,

@@ -41,7 +41,7 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
     var media = MediaQuery.of(context).size;
     return Container(
       decoration:
-      BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
+          BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -89,7 +89,7 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                         decoration: BoxDecoration(
                           color: Colors.white24,
                           borderRadius:
-                          BorderRadius.circular(media.width * 0.275),
+                              BorderRadius.circular(media.width * 0.275),
                         ),
                       ),
                     ),
@@ -97,26 +97,27 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                       scale: 1.25,
                       child: Align(
                         alignment: Alignment.bottomCenter,
-                        child: (meal.image != null && meal.image.toString().isNotEmpty) ? Image.network(
-                          meal.image.toString(),
-                          width: media.width * 0.50,
-                          height: media.width * 0.50,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              "assets/img/no_image.png",
-                              width: media.width * 0.50,
-                              height: media.width * 0.50,
-                              fit: BoxFit.contain,
-                            );
-                          },
-                        )
+                        child: (meal.image.toString().isNotEmpty)
+                            ? Image.network(
+                                meal.image.toString(),
+                                width: media.width * 0.50,
+                                height: media.width * 0.50,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                    "assets/img/no_image.png",
+                                    width: media.width * 0.50,
+                                    height: media.width * 0.50,
+                                    fit: BoxFit.contain,
+                                  );
+                                },
+                              )
                             : Image.asset(
-                          "assets/img/no_image.png",
-                          width: media.width * 0.50,
-                          height: media.width * 0.50,
-                          fit: BoxFit.contain,
-                        ),
+                                "assets/img/no_image.png",
+                                width: media.width * 0.50,
+                                height: media.width * 0.50,
+                                fit: BoxFit.contain,
+                              ),
                       ),
                     ),
                   ],
@@ -209,7 +210,7 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                                   margin: const EdgeInsets.symmetric(
                                       vertical: 8, horizontal: 4),
                                   padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
+                                      const EdgeInsets.symmetric(horizontal: 8),
                                   decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [
@@ -221,7 +222,7 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.center,
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Image.asset(
                                         nObj["image"]!,
@@ -295,7 +296,7 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                               child: Text(
                                 "${meal.ingredients.length} Items",
                                 style:
-                                TextStyle(color: TColor.gray, fontSize: 12),
+                                    TextStyle(color: TColor.gray, fontSize: 12),
                               ),
                             )
                           ],
@@ -326,38 +327,43 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                                     ),
                                     alignment: Alignment.center,
                                     child: (nObj["image"] != null &&
-                                        nObj["image"].toString().startsWith("http"))
+                                            nObj["image"]
+                                                .toString()
+                                                .startsWith("http"))
                                         ? Image.network(
-                                      nObj["image"].toString(),
-                                      width: 45,
-                                      height: 45,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Image.asset(
-                                          "assets/img/no_image.png",
-                                          width: 45,
-                                          height: 45,
-                                          fit: BoxFit.contain,
-                                        );
-                                      },
-                                    )
+                                            nObj["image"].toString(),
+                                            width: 80,
+                                            height: 80,
+                                            fit: BoxFit.contain,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return Image.asset(
+                                                "assets/img/no_image.png",
+                                                width: 45,
+                                                height: 45,
+                                                fit: BoxFit.contain,
+                                              );
+                                            },
+                                          )
                                         : Image.asset(
-                                      "assets/img/no_image.png",
-                                      width: 45,
-                                      height: 45,
-                                      fit: BoxFit.contain,
-                                    ),
+                                            "assets/img/no_image.png",
+                                            width: 45,
+                                            height: 45,
+                                            fit: BoxFit.contain,
+                                          ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     nObj["title"].toString(),
-                                    style: TextStyle(color: TColor.black, fontSize: 12),
+                                    style: TextStyle(
+                                        color: TColor.black, fontSize: 12),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
                                     nObj["value"].toString(),
-                                    style: TextStyle(color: TColor.gray, fontSize: 10),
+                                    style: TextStyle(
+                                        color: TColor.gray, fontSize: 10),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -384,7 +390,7 @@ class _FoodInfoDetails2ViewState extends State<FoodInfoDetails2View> {
                               child: Text(
                                 "${meal.recipe.length} Steps",
                                 style:
-                                TextStyle(color: TColor.gray, fontSize: 12),
+                                    TextStyle(color: TColor.gray, fontSize: 12),
                               ),
                             )
                           ],

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common_widget/meal_recommed_cell.dart';
+import 'package:fitness_workout_app/localization/app_localizations.dart';
 import 'package:fitness_workout_app/view/meal_planner/recommend_meal_food_view.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +28,8 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
   TextEditingController txtSearch = TextEditingController();
   final MealService _mealService = MealService();
   String level = '';
+  bool isLoading = true;
+  bool isLoading1 = true;
 
   List categoryArr = [
     {
@@ -71,7 +74,8 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
 
     if (widget.eObj["name"].toString() == "Snack") {
       filteredCategoryArr = categoryArr.where((category) {
-        return category["name"] != "Main Dish" && category["name"] != "Side Dish";
+        return category["name"] != "Main Dish" &&
+            category["name"] != "Side Dish";
       }).toList();
     } else {
       filteredCategoryArr = List.from(categoryArr);
@@ -99,6 +103,9 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
   }
 
   void _loadMealsByRecommendAndLevel(String mealType) async {
+    setState(() {
+      isLoading = true;
+    });
     UserModel? user = await AuthService().getUserInfo(
       FirebaseAuth.instance.currentUser!.uid,
     );
@@ -114,26 +121,37 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
       setState(() {
         level = lv;
         recommendArr = meals;
+        isLoading = false;
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Không thể lấy thông tin người dùng')),
       );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   void _loadPopularMeals(String mealType) async {
     try {
+      setState(() {
+        isLoading1 = true;
+      });
       List<Meal> meals = await _mealService.fetchMealsWithRecommend(
         recommend: mealType,
       );
       setState(() {
         popularArr = meals;
+        isLoading1 = false;
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi: $e')),
       );
+      setState(() {
+        isLoading1 = false;
+      });
     }
   }
 
@@ -225,44 +243,46 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
             ),
             txtSearch.text.isNotEmpty
                 ? (filteredMeals.isEmpty
-                ? Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Text(
-                  "Not Found",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
-                ),
-              ),
-            ) : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: filteredMeals.length,
-              itemBuilder: (context, index) {
-                Meal fObj = filteredMeals[index];
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FoodInfoDetailsView(
-                          dObj: fObj,
-                          mObj: widget.eObj,
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Text(
+                            "Not Found",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  child: SearchAllMealRow(
-                    mObj: fObj,
-                    dObj: widget.eObj,
-                  ),
-                );
-              },
-            )) : SizedBox(),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: filteredMeals.length,
+                        itemBuilder: (context, index) {
+                          Meal fObj = filteredMeals[index];
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FoodInfoDetailsView(
+                                    dObj: fObj,
+                                    mObj: widget.eObj,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: SearchAllMealRow(
+                              mObj: fObj,
+                              dObj: widget.eObj,
+                            ),
+                          );
+                        },
+                      ))
+                : SizedBox(),
             SizedBox(
               height: media.width * 0.03,
             ),
@@ -338,8 +358,7 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
                     },
                     child: Text(
                       "See All",
-                      style:
-                      TextStyle(color: TColor.gray, fontSize: 12),
+                      style: TextStyle(color: TColor.gray, fontSize: 12),
                     ),
                   )
                 ],
@@ -347,28 +366,31 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
             ),
             SizedBox(
               height: media.width * 0.6,
-              child: recommendArr.isEmpty ? Center(
-                  child: Text(
-                    'Not Found',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey,
-                    ),
-                ),
-              ) : ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                scrollDirection: Axis.horizontal,
-                itemCount: recommendArr.length > 2 ? 2 : recommendArr.length,
-                itemBuilder: (context, index) {
-                  Meal fObj = recommendArr[index];
-                  return MealRecommendCell(
-                    fObj: fObj,
-                    index: index,
-                    mObj: widget.eObj,
-                  );
-                },
-              ),
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : recommendArr.isNotEmpty
+                      ? ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                          scrollDirection: Axis.horizontal,
+                          itemCount:
+                              recommendArr.length > 2 ? 2 : recommendArr.length,
+                          itemBuilder: (context, index) {
+                            Meal fObj = recommendArr[index];
+                            return MealRecommendCell(
+                              fObj: fObj,
+                              index: index,
+                              mObj: widget.eObj,
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Text(
+                            AppLocalizations.of(context)
+                                    ?.translate("Not Found") ??
+                                "Not Found",
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                        ),
             ),
             SizedBox(
               height: media.width * 0.05,
@@ -398,46 +420,48 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
                     },
                     child: Text(
                       "See All",
-                      style:
-                      TextStyle(color: TColor.gray, fontSize: 12),
+                      style: TextStyle(color: TColor.gray, fontSize: 12),
                     ),
                   )
                 ],
               ),
             ),
-            popularArr.isEmpty ? Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
+            if (isLoading1)
+              const Center(child: CircularProgressIndicator())
+            else if (popularArr.isNotEmpty) ...[
+              ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: popularArr.length > 5 ? 5 : popularArr.length,
+                itemBuilder: (context, index) {
+                  Meal fObj = popularArr[index];
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FoodInfoDetailsView(
+                            dObj: fObj,
+                            mObj: widget.eObj,
+                          ),
+                        ),
+                      );
+                    },
+                    child: PopularMealRow(
+                      mObj: fObj,
+                    ),
+                  );
+                },
+              ),
+            ] else
+              Center(
                 child: Text(
-                  "Not Found",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  AppLocalizations.of(context)?.translate("Not Found") ??
+                      "Not Found",
+                  style: const TextStyle(color: Colors.grey),
                 ),
               ),
-            ) : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: popularArr.length > 5 ? 5 : popularArr.length,
-              itemBuilder: (context, index) {
-                Meal fObj = popularArr[index];
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FoodInfoDetailsView(
-                          dObj: fObj,
-                          mObj: widget.eObj,
-                        ),
-                      ),
-                    );
-                  },
-                  child: PopularMealRow(
-                    mObj: fObj,
-                  ),
-                );
-              },
-            ),
             SizedBox(
               height: media.width * 0.05,
             ),

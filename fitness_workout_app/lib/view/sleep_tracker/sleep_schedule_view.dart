@@ -1,8 +1,12 @@
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_workout_app/common_widget/round_button.dart';
+import 'package:fitness_workout_app/model/user_model.dart';
 import 'package:fitness_workout_app/services/alarm_services.dart';
+import 'package:fitness_workout_app/services/auth_services.dart';
 import 'package:fitness_workout_app/view/sleep_tracker/sleep_add_alarm_view.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/today_sleep_schedule_row.dart';
@@ -18,7 +22,8 @@ class SleepScheduleView extends StatefulWidget {
 }
 
 class _SleepScheduleViewState extends State<SleepScheduleView> {
-  CalendarAgendaController _calendarAgendaControllerAppBar = CalendarAgendaController();
+  final CalendarAgendaController _calendarAgendaControllerAppBar =
+      CalendarAgendaController();
   final AlarmService _alarmService = AlarmService();
   late DateTime _selectedDateAppBBar;
 
@@ -26,11 +31,51 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
   List<int> showingTooltipOnSpots = [4];
   bool darkmode = darkModeNotifier.value;
 
+  int userAge = 0;
+  String idealSleepText = "";
+
   @override
   void initState() {
     super.initState();
+    getUserInfo();
     _selectedDateAppBBar = DateTime.now();
     _loadAlarmSchedules();
+  }
+
+  void getUserInfo() async {
+    try {
+      // Lấy lại thông tin người dùng
+      UserModel? user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+
+      if (user != null) {
+        setState(() {
+          userAge = user.getAge();
+          idealSleepText = suggestIdealSleepHours(userAge);
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Có lỗi xảy ra')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
+  }
+
+  String suggestIdealSleepHours(int age) {
+    if (age < 0) return "Invalid age";
+    if (age <= 0) return "14 - 17 hours";
+    if (age <= 0.25) return "14 - 17 hours"; // 0-3 tháng
+    if (age <= 0.92) return "12 - 16 hours"; // 4-11 tháng
+    if (age <= 2) return "11 - 14 hours"; // 1-2 tuổi
+    if (age <= 5) return "10 - 13 hours"; // 3-5 tuổi
+    if (age <= 12) return "9 - 12 hours"; // 6-12 tuổi
+    if (age <= 18) return "8 - 10 hours"; // 13-18 tuổi
+    if (age <= 64) return "7 - 9 hours"; // 18-64 tuổi
+    return "7 - 8 hours"; // 65+ tuổi
   }
 
   void _loadAlarmSchedules() async {
@@ -50,16 +95,14 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
       _loadAlarmSchedules();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$res')),
+        SnackBar(content: Text(res)),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
@@ -100,7 +143,7 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
               children: [
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   child: Container(
                     width: double.maxFinite,
                     padding: const EdgeInsets.all(20),
@@ -118,21 +161,44 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(
-                                height: 50,
+                                height: 25,
                               ),
                               Text(
-                                AppLocalizations.of(context)?.translate(
-                                    "Ideal Sleep") ?? "Ideal Hours for Sleep",
+                                AppLocalizations.of(context)
+                                        ?.translate("Ideal Sleep") ??
+                                    "Ideal Hours for Sleep",
                                 style: TextStyle(
                                   fontSize: 14,
                                 ),
                               ),
                               Text(
-                                "8hours 30minutes",
+                                idealSleepText,
                                 style: TextStyle(
-                                    color: TColor.primaryColor2,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500),
+                                  color: TColor.primaryColor2,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const Spacer(),
+                              SizedBox(
+                                width: 110,
+                                height: 35,
+                                child: RoundButton(
+                                  title: "Learn More",
+                                  fontSize: 12,
+                                  onPressed: () async {
+                                    final url = Uri.parse(
+                                        'https://www.healthline.com/health/sleep/sleep-calculator#sleep-needs');
+                                    if (!await launchUrl(url,
+                                        mode: LaunchMode.externalApplication)) {
+                                      // Nếu không mở được, thử mở bằng launchUrl đơn giản
+                                      await launchUrl(url);
+                                    }
+                                  },
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 25,
                               ),
                             ]),
                         Image.asset(
@@ -148,13 +214,11 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                 ),
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   child: Text(
                     AppLocalizations.of(context)?.translate("Your Schedule") ??
                         "Your Schedule",
-                    style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                   ),
                 ),
                 CalendarAgenda(
@@ -213,14 +277,13 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                     height: media.width * 0.02,
                   ),
                   Padding(
-                    padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 20),
                     child: Text(
                       AppLocalizations.of(context)?.translate("not alarm") ??
                           "You have not scheduled an alarm!",
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                     ),
                   ),
                 ],
@@ -229,14 +292,14 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                     height: media.width * 0.02,
                   ),
                   Padding(
-                    padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 20),
                     child: Text(
-                      AppLocalizations.of(context)?.translate(
-                          "Upcoming Alarm") ?? "Upcoming Alarm",
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700),
+                      AppLocalizations.of(context)
+                              ?.translate("Upcoming Alarm") ??
+                          "Upcoming Alarm",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                     ),
                   ),
                   SizedBox(
@@ -264,27 +327,26 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                             context: context,
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title: Text(
-                                    AppLocalizations.of(context)?.translate(
-                                        "Confirm Delete") ?? "Confirm Delete"),
-                                content: Text(
-                                    AppLocalizations.of(context)?.translate(
-                                        "Confirm Delete des") ??
-                                        "Are you sure you want to delete this alarm schedule?"),
+                                title: Text(AppLocalizations.of(context)
+                                        ?.translate("Confirm Delete") ??
+                                    "Confirm Delete"),
+                                content: Text(AppLocalizations.of(context)
+                                        ?.translate("Confirm Delete des") ??
+                                    "Are you sure you want to delete this alarm schedule?"),
                                 actions: [
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.of(context).pop(false),
-                                    child: Text(
-                                        AppLocalizations.of(context)?.translate(
-                                            "Cancel") ?? "Cancel"),
+                                    child: Text(AppLocalizations.of(context)
+                                            ?.translate("Cancel") ??
+                                        "Cancel"),
                                   ),
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.of(context).pop(true),
-                                    child: Text(
-                                        AppLocalizations.of(context)?.translate(
-                                            "Delete") ?? "Delete"),
+                                    child: Text(AppLocalizations.of(context)
+                                            ?.translate("Delete") ??
+                                        "Delete"),
                                   ),
                                 ],
                               );

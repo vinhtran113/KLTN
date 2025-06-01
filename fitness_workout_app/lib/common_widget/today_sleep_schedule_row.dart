@@ -2,14 +2,14 @@ import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:flutter/material.dart';
 
-import '../common/common.dart';
 import '../model/alarm_model.dart';
 import '../view/sleep_tracker/sleep_edit_alarm_view.dart';
 
 class TodaySleepScheduleRow extends StatefulWidget {
   final AlarmSchedule sObj;
   final VoidCallback onRefresh;
-  const TodaySleepScheduleRow({super.key, required this.sObj, required this.onRefresh});
+  const TodaySleepScheduleRow(
+      {super.key, required this.sObj, required this.onRefresh});
 
   @override
   State<TodaySleepScheduleRow> createState() => _TodaySleepScheduleRowState();
@@ -36,9 +36,11 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
         }
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Căn lề phù hợp
+        margin: const EdgeInsets.symmetric(
+            vertical: 8, horizontal: 16), // Căn lề phù hợp
         padding: const EdgeInsets.all(15),
-        constraints: BoxConstraints(maxWidth: media.width - 32), // Giới hạn chiều rộng
+        constraints:
+            BoxConstraints(maxWidth: media.width - 32), // Giới hạn chiều rộng
         decoration: BoxDecoration(
           color: TColor.white,
           borderRadius: BorderRadius.circular(15),
@@ -55,27 +57,27 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
                     widget.sObj.repeatInterval.toString() == "Everyday"
                         ? "Everyday"
                         : widget.sObj.repeatInterval.contains("day")
-                        ? "Repeat: ${widget.sObj.repeatInterval.split(",").map((day) {
-                      switch (day) {
-                        case "Monday":
-                          return "2";
-                        case "Tuesday":
-                          return "3";
-                        case "Wednesday":
-                          return "4";
-                        case "Thursday":
-                          return "5";
-                        case "Friday":
-                          return "6";
-                        case "Saturday":
-                          return "7";
-                        case "Sunday":
-                          return "CN";
-                        default:
-                          return day;
-                      }
-                    }).join(",")}"
-                        : "Date: ${widget.sObj.day.toString()}",
+                            ? "Repeat: ${widget.sObj.repeatInterval.split(",").map((day) {
+                                switch (day) {
+                                  case "Monday":
+                                    return "2";
+                                  case "Tuesday":
+                                    return "3";
+                                  case "Wednesday":
+                                    return "4";
+                                  case "Thursday":
+                                    return "5";
+                                  case "Friday":
+                                    return "6";
+                                  case "Saturday":
+                                    return "7";
+                                  case "Sunday":
+                                    return "CN";
+                                  default:
+                                    return day;
+                                }
+                              }).join(",")}"
+                            : "Date: ${widget.sObj.day.toString()}",
                     style: TextStyle(
                       color: TColor.gray,
                       fontSize: 15,
@@ -134,7 +136,8 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
                               height: 40.0,
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(colors: TColor.thirdG),
+                                  gradient:
+                                      LinearGradient(colors: TColor.thirdG),
                                   borderRadius: const BorderRadius.all(
                                     Radius.circular(50.0),
                                   ),
@@ -152,7 +155,7 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
                             decoration: BoxDecoration(
                               color: TColor.white,
                               borderRadius:
-                              const BorderRadius.all(Radius.circular(25.0)),
+                                  const BorderRadius.all(Radius.circular(25.0)),
                               boxShadow: const [
                                 BoxShadow(
                                   color: Colors.black38,
@@ -219,7 +222,8 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
                               height: 40.0,
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(colors: TColor.thirdG),
+                                  gradient:
+                                      LinearGradient(colors: TColor.thirdG),
                                   borderRadius: const BorderRadius.all(
                                     Radius.circular(50.0),
                                   ),
@@ -237,7 +241,7 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
                             decoration: BoxDecoration(
                               color: TColor.white,
                               borderRadius:
-                              const BorderRadius.all(Radius.circular(25.0)),
+                                  const BorderRadius.all(Radius.circular(25.0)),
                               boxShadow: const [
                                 BoxShadow(
                                   color: Colors.black38,
@@ -261,4 +265,3 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
     );
   }
 }
-

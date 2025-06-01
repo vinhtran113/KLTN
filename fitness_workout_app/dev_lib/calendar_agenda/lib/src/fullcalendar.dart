@@ -19,7 +19,7 @@ class FullCalendar extends StatefulWidget {
   final List<String>? events;
   final Function onDateChange;
 
-  FullCalendar({
+  const FullCalendar({
     Key? key,
     this.endDate,
     required this.startDate,
@@ -49,6 +49,7 @@ class _FullCalendarState extends State<FullCalendar> {
 
   late PageController _horizontalScroll;
 
+  @override
   void initState() {
     setState(() {
       startDate = DateTime.parse(
@@ -73,7 +74,7 @@ class _FullCalendarState extends State<FullCalendar> {
     List<String> partsEnd = endDate.toString().split(" ").first.split("-");
 
     DateTime lastDate = DateTime.parse(
-        "${partsEnd.first}-${(int.parse(partsEnd[1]) + 1).toString().padLeft(2, '0')}-01 23:00:00.000")
+            "${partsEnd.first}-${(int.parse(partsEnd[1]) + 1).toString().padLeft(2, '0')}-01 23:00:00.000")
         .subtract(Duration(days: 1));
 
     double width = MediaQuery.of(context).size.width - (2 * widget.padding!);
@@ -93,7 +94,7 @@ class _FullCalendarState extends State<FullCalendar> {
     if (firstDate.year == lastDate.year && firstDate.month == lastDate.month) {
       return Padding(
         padding:
-        EdgeInsets.fromLTRB(widget.padding!, 40.0, widget.padding!, 0.0),
+            EdgeInsets.fromLTRB(widget.padding!, 40.0, widget.padding!, 0.0),
         child: month(dates, width, widget.locale, widget.fullCalendarDay),
       );
     } else {
@@ -106,110 +107,110 @@ class _FullCalendarState extends State<FullCalendar> {
 
       months.sort((b, a) => a!.compareTo(b!));
 
-      final _index = months.indexWhere((element) =>
-      element!.month == widget.selectedDate!.month &&
+      final index = months.indexWhere((element) =>
+          element!.month == widget.selectedDate!.month &&
           element.year == widget.selectedDate!.year);
 
-      _initialPage = _index;
+      _initialPage = index;
       _horizontalScroll = PageController(initialPage: _initialPage);
 
       return Container(
         padding: EdgeInsets.fromLTRB(25, 10.0, 25, 20.0),
         child: widget.calendarScroll == FullCalendarScroll.horizontal
             ? Stack(
-          children: [
-            Opacity(
-              opacity: 0.2,
-              child: Center(child: widget.calendarBackground),
-            ),
-            PageView.builder(
-              physics: BouncingScrollPhysics(),
-              controller: _horizontalScroll,
-              reverse: true,
-              scrollDirection: Axis.horizontal,
-              itemCount: months.length,
-              itemBuilder: (context, index) {
-                DateTime? date = months[index];
-                List<DateTime?> daysOfMonth = [];
-                for (var item in dates) {
-                  if (date!.month == item!.month &&
-                      date.year == item.year) {
-                    daysOfMonth.add(item);
-                  }
-                }
-
-                bool isLast = index == 0;
-
-                return Container(
-                  padding: EdgeInsets.only(bottom: isLast ? 0.0 : 10.0),
-                  child: month(daysOfMonth, width, widget.locale,
-                      widget.fullCalendarDay),
-                );
-              },
-            ),
-            Positioned(
-              bottom: 0,
-              width: MediaQuery.of(context).size.width * 0.88,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    onPressed: () {
-                      _horizontalScroll.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.ease,
-                      );
-                    },
-                    icon: Icon(Icons.arrow_back),
+                  Opacity(
+                    opacity: 0.2,
+                    child: Center(child: widget.calendarBackground),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      _horizontalScroll.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.ease,
+                  PageView.builder(
+                    physics: BouncingScrollPhysics(),
+                    controller: _horizontalScroll,
+                    reverse: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: months.length,
+                    itemBuilder: (context, index) {
+                      DateTime? date = months[index];
+                      List<DateTime?> daysOfMonth = [];
+                      for (var item in dates) {
+                        if (date!.month == item!.month &&
+                            date.year == item.year) {
+                          daysOfMonth.add(item);
+                        }
+                      }
+
+                      bool isLast = index == 0;
+
+                      return Container(
+                        padding: EdgeInsets.only(bottom: isLast ? 0.0 : 10.0),
+                        child: month(daysOfMonth, width, widget.locale,
+                            widget.fullCalendarDay),
                       );
                     },
-                    icon: Icon(Icons.arrow_forward),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    width: MediaQuery.of(context).size.width * 0.88,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            _horizontalScroll.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.ease,
+                            );
+                          },
+                          icon: Icon(Icons.arrow_back),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _horizontalScroll.previousPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.ease,
+                            );
+                          },
+                          icon: Icon(Icons.arrow_forward),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              )
+            : Stack(
+                children: [
+                  Opacity(
+                    opacity: 0.2,
+                    child: Center(
+                      child: widget.calendarBackground,
+                    ),
+                  ),
+                  ScrollablePositionedList.builder(
+                    initialScrollIndex: index,
+                    itemCount: months.length,
+                    reverse: true,
+                    physics: BouncingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      DateTime? date = months[index];
+                      List<DateTime?> daysOfMonth = [];
+                      for (var item in dates) {
+                        if (date!.month == item!.month &&
+                            date.year == item.year) {
+                          daysOfMonth.add(item);
+                        }
+                      }
+
+                      bool isLast = index == 0;
+
+                      return Container(
+                        padding: EdgeInsets.only(bottom: isLast ? 0.0 : 25.0),
+                        child: month(daysOfMonth, width, widget.locale,
+                            widget.fullCalendarDay),
+                      );
+                    },
                   ),
                 ],
               ),
-            )
-          ],
-        )
-            : Stack(
-          children: [
-            Opacity(
-              opacity: 0.2,
-              child: Center(
-                child: widget.calendarBackground,
-              ),
-            ),
-            ScrollablePositionedList.builder(
-              initialScrollIndex: _index,
-              itemCount: months.length,
-              reverse: true,
-              physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) {
-                DateTime? date = months[index];
-                List<DateTime?> daysOfMonth = [];
-                for (var item in dates) {
-                  if (date!.month == item!.month &&
-                      date.year == item.year) {
-                    daysOfMonth.add(item);
-                  }
-                }
-
-                bool isLast = index == 0;
-
-                return Container(
-                  padding: EdgeInsets.only(bottom: isLast ? 0.0 : 25.0),
-                  child: month(daysOfMonth, width, widget.locale,
-                      widget.fullCalendarDay),
-                );
-              },
-            ),
-          ],
-        ),
       );
     }
   }
@@ -219,9 +220,9 @@ class _FullCalendarState extends State<FullCalendar> {
     for (var day = 12; day <= 18; day++) {
       weekday == WeekDay.long
           ? daysNames.add(DateFormat.EEEE(locale.toString())
-          .format(DateTime.parse('1970-01-' + day.toString())))
+              .format(DateTime.parse('1970-01-$day')))
           : daysNames.add(DateFormat.E(locale.toString())
-          .format(DateTime.parse('1970-01-' + day.toString())));
+              .format(DateTime.parse('1970-01-$day')));
     }
 
     return Row(
@@ -281,21 +282,21 @@ class _FullCalendarState extends State<FullCalendar> {
                   style: TextStyle(
                       color: outOfRange
                           ? isSelectedDate
-                          ? widget.dateSelectedColor!.withOpacity(0.9)
-                          : widget.dateColor!.withOpacity(0.4)
+                              ? widget.dateSelectedColor!.withOpacity(0.9)
+                              : widget.dateColor!.withOpacity(0.4)
                           : isSelectedDate
-                          ? widget.dateSelectedColor
-                          : widget.dateColor),
+                              ? widget.dateSelectedColor
+                              : widget.dateColor),
                 ),
               ),
               event
                   ? Icon(
-                Icons.bookmark,
-                size: 8,
-                color: isSelectedDate
-                    ? widget.dateSelectedColor
-                    : widget.dateSelectedBg,
-              )
+                      Icons.bookmark,
+                      size: 8,
+                      color: isSelectedDate
+                          ? widget.dateSelectedColor
+                          : widget.dateSelectedBg,
+                    )
                   : SizedBox(height: 5.0),
             ],
           ),
@@ -325,21 +326,22 @@ class _FullCalendarState extends State<FullCalendar> {
           ),
           Padding(
             padding: const EdgeInsets.only(top: 30.0),
-            child: daysOfWeek(width - 30, widget.locale, widget.fullCalendarDay),
+            child:
+                daysOfWeek(width - 30, widget.locale, widget.fullCalendarDay),
           ),
           Container(
             padding: const EdgeInsets.only(top: 10.0),
             height: dates.length > 28
                 ? dates.length > 35
-                ? 6.2 * width / 7
-                : 5.2 * width / 7
+                    ? 6.2 * width / 7
+                    : 5.2 * width / 7
                 : 4 * width / 7,
             width: MediaQuery.of(context).size.width - 2 * widget.padding!,
             child: GridView.builder(
               itemCount: dates.length,
               physics: NeverScrollableScrollPhysics(),
               gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
+                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
               itemBuilder: (context, index) {
                 DateTime date = dates[index];
 

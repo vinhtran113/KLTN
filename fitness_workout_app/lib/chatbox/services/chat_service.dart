@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:fitness_workout_app/chatbox/models/message.dart';// đảm bảo import file định nghĩa Message
 
 class ChatService {
-  static bool isTesting = true;
+  static bool isTesting = false;
 
   static Future<String?> sendMessageToGPT({
     required String userMessage,

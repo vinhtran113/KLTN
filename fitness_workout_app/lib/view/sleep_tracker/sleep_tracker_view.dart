@@ -47,7 +47,7 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
       _loadAlarmSchedules();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$res')),
+        SnackBar(content: Text(res)),
       );
     }
   }
@@ -65,9 +65,7 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
 
     return Scaffold(
       appBar: AppBar(
@@ -124,8 +122,9 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 15),
                             child: Text(
-                              AppLocalizations.of(context)?.translate(
-                                  "Last Night Sleep") ?? "Last Night Sleep",
+                              AppLocalizations.of(context)
+                                      ?.translate("Last Night Sleep") ??
+                                  "Last Night Sleep",
                               style: TextStyle(
                                 color: TColor.white,
                                 fontSize: 14,
@@ -163,26 +162,28 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          AppLocalizations.of(context)?.translate(
-                              "Daily Sleep Schedule") ?? "Daily Sleep Schedule",
+                          AppLocalizations.of(context)
+                                  ?.translate("Daily Sleep Schedule") ??
+                              "Daily Sleep Schedule",
                           style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700),
+                              fontSize: 14, fontWeight: FontWeight.w700),
                         ),
                         SizedBox(
                           width: 80,
                           height: 30,
                           child: RoundButton(
-                            title: AppLocalizations.of(context)?.translate(
-                                "Check") ?? "Check",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Check") ??
+                                "Check",
                             type: RoundButtonType.bgGradient,
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                             onPressed: () async {
                               final result = await Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) =>
-                                      SleepScheduleView()));
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          SleepScheduleView()));
 
                               if (result == true) {
                                 setState(() {
@@ -204,11 +205,10 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
                       children: [
                         Text(
                           AppLocalizations.of(context)?.translate(
-                              "You haven't set an alarm for today") ??
+                                  "You haven't set an alarm for today") ??
                               "You haven't set an alarm for today",
                           style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700),
+                              fontSize: 16, fontWeight: FontWeight.w700),
                         ),
                       ],
                     ),
@@ -218,11 +218,11 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          AppLocalizations.of(context)?.translate(
-                              "Today Alarm") ?? "Today Alarm",
+                          AppLocalizations.of(context)
+                                  ?.translate("Today Alarm") ??
+                              "Today Alarm",
                           style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700),
+                              fontSize: 16, fontWeight: FontWeight.w700),
                         ),
                       ],
                     ),
@@ -243,8 +243,8 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
                             color: Colors.red,
                             alignment: Alignment.centerRight,
                             padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: const Icon(
-                                Icons.delete, color: Colors.white),
+                            child:
+                                const Icon(Icons.delete, color: Colors.white),
                           ),
                           confirmDismiss: (direction) async {
                             // Hiển thị hộp thoại xác nhận trước khi xoá
@@ -252,28 +252,26 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: Text(
-                                      AppLocalizations.of(context)?.translate(
-                                          "Confirm Delete") ??
-                                          "Confirm Delete"),
-                                  content: Text(
-                                      AppLocalizations.of(context)?.translate(
-                                          "Confirm Delete des") ??
-                                          "Are you sure you want to delete this alarm schedule?"),
+                                  title: Text(AppLocalizations.of(context)
+                                          ?.translate("Confirm Delete") ??
+                                      "Confirm Delete"),
+                                  content: Text(AppLocalizations.of(context)
+                                          ?.translate("Confirm Delete des") ??
+                                      "Are you sure you want to delete this alarm schedule?"),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.of(context).pop(false),
-                                      child: Text(AppLocalizations
-                                          .of(context)
-                                          ?.translate("Cancel") ?? "Cancel"),
+                                      child: Text(AppLocalizations.of(context)
+                                              ?.translate("Cancel") ??
+                                          "Cancel"),
                                     ),
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.of(context).pop(true),
-                                      child: Text(AppLocalizations
-                                          .of(context)
-                                          ?.translate("Delete") ?? "Delete"),
+                                      child: Text(AppLocalizations.of(context)
+                                              ?.translate("Delete") ??
+                                          "Delete"),
                                     ),
                                   ],
                                 );

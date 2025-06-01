@@ -53,7 +53,9 @@ class SelectFoodRow extends StatelessWidget {
                     width: 100,
                     height: 30,
                     child: RoundButton(
-                      title: AppLocalizations.of(context)?.translate("Select") ?? "Select",
+                      title:
+                          AppLocalizations.of(context)?.translate("Select") ??
+                              "Select",
                       fontSize: 12,
                       type: RoundButtonType.textGradient,
                       elevation: 0.05,
@@ -80,26 +82,27 @@ class SelectFoodRow extends StatelessWidget {
                 ),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(30),
-                  child: wObj.image != null && wObj.image.toString().isNotEmpty ? Image.network(
-                    wObj.image.toString(),
-                    width: 90,
-                    height: 90,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        "assets/img/no_image.png",
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.contain,
-                      );
-                    },
-                  )
+                  child: wObj.image.toString().isNotEmpty
+                      ? Image.network(
+                          wObj.image.toString(),
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              "assets/img/no_image.png",
+                              width: 90,
+                              height: 90,
+                              fit: BoxFit.contain,
+                            );
+                          },
+                        )
                       : Image.asset(
-                    "assets/img/no_image.png",
-                    width: 90,
-                    height: 90,
-                    fit: BoxFit.contain,
-                  ),
+                          "assets/img/no_image.png",
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.contain,
+                        ),
                 ),
               ],
             ),

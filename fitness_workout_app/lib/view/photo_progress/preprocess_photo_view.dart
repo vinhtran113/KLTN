@@ -1,13 +1,16 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
+import '../../common_widget/GenderDropdown.dart';
 import '../../common_widget/icon_title_next_row_2.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
+import '../../common_widget/selectDate.dart';
 import '../../localization/app_localizations.dart';
 import '../../main.dart';
 import '../../model/user_model.dart';
@@ -34,13 +37,23 @@ class _PreprocessPhotoViewState extends State<PreprocessPhotoView> {
   late TextEditingController bodyFatController;
   bool darkmode = darkModeNotifier.value;
   bool isLoading = false;
+  final TextEditingController selectedStyle = TextEditingController();
+  TextEditingController selectDateController = TextEditingController();
+  Timestamp? selectedDate;
 
   @override
   void initState() {
     super.initState();
+    selectedStyle.text = "";
     heightController = TextEditingController(text: widget.userHeight.toString());
     weightController = TextEditingController(text: widget.userWeight.toString());
     bodyFatController = TextEditingController(text: widget.userBodyFat.toString());
+    // Gán ngày hôm nay cho controller
+    DateTime now = DateTime.now();
+    selectDateController.text = "${now.day}/${now.month}/${now.year}";
+
+    // Gán Timestamp hiện tại
+    selectedDate = Timestamp.fromDate(DateTime(now.year, now.month, now.day));
   }
 
   @override
@@ -64,11 +77,14 @@ class _PreprocessPhotoViewState extends State<PreprocessPhotoView> {
       isLoading = true;
     });
     final result = await PhotoService.savePhoto(
+      context: context,
       uid: FirebaseAuth.instance.currentUser!.uid,
       imageFile: widget.imageFile,
       weight: weightController.text,
       height: heightController.text,
       bodyFat: bodyFatController.text,
+      style: selectedStyle.text,
+        date: selectedDate!
     );
 
     if (result != "success") {
@@ -175,6 +191,32 @@ class _PreprocessPhotoViewState extends State<PreprocessPhotoView> {
               children: [
                 Image.file(widget.imageFile, height: 500, fit: BoxFit.cover),
                 SizedBox(height: media.width * 0.05),
+                InkWell(
+                  onTap: () async {
+                    final pickedTimestamp =
+                    await DatePickerHelper.selectDate2(context, selectDateController);
+                    if (pickedTimestamp != null) {
+                      setState(() {
+                        selectedDate = pickedTimestamp; // dùng biến này để lưu vào Firestore
+                      });
+                    }
+                  },
+                  child: IgnorePointer(
+                    child: RoundTextField(
+                      controller: selectDateController,
+                      labelText: "Date",
+                      icon: "assets/img/date.png",
+                    ),
+                  ),
+                ),
+                SizedBox(height: media.width * 0.04),
+                GenderDropdown(
+                  icon: "assets/img/difficulity.png",
+                  labelText:"Choose Style",
+                  options: ["Front Facing", "Back Facing", "Left Facing", "Right Facing"],
+                  controller: selectedStyle,
+                ),
+                SizedBox(height: media.width * 0.04),
                 Row(
                   children: [
                     Expanded(

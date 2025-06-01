@@ -1,9 +1,6 @@
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fitness_workout_app/common/colo_extension.dart';
-import 'package:flutter/material.dart';
-
 import '../main.dart';
 import '../view/workout_tracker/workout_detail_view.dart';
 
@@ -28,8 +25,18 @@ class NotificationRow extends StatelessWidget {
 
   String _getMonthName(int month) {
     const months = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
     ];
     return months[month - 1];
   }
@@ -68,7 +75,7 @@ class NotificationRow extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: loadingProgress.expectedTotalBytes != null
                         ? loadingProgress.cumulativeBytesLoaded /
-                        (loadingProgress.expectedTotalBytes ?? 1)
+                            (loadingProgress.expectedTotalBytes ?? 1)
                         : null,
                   ),
                 );
@@ -88,23 +95,21 @@ class NotificationRow extends StatelessWidget {
           ),
           Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12),
-                  ),
-                  Text(
-                    time != null ? _formatTime(time) : "Invalid time",
-                    style: TextStyle(
-                      color: TColor.gray,
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              )),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+              ),
+              Text(
+                time != null ? _formatTime(time) : "Invalid time",
+                style: TextStyle(
+                  color: TColor.gray,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          )),
           IconButton(
               onPressed: () {
                 navigatorKey.currentState?.push(

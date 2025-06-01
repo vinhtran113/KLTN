@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_workout_app/services/roboflow_service.dart';
 import 'package:fitness_workout_app/view/meal_planner/select_meal_food_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +47,7 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
   bool isNotificationEnabled = true;
   String selectedTime = "";
   bool isLoading = false;
-  File? selectedImage;
+  //File? selectedImage;
   bool darkmode = darkModeNotifier.value;
 
   double tdee = 1;
@@ -75,7 +76,8 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
   void _getUser() async {
     try {
       // Lấy thông tin người dùng
-      UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      UserModel? user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
       double weight = double.parse(user!.weight);
       double height = double.parse(user.height);
       int age = user.getAge();
@@ -84,9 +86,13 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
       String goal = user.level;
 
       setState(() {
-        tdee = NutritionCalculator.calculateTDEE(weight: weight, height: height, age: age, activityLevel: activityLevel, bodyFatPercent: bodyFatPercent);
+        tdee = NutritionCalculator.calculateTDEE(
+            weight: weight,
+            height: height,
+            age: age,
+            activityLevel: activityLevel,
+            bodyFatPercent: bodyFatPercent);
         cals = NutritionCalculator.adjustCaloriesForGoal(tdee, goal);
-
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -121,7 +127,8 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
       final now = DateTime.now();
 
       final formattedTime = DateFormat('hh:mm a').format(
-        DateTime(now.year, now.month, now.day, pickedTime.hour, pickedTime.minute),
+        DateTime(
+            now.year, now.month, now.day, pickedTime.hour, pickedTime.minute),
       );
 
       setState(() {
@@ -130,22 +137,10 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
     }
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: source);
-
-    if (image != null) {
-      setState(() {
-        selectedImage = File(image.path);
-      });
-
-      // TODO: Gọi AI/Model để phân tích ảnh ở đây
-      // Ví dụ: gửi ảnh tới API -> nhận lại tên món ăn / đồ uống -> set vào controller
-    }
-  }
-
   Future<void> _handleAddMealSchedule() async {
-    if (selectedFoods.isEmpty || selectedTime == '' || selectedMealType.text.isEmpty) {
+    if (selectedFoods.isEmpty ||
+        selectedTime == '' ||
+        selectedMealType.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Vui lòng nhập đầy đủ thông tin")),
       );
@@ -159,7 +154,8 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
     );
 
     if (check != 'pass' && check != 'fail') {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(check)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(check)));
       return;
     } else if (check == 'fail') {
       setState(() {
@@ -173,7 +169,11 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
 
     // Tính tổng calories của các món mới
     double newCalories = selectedFoods.fold(0.0, (sum, meal) {
-      return sum + meal.ingredients.fold(0.0, (s, ing) => s + (ing.amount * (ing.nutri.values['calories'] ?? 0.0)));
+      return sum +
+          meal.ingredients.fold(
+              0.0,
+              (s, ing) =>
+                  s + (ing.amount * (ing.nutri.values['calories'] ?? 0.0)));
     });
 
     // Gọi dịch vụ kiểm tra tổng calories trong ngày
@@ -214,7 +214,8 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
 
     // Kiểm tra xem món có phù hợp với bữa ăn không
     final incompatibleMeals = selectedFoods.where((meal) {
-      return !(meal.recommend.contains(selectedMealType.text.toLowerCase()) ?? true);
+      return !(meal.recommend.contains(selectedMealType.text.toLowerCase()) ??
+          true);
     }).toList();
 
     if (incompatibleMeals.isNotEmpty) {
@@ -224,7 +225,7 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
           title: Text('Món ăn không phù hợp'),
           content: Text(
             'Một số món không phù hợp cho bữa "${selectedMealType.text}":\n'
-                '${incompatibleMeals.map((m) => "- ${m.name}").join("\n")}\n\nBạn có chắc muốn tiếp tục?',
+            '${incompatibleMeals.map((m) => "- ${m.name}").join("\n")}\n\nBạn có chắc muốn tiếp tục?',
           ),
           actions: [
             TextButton(
@@ -249,18 +250,22 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
 
     final simpleMeals = await Future.wait(selectedFoods.map((meal) async {
       final totalCal = meal.ingredients.fold<double>(
-        0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['calories'] ?? 0.0)));
+          0.0,
+          (sum, ing) =>
+              sum + (ing.amount * (ing.nutri.values['calories'] ?? 0.0)));
 
-      final totalCarb = meal.ingredients.fold<double>(
-          0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['carb'] ?? 0.0)));
+      final totalCarb = meal.ingredients.fold<double>(0.0,
+          (sum, ing) => sum + (ing.amount * (ing.nutri.values['carb'] ?? 0.0)));
 
-      final totalFat = meal.ingredients.fold<double>(
-          0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['fat'] ?? 0.0)));
+      final totalFat = meal.ingredients.fold<double>(0.0,
+          (sum, ing) => sum + (ing.amount * (ing.nutri.values['fat'] ?? 0.0)));
 
       final totalProtein = meal.ingredients.fold<double>(
-          0.0, (sum, ing) => sum + (ing.amount * (ing.nutri.values['protein'] ?? 0.0)));
+          0.0,
+          (sum, ing) =>
+              sum + (ing.amount * (ing.nutri.values['protein'] ?? 0.0)));
 
-      String id_notify = '0';
+      String idNotify = '0';
 
       if (isNotificationEnabled) {
         final DateFormat hourFormat = DateFormat('hh:mm a');
@@ -276,7 +281,7 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
         );
         String id = meal.name + selectedDateTime.toString();
 
-        id_notify = await _notificationServices.scheduleMealNotification(
+        idNotify = await _notificationServices.scheduleMealNotification(
           id: id,
           mealType: selectedMealType.text,
           Time: selectedDateTime,
@@ -294,7 +299,7 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
         totalProtein: totalProtein,
         time: selectedTime,
         notify: isNotificationEnabled,
-        id_notify: id_notify,
+        id_notify: idNotify,
         ingredients: meal.ingredients,
       );
     }).toList());
@@ -311,9 +316,11 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
     });
 
     if (result != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(result)));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Thêm bữa ăn thành công")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Thêm bữa ăn thành công")));
       Navigator.pop(context, true);
     }
   }
@@ -321,29 +328,87 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
   void _showImageSourceDialog() {
     showModalBottomSheet(
       context: context,
-      builder: (_) =>
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.camera_alt),
-                title: Text("Chụp ảnh"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.photo),
-                title: Text("Chọn từ thư viện"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(ImageSource.gallery);
-                },
-              ),
-            ],
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(Icons.camera_alt),
+            title: Text("Chụp ảnh"),
+            onTap: () {
+              Navigator.pop(context);
+              _pickImage(ImageSource.camera);
+            },
           ),
+          ListTile(
+            leading: Icon(Icons.photo),
+            title: Text("Chọn từ thư viện"),
+            onTap: () {
+              Navigator.pop(context);
+              _pickImage(ImageSource.gallery);
+            },
+          ),
+        ],
+      ),
     );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: source);
+
+    if (image != null) {
+      final file = File(image.path);
+      setState(() {
+        //selectedImage = file;
+        isLoading = true;
+      });
+
+      final foodNames = await RoboflowService.detectFoodItems(file);
+
+      if (foodNames.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Không nhận diện được món ăn nào")),
+        );
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
+      int addedCount = 0;
+
+      for (final name in foodNames) {
+        try {
+          final futures = foodNames.map((name) =>
+              MealService().getMealByName(name).catchError((_) => null));
+          final meals = await Future.wait(futures);
+          for (final meal in meals) {
+            if (!selectedFoods.any((m) => m.name == meal.name)) {
+              setState(() {
+                selectedFoods.add(meal);
+              });
+              addedCount++;
+            }
+          }
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Không tìm thấy món: $name")),
+          );
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                "Đã thêm $addedCount/${foodNames.length} món vào danh sách")),
+      );
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   void _showMealTypeSelector(BuildContext context) {
@@ -354,7 +419,8 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
           padding: const EdgeInsets.all(10),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: ["Breakfast", "Lunch", "Dinner", "Snacks"].map((mealtype) {
+            children:
+                ["Breakfast", "Lunch", "Dinner", "Snacks"].map((mealtype) {
               return ListTile(
                 title: Text(
                   AppLocalizations.of(context)?.translate(mealtype) ?? mealtype,
@@ -378,9 +444,7 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
@@ -419,8 +483,8 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Date: ${DateFormat('E, dd MMM yyyy').format(
-                    widget.date)}"),
+                Text(
+                    "Date: ${DateFormat('E, dd MMM yyyy').format(widget.date)}"),
                 SizedBox(
                   height: media.width * 0.03,
                 ),
@@ -429,8 +493,8 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                     _showMealTypeSelector(context);
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8, horizontal: 15),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
                     decoration: BoxDecoration(
                       color: TColor.lightGray,
                       borderRadius: BorderRadius.circular(15),
@@ -452,7 +516,9 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            AppLocalizations.of(context)?.translate("Meal Type") ?? "Meal Type",
+                            AppLocalizations.of(context)
+                                    ?.translate("Meal Type") ??
+                                "Meal Type",
                             style: TextStyle(color: TColor.gray, fontSize: 12),
                           ),
                         ),
@@ -484,7 +550,10 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                 ),
                 IconTitleNextRow(
                   icon: "assets/img/clock_icon.png",
-                  title: AppLocalizations.of(context)?.translate("Time",) ?? "Time",
+                  title: AppLocalizations.of(context)?.translate(
+                        "Time",
+                      ) ??
+                      "Time",
                   time: selectedTime,
                   color: TColor.lightGray,
                   onPressed: () => _selectTime(context),
@@ -494,8 +563,9 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                 ),
                 IconSelectFoodRow(
                   icon: "assets/img/choose_food_icon.png",
-                  title: AppLocalizations.of(context)?.translate(
-                      "Choose Food/Beverage") ?? "Choose Food/Beverage",
+                  title: AppLocalizations.of(context)
+                          ?.translate("Choose Food/Beverage") ??
+                      "Choose Food/Beverage",
                   selectedMeals: selectedFoods,
                   color: TColor.lightGray,
                   onPressed: () async {
@@ -505,9 +575,10 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                         builder: (context) => const SelectMealFoodView(),
                       ),
                     );
-                    if (result != null && result is Meal &&
-                        !selectedFoods.any((meal) => meal.name ==
-                            result.name)) {
+                    if (result != null &&
+                        result is Meal &&
+                        !selectedFoods
+                            .any((meal) => meal.name == result.name)) {
                       setState(() {
                         selectedFoods.add(result);
                       });
@@ -520,8 +591,10 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                   },
                   onIngredientAmountChanged: (mealIndex, ingIndex, newAmount) {
                     setState(() {
-                      final oldIng = selectedFoods[mealIndex].ingredients[ingIndex];
-                      selectedFoods[mealIndex].ingredients[ingIndex] = Ingredient(
+                      final oldIng =
+                          selectedFoods[mealIndex].ingredients[ingIndex];
+                      selectedFoods[mealIndex].ingredients[ingIndex] =
+                          Ingredient(
                         name: oldIng.name,
                         amount: newAmount,
                         unit: oldIng.unit,
@@ -538,8 +611,9 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      AppLocalizations.of(context)?.translate(
-                          "Enable Notifications") ?? "Enable Notifications",
+                      AppLocalizations.of(context)
+                              ?.translate("Enable Notifications") ??
+                          "Enable Notifications",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -560,25 +634,46 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                   height: media.width * 0.01,
                 ),
                 // Nút chọn ảnh và hiển thị ảnh đã chọn
-                OutlinedButton.icon(
-                  onPressed: _showImageSourceDialog,
-                  icon: Icon(Icons.camera_alt_outlined),
-                  label: Text("Chụp hoặc chọn ảnh món ăn"),
-                ),
-                SizedBox(height: media.width * 0.03,),
-                selectedImage != null ? Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.file(
-                        selectedImage!,
-                        height: 400,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _showImageSourceDialog,
+                      icon: const Icon(Icons.camera_alt_outlined, size: 28),
+                      label: const Text("Automatic Food Recognition"),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        textStyle: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500),
+                        side:
+                            BorderSide(color: TColor.secondaryColor1, width: 2),
+                        foregroundColor: TColor.secondaryColor1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
                       ),
                     ),
-                  ],
-                ) : SizedBox(height: media.width * 0.8),
+                  ),
+                )
+                // SizedBox(
+                //   height: media.width * 0.03,
+                // ),
+                // selectedImage != null
+                //     ? Column(
+                //         children: [
+                //           ClipRRect(
+                //             borderRadius: BorderRadius.circular(10),
+                //             child: Image.file(
+                //               selectedImage!,
+                //               height: 400,
+                //               width: double.infinity,
+                //               fit: BoxFit.cover,
+                //             ),
+                //           ),
+                //         ],
+                //       )
+                //     : SizedBox(height: media.width * 0.8),
               ],
             ),
           ),
@@ -592,9 +687,10 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: RoundButton(
-                        title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
-                        onPressed: _handleAddMealSchedule
-                    ),
+                        title:
+                            AppLocalizations.of(context)?.translate("Save") ??
+                                "Save",
+                        onPressed: _handleAddMealSchedule),
                   ),
                 ],
               ),

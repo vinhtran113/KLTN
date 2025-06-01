@@ -1,7 +1,6 @@
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common/common.dart';
@@ -23,7 +22,8 @@ class MealScheduleView extends StatefulWidget {
 }
 
 class _MealScheduleViewState extends State<MealScheduleView> {
-  final CalendarAgendaController _calendarAgendaControllerAppBar = CalendarAgendaController();
+  final CalendarAgendaController _calendarAgendaControllerAppBar =
+      CalendarAgendaController();
   final MealService _mealService = MealService();
   late DateTime _selectedDateAppBBar;
 
@@ -49,7 +49,7 @@ class _MealScheduleViewState extends State<MealScheduleView> {
   double fat = 1;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _selectedDateAppBBar = DateTime.now();
     _getUser();
@@ -59,7 +59,8 @@ class _MealScheduleViewState extends State<MealScheduleView> {
 
   void _loadMealSchedule() async {
     String uid = FirebaseAuth.instance.currentUser!.uid;
-    List<Map<String, dynamic>> schedule = await _mealService.fetchMealScheduleList(uid);
+    List<Map<String, dynamic>> schedule =
+        await _mealService.fetchMealScheduleList(uid);
     setState(() {
       mealEventArr = schedule;
     });
@@ -69,7 +70,8 @@ class _MealScheduleViewState extends State<MealScheduleView> {
   void _getUser() async {
     try {
       // Lấy thông tin người dùng
-      UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      UserModel? user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
       double weight = double.parse(user!.weight);
       double height = double.parse(user.height);
       int age = user.getAge();
@@ -78,7 +80,12 @@ class _MealScheduleViewState extends State<MealScheduleView> {
       String goal = user.level;
 
       setState(() {
-        tdee = NutritionCalculator.calculateTDEE(weight: weight, height: height, age: age, activityLevel: activityLevel, bodyFatPercent: bodyFatPercent);
+        tdee = NutritionCalculator.calculateTDEE(
+            weight: weight,
+            height: height,
+            age: age,
+            activityLevel: activityLevel,
+            bodyFatPercent: bodyFatPercent);
         cals = NutritionCalculator.adjustCaloriesForGoal(tdee, goal);
         carb = NutritionCalculator.calculateMaxCarb(cals, goal);
         protein = NutritionCalculator.calculateMaxProtein(cals, goal);
@@ -146,10 +153,14 @@ class _MealScheduleViewState extends State<MealScheduleView> {
       for (var meal in mealGroup) {
         final nutri = Map<String, dynamic>.from(meal['nutri'] ?? {});
 
-        dailyNutrition['calories'] = dailyNutrition['calories']! + (meal['totalCalories'] ?? 0).toDouble();
-        dailyNutrition['protein'] = dailyNutrition['protein']! + (meal['totalProtein'] ?? 0).toDouble();
-        dailyNutrition['fat'] = dailyNutrition['fat']! + (meal['totalFat'] ?? 0).toDouble();
-        dailyNutrition['carb'] = dailyNutrition['carb']! + (meal['totalCarb'] ?? 0).toDouble();
+        dailyNutrition['calories'] = dailyNutrition['calories']! +
+            (meal['totalCalories'] ?? 0).toDouble();
+        dailyNutrition['protein'] =
+            dailyNutrition['protein']! + (meal['totalProtein'] ?? 0).toDouble();
+        dailyNutrition['fat'] =
+            dailyNutrition['fat']! + (meal['totalFat'] ?? 0).toDouble();
+        dailyNutrition['carb'] =
+            dailyNutrition['carb']! + (meal['totalCarb'] ?? 0).toDouble();
       }
     }
 
@@ -283,269 +294,285 @@ class _MealScheduleViewState extends State<MealScheduleView> {
             ),
           ),
           Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "BreakFast",
-                            style: TextStyle(
-                                color: TColor.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700),
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              "${breakfastArr.length} Items | ${breakfastCalories.toStringAsFixed(0)} kCal",
-                              style: TextStyle(color: TColor.gray, fontSize: 12),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    breakfastArr.isEmpty ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Text(
-                          "Not Scheduled",
-                          style: TextStyle(fontSize: 13, color: Colors.grey),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "BreakFast",
+                          style: TextStyle(
+                              color: TColor.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700),
                         ),
-                      ),
-                    ) : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: breakfastArr.length,
-                        itemBuilder: (context, index) {
-                          var mObj = breakfastArr[index] as Map? ?? {};
-                          return InkWell(
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "${breakfastArr.length} Items | ${breakfastCalories.toStringAsFixed(0)} kCal",
+                            style: TextStyle(color: TColor.gray, fontSize: 12),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  breakfastArr.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Text(
+                              "Not Scheduled",
+                              style:
+                                  TextStyle(fontSize: 13, color: Colors.grey),
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: breakfastArr.length,
+                          itemBuilder: (context, index) {
+                            var mObj = breakfastArr[index] as Map? ?? {};
+                            return InkWell(
                               onTap: () async {
                                 final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditMealScheduleView(
-                                  bObj: mObj,),
-                                ),
-                              );
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditMealScheduleView(
+                                      bObj: mObj,
+                                    ),
+                                  ),
+                                );
                                 if (result == true) {
                                   _loadMealSchedule();
                                 }
-                          },
-                            child: MealFoodScheduleRow(
-                            mObj: mObj,
-                            index: index,
-                            ),
-                          );
-                        }),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Lunch",
-                            style: TextStyle(
-                                color: TColor.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700),
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              "${lunchArr.length} Items | ${lunchCalories.toStringAsFixed(0)} kCal",
-                              style: TextStyle(color: TColor.gray, fontSize: 12),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    lunchArr.isEmpty ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Text(
-                          "Not Scheduled",
-                          style: TextStyle(fontSize: 13, color: Colors.grey),
+                              },
+                              child: MealFoodScheduleRow(
+                                mObj: mObj,
+                                index: index,
+                              ),
+                            );
+                          }),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Lunch",
+                          style: TextStyle(
+                              color: TColor.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700),
                         ),
-                      ),
-                    ) : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: lunchArr.length,
-                        itemBuilder: (context, index) {
-                          var mObj = lunchArr[index] as Map? ?? {};
-                          return InkWell(
-                            onTap: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditMealScheduleView(
-                                    bObj: mObj,),
-                                ),
-                              );
-                              if (result == true) {
-                                _loadMealSchedule();
-                              }
-                            },
-                            child: MealFoodScheduleRow(
-                              mObj: mObj,
-                              index: index,
-                            ),
-                          );
-                        }),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Dinner",
-                            style: TextStyle(
-                                color: TColor.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "${lunchArr.length} Items | ${lunchCalories.toStringAsFixed(0)} kCal",
+                            style: TextStyle(color: TColor.gray, fontSize: 12),
                           ),
-                          TextButton(
-                            onPressed: () {},
+                        )
+                      ],
+                    ),
+                  ),
+                  lunchArr.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
                             child: Text(
-                              "${dinnerArr.length} Items | ${dinnerCalories.toStringAsFixed(0)} kCal",
-                              style: TextStyle(color: TColor.gray, fontSize: 12),
+                              "Not Scheduled",
+                              style:
+                                  TextStyle(fontSize: 13, color: Colors.grey),
                             ),
-                          )
-                        ],
-                      ),
-                    ),
-                    dinnerArr.isEmpty ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Text(
-                          "Not Scheduled",
-                          style: TextStyle(fontSize: 13, color: Colors.grey),
-                        ),
-                      ),
-                    ) : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: dinnerArr.length,
-                        itemBuilder: (context, index) {
-                          var mObj = dinnerArr[index] as Map? ?? {};
-                          return InkWell(
-                            onTap: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditMealScheduleView(
-                                    bObj: mObj,),
-                                ),
-                              );
-                              if (result == true) {
-                                _loadMealSchedule();
-                              }
-                            },
-                            child: MealFoodScheduleRow(
-                              mObj: mObj,
-                              index: index,
-                            ),
-                          );
-                        }),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Snacks",
-                            style: TextStyle(
-                                color: TColor.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700),
                           ),
-                          TextButton(
-                            onPressed: () {},
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: lunchArr.length,
+                          itemBuilder: (context, index) {
+                            var mObj = lunchArr[index] as Map? ?? {};
+                            return InkWell(
+                              onTap: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditMealScheduleView(
+                                      bObj: mObj,
+                                    ),
+                                  ),
+                                );
+                                if (result == true) {
+                                  _loadMealSchedule();
+                                }
+                              },
+                              child: MealFoodScheduleRow(
+                                mObj: mObj,
+                                index: index,
+                              ),
+                            );
+                          }),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Dinner",
+                          style: TextStyle(
+                              color: TColor.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "${dinnerArr.length} Items | ${dinnerCalories.toStringAsFixed(0)} kCal",
+                            style: TextStyle(color: TColor.gray, fontSize: 12),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  dinnerArr.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
                             child: Text(
-                              "${snacksArr.length} Items | ${snacksCalories.toStringAsFixed(0)} kCal",
-                              style: TextStyle(color: TColor.gray, fontSize: 12),
+                              "Not Scheduled",
+                              style:
+                                  TextStyle(fontSize: 13, color: Colors.grey),
                             ),
-                          )
-                        ],
-                      ),
-                    ),
-                    snacksArr.isEmpty ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Text(
-                          "Not Scheduled",
-                          style: TextStyle(fontSize: 13, color: Colors.grey),
-                        ),
-                      ),
-                    ) : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: snacksArr.length,
-                        itemBuilder: (context, index) {
-                          var mObj = snacksArr[index] as Map? ?? {};
-                          return InkWell(
-                            onTap: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditMealScheduleView(
-                                    bObj: mObj,),
-                                ),
-                              );
-                              if (result == true) {
-                                _loadMealSchedule();
-                              }
-                            },
-                            child: MealFoodScheduleRow(
-                              mObj: mObj,
-                              index: index,
-                            ),
-                          );
-                        }),
-                    SizedBox(
-                      height: media.width * 0.05,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Nutritions Of The Day",
-                            style: TextStyle(
-                                color: TColor.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700),
                           ),
-                        ],
-                      ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: dinnerArr.length,
+                          itemBuilder: (context, index) {
+                            var mObj = dinnerArr[index] as Map? ?? {};
+                            return InkWell(
+                              onTap: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditMealScheduleView(
+                                      bObj: mObj,
+                                    ),
+                                  ),
+                                );
+                                if (result == true) {
+                                  _loadMealSchedule();
+                                }
+                              },
+                              child: MealFoodScheduleRow(
+                                mObj: mObj,
+                                index: index,
+                              ),
+                            );
+                          }),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Snacks",
+                          style: TextStyle(
+                              color: TColor.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "${snacksArr.length} Items | ${snacksCalories.toStringAsFixed(0)} kCal",
+                            style: TextStyle(color: TColor.gray, fontSize: 12),
+                          ),
+                        )
+                      ],
                     ),
-                    ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: nutritionArr.length,
-                        itemBuilder: (context, index) {
-                          var nObj = nutritionArr[index] as Map? ?? {};
-                          return NutritionRow(
-                            nObj: nObj,
-                          );
-                        }),
-                    SizedBox(
-                      height: media.width * 0.12,
-                    )
-                  ],
-                ),
+                  ),
+                  snacksArr.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Text(
+                              "Not Scheduled",
+                              style:
+                                  TextStyle(fontSize: 13, color: Colors.grey),
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: snacksArr.length,
+                          itemBuilder: (context, index) {
+                            var mObj = snacksArr[index] as Map? ?? {};
+                            return InkWell(
+                              onTap: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditMealScheduleView(
+                                      bObj: mObj,
+                                    ),
+                                  ),
+                                );
+                                if (result == true) {
+                                  _loadMealSchedule();
+                                }
+                              },
+                              child: MealFoodScheduleRow(
+                                mObj: mObj,
+                                index: index,
+                              ),
+                            );
+                          }),
+                  SizedBox(
+                    height: media.width * 0.05,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Nutritions Of The Day",
+                          style: TextStyle(
+                              color: TColor.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: nutritionArr.length,
+                      itemBuilder: (context, index) {
+                        var nObj = nutritionArr[index] as Map? ?? {};
+                        return NutritionRow(
+                          nObj: nObj,
+                        );
+                      }),
+                  SizedBox(
+                    height: media.width * 0.12,
+                  )
+                ],
               ),
+            ),
           )
         ],
       ),
@@ -554,7 +581,8 @@ class _MealScheduleViewState extends State<MealScheduleView> {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddMealScheduleView(date: _selectedDateAppBBar),
+              builder: (context) =>
+                  AddMealScheduleView(date: _selectedDateAppBBar),
             ),
           );
           if (result == true) {
@@ -568,7 +596,8 @@ class _MealScheduleViewState extends State<MealScheduleView> {
               gradient: LinearGradient(colors: TColor.secondaryG),
               borderRadius: BorderRadius.circular(27.5),
               boxShadow: const [
-                BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 2))
+                BoxShadow(
+                    color: Colors.black12, blurRadius: 5, offset: Offset(0, 2))
               ]),
           alignment: Alignment.center,
           child: Icon(

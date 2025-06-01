@@ -76,16 +76,16 @@ class CalendarAgenda extends StatefulWidget implements PreferredSizeWidget {
     this.weekDay = WeekDay.short,
     this.selectedDayPosition = SelectedDayPosition.left,
   })  : assert(
-  initialDate.difference(firstDate).inDays >= 0,
-  'initialDate must be on or after firstDate',
-  ),
-        assert(
-        !initialDate.isAfter(lastDate),
-        'initialDate must be on or before lastDate',
+          initialDate.difference(firstDate).inDays >= 0,
+          'initialDate must be on or after firstDate',
         ),
         assert(
-        !firstDate.isAfter(lastDate),
-        'lastDate must be on or after firstDate',
+          !initialDate.isAfter(lastDate),
+          'initialDate must be on or before lastDate',
+        ),
+        assert(
+          !firstDate.isAfter(lastDate),
+          'lastDate must be on or after firstDate',
         ),
         super(key: key);
 
@@ -93,12 +93,12 @@ class CalendarAgenda extends StatefulWidget implements PreferredSizeWidget {
   CalendarAgendaState createState() => CalendarAgendaState();
 
   @override
-  Size get preferredSize => new Size.fromHeight(250.0);
+  Size get preferredSize => Size.fromHeight(250.0);
 }
 
 class CalendarAgendaState extends State<CalendarAgenda>
     with TickerProviderStateMixin {
-  ItemScrollController _scrollController = new ItemScrollController();
+  final ItemScrollController _scrollController = ItemScrollController();
 
   late Color backgroundColor;
   late double padding;
@@ -106,7 +106,7 @@ class CalendarAgendaState extends State<CalendarAgenda>
   late Widget training;
   late double _scrollAlignment;
 
-  List<String> _eventDates = [];
+  final List<String> _eventDates = [];
   List<DateTime> _dates = [];
   DateTime? _selectedDate;
   int? _daySelectedIndex;
@@ -147,16 +147,16 @@ class CalendarAgendaState extends State<CalendarAgenda>
         child: ScrollablePositionedList.builder(
             padding: _dates.length < 5
                 ? EdgeInsets.symmetric(
-                horizontal: MediaQuery.of(context).size.width *
-                    (5 - _dates.length) /
-                    10)
+                    horizontal: MediaQuery.of(context).size.width *
+                        (5 - _dates.length) /
+                        10)
                 : const EdgeInsets.symmetric(horizontal: 10),
             initialScrollIndex: _daySelectedIndex ?? 0,
             // initialAlignment: _scrollAlignment,
             initialAlignment:
-            widget.selectedDayPosition == SelectedDayPosition.center
-                ? 78 / 200
-                : _scrollAlignment,
+                widget.selectedDayPosition == SelectedDayPosition.center
+                    ? 78 / 200
+                    : _scrollAlignment,
             scrollDirection: Axis.horizontal,
             reverse: widget.selectedDayPosition == SelectedDayPosition.left
                 ? false
@@ -187,17 +187,17 @@ class CalendarAgendaState extends State<CalendarAgenda>
                           boxShadow: [
                             isSelected
                                 ? BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 1,
-                              blurRadius: 4,
-                              offset: Offset(0, 1),
-                            )
+                                    color: Colors.black.withOpacity(0.2),
+                                    spreadRadius: 1,
+                                    blurRadius: 4,
+                                    offset: Offset(0, 1),
+                                  )
                                 : BoxShadow(
-                              color: Colors.grey.withOpacity(0.0),
-                              spreadRadius: 5,
-                              blurRadius: 20,
-                              offset: Offset(0, 3),
-                            )
+                                    color: Colors.grey.withOpacity(0.0),
+                                    spreadRadius: 5,
+                                    blurRadius: 20,
+                                    offset: Offset(0, 3),
+                                  )
                           ],
                         ),
                         child: Stack(
@@ -209,37 +209,37 @@ class CalendarAgendaState extends State<CalendarAgenda>
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 _eventDates.contains(
-                                    date.toString().split(" ").first)
+                                        date.toString().split(" ").first)
                                     ? isSelected
-                                    ? Icon(
-                                  Icons.bookmark,
-                                  size: 16,
-                                  color: isSelected
-                                      ? widget.selectedDateColor
-                                      : widget.dateColor!
-                                      .withOpacity(0.5),
-                                )
-                                    : Icon(
-                                  Icons.bookmark,
-                                  size: 8,
-                                  color: isSelected
-                                      ? widget.calendarEventColor
-                                      : widget.dateColor!
-                                      .withOpacity(0.5),
-                                )
+                                        ? Icon(
+                                            Icons.bookmark,
+                                            size: 16,
+                                            color: isSelected
+                                                ? widget.selectedDateColor
+                                                : widget.dateColor!
+                                                    .withOpacity(0.5),
+                                          )
+                                        : Icon(
+                                            Icons.bookmark,
+                                            size: 8,
+                                            color: isSelected
+                                                ? widget.calendarEventColor
+                                                : widget.dateColor!
+                                                    .withOpacity(0.5),
+                                          )
                                     : SizedBox(
-                                  height: 5.0,
-                                ),
+                                        height: 5.0,
+                                      ),
                                 SizedBox(
                                   height: 2.0,
                                 ),
                                 Text(
                                   widget.weekDay == WeekDay.long
                                       ? DateFormat.EEEE(
-                                      Locale(_locale).toString())
-                                      .format(date)
+                                              Locale(_locale).toString())
+                                          .format(date)
                                       : DateFormat.E(Locale(_locale).toString())
-                                      .format(date),
+                                          .format(date),
                                   style: TextStyle(
                                     fontSize: widget.dayNameFontSize,
                                     color: isSelected
@@ -275,7 +275,7 @@ class CalendarAgendaState extends State<CalendarAgenda>
       );
     }
 
-    return Container(
+    return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: widget.appbar ? 210 : 140.0,
       child: Stack(
@@ -290,7 +290,7 @@ class CalendarAgendaState extends State<CalendarAgenda>
           ),
           Positioned(
             top: widget.appbar ? 50.0 : 0.0,
-            child:  Container(
+            child: SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -298,30 +298,29 @@ class CalendarAgendaState extends State<CalendarAgenda>
                   leading,
                   widget.fullCalendar!
                       ? GestureDetector(
-                    onTap: () => widget.fullCalendar!
-                        ? _showFullCalendar(_locale, widget.weekDay)
-                        : null,
-                    child: Row(
-                      children: [
-                        Text(
-                          DateFormat.yMMMM(Locale(_locale).toString())
-                              .format(_selectedDate!),
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            color: widget.dateColor,
-                            fontWeight: FontWeight.w400,
+                          onTap: () => widget.fullCalendar!
+                              ? _showFullCalendar(_locale, widget.weekDay)
+                              : null,
+                          child: Row(
+                            children: [
+                              Text(
+                                DateFormat.yMMMM(Locale(_locale).toString())
+                                    .format(_selectedDate!),
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  color: widget.dateColor,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  )
+                        )
                       : SizedBox(),
                   training
                 ],
               ),
             ),
-
           ),
           Positioned(
             bottom: 0.0,
@@ -342,11 +341,11 @@ class CalendarAgendaState extends State<CalendarAgenda>
         "${widget.lastDate.toString().split(" ").first} 23:00:00.000");
 
     DateTime basicDate =
-    DateTime.parse("${first.toString().split(" ").first} 12:00:00.000");
+        DateTime.parse("${first.toString().split(" ").first} 12:00:00.000");
 
     List<DateTime> listDates = List.generate(
         (last.difference(first).inHours / 24).round(),
-            (index) => basicDate.add(Duration(days: index)));
+        (index) => basicDate.add(Duration(days: index)));
 
     widget.selectedDayPosition == SelectedDayPosition.left
         ? listDates.sort((b, a) => b.compareTo(a))
@@ -376,7 +375,7 @@ class CalendarAgendaState extends State<CalendarAgenda>
         } else {
           height = (MediaQuery.of(context).size.height - 100.0);
         }
-        return Container(
+        return SizedBox(
           height: widget.fullCalendarScroll == FullCalendarScroll.vertical
               ? height
               : (MediaQuery.of(context).size.height / 7) * 4.3,
@@ -426,7 +425,7 @@ class CalendarAgendaState extends State<CalendarAgenda>
         "${_selectedDate.toString().split(" ").first} 00:00:00.000");
 
     _daySelectedIndex = _dates.indexOf(_dates.firstWhere((dayDate) =>
-    DateTime.parse("${dayDate.toString().split(" ").first} 00:00:00.000") ==
+        DateTime.parse("${dayDate.toString().split(" ").first} 00:00:00.000") ==
         getSelected));
   }
 

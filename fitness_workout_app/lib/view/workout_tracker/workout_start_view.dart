@@ -18,23 +18,27 @@ class WorkOutDet extends StatelessWidget {
   final String diff;
 
   const WorkOutDet({
-    Key? key,
+    super.key,
     required this.exercises,
     required this.index,
     required this.historyId,
     required this.diff,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final currentExercise = exercises[index];
-    final WorkoutService _workoutService = WorkoutService();
+    final WorkoutService workoutService = WorkoutService();
     bool darkmode = darkModeNotifier.value;
 
     return ChangeNotifierProvider<TimerModelSec>(
       create: (context) => TimerModelSec(
-          context, currentExercise.difficulty[diff]!.time, exercises, index,
-          historyId, diff),
+          context,
+          currentExercise.difficulty[diff]!.time,
+          exercises,
+          index,
+          historyId,
+          diff),
       child: PopScope(
         canPop: false, // Ngừng việc quay lại màn hình trước
         onPopInvokedWithResult: (didPop, result) {
@@ -44,7 +48,7 @@ class WorkOutDet extends StatelessWidget {
           }
         },
         child: Scaffold(
-          backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+          backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
           body: Stack(
             children: [
               Container(
@@ -76,41 +80,47 @@ class WorkOutDet extends StatelessWidget {
                       ),
                       child: currentExercise.difficulty[diff]!.rep == 0
                           ? Consumer<TimerModelSec>(
-                        builder: (context, myModel, child) {
-                          int minutes = myModel.countdown ~/ 60;
-                          int seconds = myModel.countdown % 60;
-                          return Text(
-                            "${minutes.toString().padLeft(2, '0')} : ${seconds
-                                .toString().padLeft(2, '0')}",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 30,
-                              color: Colors.white,
-                            ),
-                          );
-                        },
-                      )
+                              builder: (context, myModel, child) {
+                                int minutes = myModel.countdown ~/ 60;
+                                int seconds = myModel.countdown % 60;
+                                return Text(
+                                  "${minutes.toString().padLeft(2, '0')} : ${seconds.toString().padLeft(2, '0')}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 30,
+                                    color: Colors.white,
+                                  ),
+                                );
+                              },
+                            )
                           : Text(
-                        "x${currentExercise.difficulty[diff]!.rep}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                          color: Colors.white,
-                        ),
-                      ),
+                              "x${currentExercise.difficulty[diff]!.rep}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 30,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                     const Spacer(),
-                    const SizedBox(height: 30,),
+                    const SizedBox(
+                      height: 30,
+                    ),
                     Consumer<TimerModelSec>(
                       builder: (context, myModel, child) {
-                        return ElevatedButton(onPressed: () {
-                          myModel.show();
-                        }, child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 15),
-                            child: Text(
-                                AppLocalizations.of(context)?.translate("PAUSE") ?? "PAUSE",
-                              style: TextStyle(fontSize: 20),)));
+                        return ElevatedButton(
+                            onPressed: () {
+                              myModel.show();
+                            },
+                            child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 15),
+                                child: Text(
+                                  AppLocalizations.of(context)
+                                          ?.translate("PAUSE") ??
+                                      "PAUSE",
+                                  style: TextStyle(fontSize: 20),
+                                )));
                       },
                     ),
                     Spacer(),
@@ -121,51 +131,56 @@ class WorkOutDet extends StatelessWidget {
                         children: [
                           index != 0
                               ? Consumer<TimerModelSec>(
-                            builder: (context, myModel, child) {
-                              return TextButton(
-                                onPressed: () async {
-                                  // Tính toán thời gian thực tế và lượng calo
-                                  final currentExercise = exercises[index];
-                                  final realTime = currentExercise
-                                      .difficulty[diff]!.time -
-                                      myModel.countdown; // Thời gian thực tế
-                                  final caloriesBurned = (realTime *
-                                      currentExercise.difficulty[diff]!.calo) ~/
-                                      currentExercise.difficulty[diff]!
-                                          .time; // Tính calo
+                                  builder: (context, myModel, child) {
+                                    return TextButton(
+                                      onPressed: () async {
+                                        // Tính toán thời gian thực tế và lượng calo
+                                        final currentExercise =
+                                            exercises[index];
+                                        final realTime = currentExercise
+                                                .difficulty[diff]!.time -
+                                            myModel
+                                                .countdown; // Thời gian thực tế
+                                        final caloriesBurned = (realTime *
+                                                currentExercise
+                                                    .difficulty[diff]!.calo) ~/
+                                            currentExercise.difficulty[diff]!
+                                                .time; // Tính calo
 
-                                  // Cập nhật lịch sử trước khi chuyển bài
-                                  await _workoutService.updateWorkoutHistory(
-                                    historyId: historyId,
-                                    index: index,
-                                    duration: realTime,
-                                    caloriesBurned: caloriesBurned,
-                                    completedAt: DateTime.now(),
-                                  );
+                                        // Cập nhật lịch sử trước khi chuyển bài
+                                        await workoutService
+                                            .updateWorkoutHistory(
+                                          historyId: historyId,
+                                          index: index,
+                                          duration: realTime,
+                                          caloriesBurned: caloriesBurned,
+                                          completedAt: DateTime.now(),
+                                        );
 
-                                  myModel.Pass(); // Dừng bộ đếm thời gian
-                                  await Future.delayed(
-                                      const Duration(seconds: 1));
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          BreakTime(
-                                            exercises: exercises,
-                                            index: index,
-                                            historyId: historyId,
-                                            diff: diff,
+                                        myModel.Pass(); // Dừng bộ đếm thời gian
+                                        await Future.delayed(
+                                            const Duration(seconds: 1));
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => BreakTime(
+                                              exercises: exercises,
+                                              index: index,
+                                              historyId: historyId,
+                                              diff: diff,
+                                            ),
                                           ),
-                                    ),
-                                  );
-                                },
-                                child: Text(
-                                    AppLocalizations.of(context)?.translate("Previous") ?? "Previous",
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              );
-                            },
-                          )
+                                        );
+                                      },
+                                      child: Text(
+                                        AppLocalizations.of(context)
+                                                ?.translate("Previous") ??
+                                            "Previous",
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    );
+                                  },
+                                )
                               : Container(),
                           Consumer<TimerModelSec>(
                             builder: (context, myModel, child) {
@@ -174,15 +189,16 @@ class WorkOutDet extends StatelessWidget {
                                   // Tính toán thời gian thực tế và lượng calo
                                   final currentExercise = exercises[index];
                                   final realTime = currentExercise
-                                      .difficulty[diff]!.time -
+                                          .difficulty[diff]!.time -
                                       myModel.countdown; // Thời gian thực tế
                                   final caloriesBurned = (realTime *
-                                      currentExercise.difficulty[diff]!.calo) ~/
-                                      currentExercise.difficulty[diff]!
-                                          .time; // Tính calo
+                                          currentExercise
+                                              .difficulty[diff]!.calo) ~/
+                                      currentExercise
+                                          .difficulty[diff]!.time; // Tính calo
 
                                   // Cập nhật lịch sử trước khi chuyển bài
-                                  await _workoutService.updateWorkoutHistory(
+                                  await workoutService.updateWorkoutHistory(
                                     historyId: historyId,
                                     index: index,
                                     duration: realTime,
@@ -198,30 +214,36 @@ class WorkOutDet extends StatelessWidget {
                                   if (index == exercises.length - 1) {
                                     Navigator.of(context).pushAndRemoveUntil(
                                       MaterialPageRoute(
-                                        builder: (context) => FinishedWorkoutView(historyId: historyId,),
+                                        builder: (context) =>
+                                            FinishedWorkoutView(
+                                          historyId: historyId,
+                                        ),
                                       ),
-                                          (route) => false, // Xóa toàn bộ route cũ
+                                      (route) => false, // Xóa toàn bộ route cũ
                                     );
                                   } else {
                                     // Nếu không, điều hướng đến bài tập tiếp theo
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            BreakTime(
-                                              exercises: exercises,
-                                              index: index + 1,
-                                              historyId: historyId,
-                                              diff: diff,
-                                            ),
+                                        builder: (context) => BreakTime(
+                                          exercises: exercises,
+                                          index: index + 1,
+                                          historyId: historyId,
+                                          diff: diff,
+                                        ),
                                       ),
                                     );
                                   }
                                 },
                                 child: Text(
                                   index == exercises.length - 1
-                                      ? AppLocalizations.of(context)?.translate("Finish") ?? "Finish"
-                                      : AppLocalizations.of(context)?.translate("Next") ?? "Next",
+                                      ? AppLocalizations.of(context)
+                                              ?.translate("Finish") ??
+                                          "Finish"
+                                      : AppLocalizations.of(context)
+                                              ?.translate("Next") ??
+                                          "Next",
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               );
@@ -230,17 +252,19 @@ class WorkOutDet extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Divider(thickness: 2,),
+                    const Divider(
+                      thickness: 2,
+                    ),
                     Align(
                         alignment: Alignment.bottomLeft,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 15),
-                          child: Text("${AppLocalizations.of(context)?.translate("Next:") ?? "Next:"} ${index != exercises.length - 1
-                              ? exercises[index + 1].name
-                              : AppLocalizations.of(context)?.translate("Finish") ?? "Finish"}",
-                            style: const TextStyle(fontSize: 18,
-                                fontWeight: FontWeight.bold),),
+                          child: Text(
+                            "${AppLocalizations.of(context)?.translate("Next:") ?? "Next:"} ${index != exercises.length - 1 ? exercises[index + 1].name : AppLocalizations.of(context)?.translate("Finish") ?? "Finish"}",
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
                         ))
                   ],
                 ),
@@ -251,21 +275,23 @@ class WorkOutDet extends StatelessWidget {
                       visible: myModel.visible,
                       child: Container(
                         color: Colors.blueAccent.withOpacity(0.9),
-                        height: MediaQuery
-                            .of(context)
-                            .size
-                            .height,
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width,
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(AppLocalizations.of(context)?.translate("Pause") ?? "Pause", style: TextStyle(fontSize: 40,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),),
-                            const SizedBox(height: 30,),
+                            Text(
+                              AppLocalizations.of(context)
+                                      ?.translate("Pause") ??
+                                  "Pause",
+                              style: TextStyle(
+                                  fontSize: 40,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            ),
                             OutlinedButton(
                               onPressed: () {
                                 // Hiển thị hộp thoại xác nhận
@@ -296,7 +322,8 @@ class WorkOutDet extends StatelessWidget {
                                                   exercises: exercises,
                                                   index: 0,
                                                   historyId: historyId,
-                                                  diff: diff,),
+                                                  diff: diff,
+                                                ),
                                               ),
                                             );
                                           },
@@ -307,10 +334,12 @@ class WorkOutDet extends StatelessWidget {
                                   },
                                 );
                               },
-                              child: Container(
+                              child: SizedBox(
                                 width: 180,
                                 child: Text(
-                                    AppLocalizations.of(context)?.translate("Restart") ?? "Restart",
+                                  AppLocalizations.of(context)
+                                          ?.translate("Restart") ??
+                                      "Restart",
                                   style: TextStyle(color: Colors.white),
                                   textAlign: TextAlign.center,
                                 ),
@@ -337,20 +366,22 @@ class WorkOutDet extends StatelessWidget {
                                         TextButton(
                                           onPressed: () async {
                                             // Tính toán thời gian thực tế và lượng calo
-                                            final currentExercise = exercises[index];
+                                            final currentExercise =
+                                                exercises[index];
                                             final realTime = currentExercise
-                                                .difficulty[diff]!.time -
+                                                    .difficulty[diff]!.time -
                                                 myModel
                                                     .countdown; // Thời gian thực tế
                                             final caloriesBurned = (realTime *
-                                                currentExercise
-                                                    .difficulty[diff]!.calo) ~/
+                                                    currentExercise
+                                                        .difficulty[diff]!
+                                                        .calo) ~/
                                                 currentExercise
                                                     .difficulty[diff]!
                                                     .time; // Tính calo
 
                                             // Cập nhật lịch sử trước khi chuyển bài
-                                            await _workoutService
+                                            await workoutService
                                                 .updateWorkoutHistory(
                                               historyId: historyId,
                                               index: index,
@@ -362,11 +393,16 @@ class WorkOutDet extends StatelessWidget {
                                             // Nếu người dùng nhấn "Có", điều hướng đến WorkoutTrackerView
                                             Navigator.of(context)
                                                 .pop(); // Đóng hộp thoại trước
-                                            Navigator.of(context).pushAndRemoveUntil(
+                                            Navigator.of(context)
+                                                .pushAndRemoveUntil(
                                               MaterialPageRoute(
-                                                builder: (context) => FinishedWorkoutView(historyId: historyId,),
+                                                builder: (context) =>
+                                                    FinishedWorkoutView(
+                                                  historyId: historyId,
+                                                ),
                                               ),
-                                                  (route) => false, // Xóa toàn bộ route cũ
+                                              (route) =>
+                                                  false, // Xóa toàn bộ route cũ
                                             );
                                           },
                                           child: Text("Có"),
@@ -376,28 +412,36 @@ class WorkOutDet extends StatelessWidget {
                                   },
                                 );
                               },
-                              child: Container(
+                              child: SizedBox(
                                 width: 180,
                                 child: Text(
-                                  AppLocalizations.of(context)?.translate("Quit") ?? "Quit",
+                                  AppLocalizations.of(context)
+                                          ?.translate("Quit") ??
+                                      "Quit",
                                   style: TextStyle(color: Colors.white),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
-                            OutlinedButton(onPressed: () {
-                              myModel.hide();
-                            }, child: Container(
-                              width: 180,
-                              child: Text(
-                                AppLocalizations.of(context)?.translate("Resume") ?? "Resume", textAlign: TextAlign.center),
-                            ), style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
-                                    Colors.white)),)
+                            OutlinedButton(
+                              onPressed: () {
+                                myModel.hide();
+                              },
+                              style: ButtonStyle(
+                                  backgroundColor:
+                                      WidgetStateProperty.all(Colors.white)),
+                              child: SizedBox(
+                                width: 180,
+                                child: Text(
+                                    AppLocalizations.of(context)
+                                            ?.translate("Resume") ??
+                                        "Resume",
+                                    textAlign: TextAlign.center),
+                              ),
+                            )
                           ],
                         ),
-                      )
-                  );
+                      ));
                 },
               )
             ],
@@ -417,7 +461,9 @@ class TimerModelSec with ChangeNotifier {
   final WorkoutService _workoutService = WorkoutService();
   final String diff;
 
-  TimerModelSec(BuildContext context, int initialTime, List<Exercise> exercises, int index, this.historyId, this.diff) : countdown = initialTime {
+  TimerModelSec(BuildContext context, int initialTime, List<Exercise> exercises,
+      int index, this.historyId, this.diff)
+      : countdown = initialTime {
     _startTimer(context, exercises, index);
   }
 
@@ -442,22 +488,23 @@ class TimerModelSec with ChangeNotifier {
           if (index >= exercises.length - 1) {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                builder: (context) => FinishedWorkoutView(historyId: historyId,),
+                builder: (context) => FinishedWorkoutView(
+                  historyId: historyId,
+                ),
               ),
-                  (route) => false, // Xóa toàn bộ route cũ
+              (route) => false, // Xóa toàn bộ route cũ
             );
           } else {
             // Chuyển đến bài tập tiếp theo
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    BreakTime(
-                      exercises: exercises,
-                      index: index + 1,
-                      historyId: historyId,
-                      diff: diff,
-                    ),
+                builder: (context) => BreakTime(
+                  exercises: exercises,
+                  index: index + 1,
+                  historyId: historyId,
+                  diff: diff,
+                ),
               ),
             );
           }

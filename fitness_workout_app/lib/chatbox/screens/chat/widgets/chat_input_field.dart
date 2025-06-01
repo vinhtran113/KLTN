@@ -12,16 +12,15 @@ class ChatInputField extends StatefulWidget {
   // ✅ Thêm callback để xử lý ghi âm voice
   final VoidCallback onVoiceRecord;
 
-
   const ChatInputField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onSend,
     required this.onImagePick,
     required this.onImageClear,
     required this.onVoiceRecord,
     this.selectedImage,
-  }) : super(key: key);
+  });
 
   @override
   State<ChatInputField> createState() => _ChatInputFieldState();
@@ -37,8 +36,8 @@ class _ChatInputFieldState extends State<ChatInputField> {
 
     // Gửi tin nhắn và ảnh (nếu có)
     widget.onSend(text, image);
-    widget.controller.clear();  // Xóa nội dung trong TextField
-    widget.onImageClear(null);  // Xóa ảnh đã chọn
+    widget.controller.clear(); // Xóa nội dung trong TextField
+    widget.onImageClear(null); // Xóa ảnh đã chọn
   }
 
   @override
@@ -64,8 +63,9 @@ class _ChatInputFieldState extends State<ChatInputField> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white, size: 20),
-                    onPressed: () => widget.onImageClear(null),  // Xóa ảnh
+                    icon:
+                        const Icon(Icons.close, color: Colors.white, size: 20),
+                    onPressed: () => widget.onImageClear(null), // Xóa ảnh
                   ),
                 ],
               ),
@@ -98,21 +98,21 @@ class _ChatInputFieldState extends State<ChatInputField> {
                     hintStyle: const TextStyle(color: Colors.white54),
                     filled: true,
                     fillColor: const Color(0xFF40414F),
-                    contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide.none,
                     ),
                   ),
-                  onSubmitted: (_) => _send(),  // Gửi tin nhắn khi nhấn Enter
+                  onSubmitted: (_) => _send(), // Gửi tin nhắn khi nhấn Enter
                 ),
               ),
               const SizedBox(width: 8),
               // Nút gửi tin nhắn
               IconButton(
                 icon: const Icon(Icons.send, color: Colors.white),
-                onPressed: _send,  // Gửi tin nhắn khi nhấn nút gửi
+                onPressed: _send, // Gửi tin nhắn khi nhấn nút gửi
               ),
             ],
           ),

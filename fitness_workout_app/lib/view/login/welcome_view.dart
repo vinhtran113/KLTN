@@ -24,11 +24,11 @@ class _WelcomeViewState extends State<WelcomeView> {
     getUserName();
   }
 
-
   void getUserName() async {
     try {
       // Lấy thông tin người dùng
-      UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      UserModel? user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
       setState(() {
         fname = user!.fname;
         lname = user.lname;
@@ -42,23 +42,24 @@ class _WelcomeViewState extends State<WelcomeView> {
 
   void getUserInfo() async {
     try {
-        // Lấy thông tin người dùng
-        UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      // Lấy thông tin người dùng
+      UserModel? user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
 
-        if (user != null) {
-          // Điều hướng đến HomeView với user
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MainTabView(user: user),
-            ),
-          );
-        } else{
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Có lỗi xảy ra')),
-          );
-        }
-      } catch (e) {
+      if (user != null) {
+        // Điều hướng đến HomeView với user
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainTabView(user: user),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Có lỗi xảy ra')),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi xảy ra: $e')),
       );
@@ -90,7 +91,7 @@ class _WelcomeViewState extends State<WelcomeView> {
                 height: media.width * 0.1,
               ),
               Text(
-                "Welcome, ${fname} ${lname}",
+                "Welcome, $fname $lname",
                 style: TextStyle(
                     color: TColor.black,
                     fontSize: 20,
@@ -102,16 +103,10 @@ class _WelcomeViewState extends State<WelcomeView> {
                 style: TextStyle(color: TColor.gray, fontSize: 12),
               ),
               const Spacer(),
-
-              RoundButton(
-                  title: "Go To Home",
-                  onPressed: getUserInfo
-              ),
-
+              RoundButton(title: "Go To Home", onPressed: getUserInfo),
             ],
           ),
         ),
-
       ),
     );
   }

@@ -30,25 +30,25 @@ class _ChangePasswordView extends State<ChangePasswordView> {
 
   void getOTP() async {
     try {
-      UserModel? user = await AuthService().getUserInfo(
-          FirebaseAuth.instance.currentUser!.uid);
-        String res = await AuthService().sendOtpEmailResetPass(user!.email);
-        if (res == "success") {
-          setState(() {
-            isCheck = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('OTP đã được gửi đến email của bạn')),
-          );
-        } else {
-          setState(() {
-            isCheck = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(res)),
-          );
-        }
-    }catch (e) {
+      UserModel? user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      String res = await AuthService().sendOtpEmailResetPass(user!.email);
+      if (res == "success") {
+        setState(() {
+          isCheck = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('OTP đã được gửi đến email của bạn')),
+        );
+      } else {
+        setState(() {
+          isCheck = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res)),
+        );
+      }
+    } catch (e) {
       setState(() {
         isCheck = false;
       });
@@ -64,10 +64,12 @@ class _ChangePasswordView extends State<ChangePasswordView> {
     });
 
     try {
-      UserModel? user = await AuthService().getUserInfo(
-          FirebaseAuth.instance.currentUser!.uid);
-      if (oldPasswordController.text.isEmpty || passwordController.text.isEmpty
-          || confirmPassController.text.isEmpty || otpController.text.isEmpty) {
+      UserModel? user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      if (oldPasswordController.text.isEmpty ||
+          passwordController.text.isEmpty ||
+          confirmPassController.text.isEmpty ||
+          otpController.text.isEmpty) {
         setState(() {
           isCheck = false;
         });
@@ -98,7 +100,7 @@ class _ChangePasswordView extends State<ChangePasswordView> {
                         MaterialPageRoute(
                           builder: (context) => const LoginView(),
                         ),
-                            (route) => false, // Xóa toàn bộ route cũ
+                        (route) => false, // Xóa toàn bộ route cũ
                       );
                     },
                     child: Text("OK"),
@@ -107,8 +109,7 @@ class _ChangePasswordView extends State<ChangePasswordView> {
               );
             },
           );
-        }
-        else {
+        } else {
           setState(() {
             isCheck = false;
           });
@@ -128,7 +129,6 @@ class _ChangePasswordView extends State<ChangePasswordView> {
     }
   }
 
-
   @override
   void dispose() {
     super.dispose();
@@ -137,15 +137,13 @@ class _ChangePasswordView extends State<ChangePasswordView> {
     confirmPassController.dispose();
     otpController.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
         elevation: 0,
         leading: InkWell(
           onTap: () {
@@ -183,21 +181,25 @@ class _ChangePasswordView extends State<ChangePasswordView> {
                       height: media.width * 0.02,
                     ),
                     Text(
-                      AppLocalizations.of(context)?.translate("Change password") ?? "Change password",
-                      style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700),
+                      AppLocalizations.of(context)
+                              ?.translate("Change password") ??
+                          "Change password",
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                     ),
                     Text(
-                      AppLocalizations.of(context)?.translate("Reset pass des") ?? "Please enter your email and new password to reset the password",
-                      style: TextStyle(
-                          color: TColor.gray, fontSize: 13),
+                      AppLocalizations.of(context)
+                              ?.translate("Reset pass des") ??
+                          "Please enter your email and new password to reset the password",
+                      style: TextStyle(color: TColor.gray, fontSize: 13),
                     ),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
                     RoundTextField(
-                      labelText: AppLocalizations.of(context)?.translate("Old Password") ?? "Old Password",
+                      labelText: AppLocalizations.of(context)
+                              ?.translate("Old Password") ??
+                          "Old Password",
                       icon: "assets/img/lock.png",
                       controller: oldPasswordController,
                       obscureText: obscureText,
@@ -228,7 +230,9 @@ class _ChangePasswordView extends State<ChangePasswordView> {
                       height: media.width * 0.04,
                     ),
                     RoundTextField(
-                      labelText: AppLocalizations.of(context)?.translate("New Password") ?? "New Password",
+                      labelText: AppLocalizations.of(context)
+                              ?.translate("New Password") ??
+                          "New Password",
                       icon: "assets/img/lock.png",
                       controller: passwordController,
                       obscureText: obscureText,
@@ -259,7 +263,9 @@ class _ChangePasswordView extends State<ChangePasswordView> {
                       height: media.width * 0.04,
                     ),
                     RoundTextField(
-                      labelText: AppLocalizations.of(context)?.translate("Confirm New Password") ?? "Confirm New Password",
+                      labelText: AppLocalizations.of(context)
+                              ?.translate("Confirm New Password") ??
+                          "Confirm New Password",
                       icon: "assets/img/lock.png",
                       controller: confirmPassController,
                       obscureText: obscureText1,
@@ -300,11 +306,13 @@ class _ChangePasswordView extends State<ChangePasswordView> {
                           ),
                         ),
                         SizedBox(width: 10),
-                        Container(
+                        SizedBox(
                           width: 110,
                           child: RoundButton(
                             type: RoundButtonType.bgSGradient,
-                            title: AppLocalizations.of(context)?.translate("Get OTP") ?? "Get OTP",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Get OTP") ??
+                                "Get OTP",
                             onPressed: getOTP,
                           ),
                         ),
@@ -314,9 +322,10 @@ class _ChangePasswordView extends State<ChangePasswordView> {
                       height: media.width * 0.06,
                     ),
                     RoundButton(
-                        title: AppLocalizations.of(context)?.translate("Confirm") ?? "Confirm",
-                        onPressed: handleResetpassword
-                    ),
+                        title: AppLocalizations.of(context)
+                                ?.translate("Confirm") ??
+                            "Confirm",
+                        onPressed: handleResetpassword),
                   ],
                 ),
               ),

@@ -15,17 +15,20 @@ import '../view/workout_tracker/workout_detail_view.dart';
 
 class NotificationServices {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  final AndroidNotificationChannel _androidChannel = const AndroidNotificationChannel(
+  final AndroidNotificationChannel _androidChannel =
+      const AndroidNotificationChannel(
     'workout_channel',
     'Workout Notifications',
     description: 'This channel is used for workout reminders',
     importance: Importance.max,
   );
 
-  final AndroidNotificationChannel _sleepChannel = const AndroidNotificationChannel(
+  final AndroidNotificationChannel _sleepChannel =
+      const AndroidNotificationChannel(
     'sleep_channel',
     'Sleep Notifications',
     description: 'This channel is used for bedtime reminders',
@@ -33,7 +36,8 @@ class NotificationServices {
     sound: RawResourceAndroidNotificationSound('alarm'),
   );
 
-  final AndroidNotificationChannel _wakeUpChannel = const AndroidNotificationChannel(
+  final AndroidNotificationChannel _wakeUpChannel =
+      const AndroidNotificationChannel(
     'wake_up_channel',
     'Wake Up Notifications',
     description: 'This channel is used for wake-up reminders',
@@ -41,7 +45,8 @@ class NotificationServices {
     sound: RawResourceAndroidNotificationSound('alarm'),
   );
 
-  final AndroidNotificationChannel _mealChannel = const AndroidNotificationChannel(
+  final AndroidNotificationChannel _mealChannel =
+      const AndroidNotificationChannel(
     'meal_channel',
     'Meal Notifications',
     description: 'This channel is used for meal reminders',
@@ -54,7 +59,8 @@ class NotificationServices {
     tz.setLocalLocation(tz.getLocation('Asia/Ho_Chi_Minh'));
   }
 
-  Future<void> _addNotificationToArr(Map<String, dynamic> notificationData, DateTime scheduledTime) async {
+  Future<void> _addNotificationToArr(
+      Map<String, dynamic> notificationData, DateTime scheduledTime) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> notificationArr = prefs.getStringList('notificationArr') ?? [];
 
@@ -72,7 +78,8 @@ class NotificationServices {
   Future<List<Map<String, String>>> loadNotificationArr() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final encodedData = prefs.getStringList('notificationArr'); // Sử dụng getStringList thay vì getString
+      final encodedData = prefs.getStringList(
+          'notificationArr'); // Sử dụng getStringList thay vì getString
       if (encodedData != null && encodedData.isNotEmpty) {
         // Giải mã từng phần tử trong danh sách JSON
         final decodedData = encodedData.map((item) {
@@ -116,8 +123,8 @@ class NotificationServices {
 
   Future<void> initNotifications() async {
     // Yêu cầu quyền từ người dùng
-    NotificationSettings settings = await _firebaseMessaging
-        .requestPermission();
+    NotificationSettings settings =
+        await _firebaseMessaging.requestPermission();
     if (settings.authorizationStatus != AuthorizationStatus.authorized) {
       print('User declined or has not accepted permission');
       return;
@@ -129,9 +136,10 @@ class NotificationServices {
 
   Future<void> initLocalNotifications() async {
     const DarwinInitializationSettings iOS = DarwinInitializationSettings();
-    const AndroidInitializationSettings android = AndroidInitializationSettings('@drawable/icon_app');
-    const InitializationSettings settings = InitializationSettings(
-        android: android, iOS: iOS);
+    const AndroidInitializationSettings android =
+        AndroidInitializationSettings('@drawable/icon_app');
+    const InitializationSettings settings =
+        InitializationSettings(android: android, iOS: iOS);
 
     await _localNotifications.initialize(
       settings,
@@ -151,15 +159,12 @@ class NotificationServices {
             } else if (type == 'meal') {
               navigatorKey.currentState?.push(
                 MaterialPageRoute(
-                  builder: (context) =>
-                  const MealScheduleView(),
+                  builder: (context) => const MealScheduleView(),
                 ),
               );
-            } else if(type == 'alarm') {
-              navigatorKey.currentState?.push(
-                  MaterialPageRoute(builder: (context) =>
-                  const SleepScheduleView())
-              );
+            } else if (type == 'alarm') {
+              navigatorKey.currentState?.push(MaterialPageRoute(
+                  builder: (context) => const SleepScheduleView()));
             } else {
               print("Unknown notification type: $type");
             }
@@ -220,7 +225,8 @@ class NotificationServices {
     required DateTime bedtime,
     required String repeatInterval,
   }) async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
       'sleep_channel',
       'Sleep Notifications',
       channelDescription: 'This channel is used for bedtime reminders',
@@ -229,7 +235,8 @@ class NotificationServices {
       icon: 'icon_app',
       sound: RawResourceAndroidNotificationSound('alarm'),
     );
-    const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
+    const NotificationDetails platformDetails =
+        NotificationDetails(android: androidDetails);
     DateTime newScheduledTime = bedtime;
     // Nếu lặp lại là 'Everyday', kiểm tra xem thời gian đã qua chưa
     if (repeatInterval == 'Everyday') {
@@ -239,10 +246,11 @@ class NotificationServices {
     }
     // Nếu lặp lại là các ngày trong tuần (Monday, Friday)
     else if (repeatInterval.contains(',')) {
-      newScheduledTime = _getNextWeekdayWithSameTime(
-          DateTime.now(), repeatInterval, bedtime);
+      newScheduledTime =
+          _getNextWeekdayWithSameTime(DateTime.now(), repeatInterval, bedtime);
     }
-    final tz.TZDateTime scheduledTZDateTime = tz.TZDateTime.from(newScheduledTime, tz.local);
+    final tz.TZDateTime scheduledTZDateTime =
+        tz.TZDateTime.from(newScheduledTime, tz.local);
     if (repeatInterval == 'no') {
       // Thông báo một lần
       await _localNotifications.zonedSchedule(
@@ -255,7 +263,8 @@ class NotificationServices {
           'type': 'alarm',
         }),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
       );
     } else if (repeatInterval == 'Everyday') {
       // Thông báo hàng ngày
@@ -269,7 +278,8 @@ class NotificationServices {
         }),
         platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
     } else {
@@ -300,12 +310,14 @@ class NotificationServices {
             }),
             platformDetails,
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.wallClockTime,
             matchDateTimeComponents: DateTimeComponents.time,
           );
         }
         // Tính ngày tiếp theo trong tuần
-        currentScheduledTime = _nextInstanceOfWeekday(currentScheduledTime, weekdaysSet);
+        currentScheduledTime =
+            _nextInstanceOfWeekday(currentScheduledTime, weekdaysSet);
       }
       // Kiểm tra nếu ngày lên lịch không nằm trong danh sách, thêm vào
       if (!weekdaysSet.contains(scheduledTZDateTime.weekday)) {
@@ -320,7 +332,8 @@ class NotificationServices {
           }),
           platformDetails,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.wallClockTime,
         );
       }
     }
@@ -333,7 +346,8 @@ class NotificationServices {
     required DateTime wakeUpTime,
     required String repeatInterval,
   }) async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
       'wake_up_channel',
       'Wake Up Notifications',
       channelDescription: 'This channel is used for wake-up reminders',
@@ -342,7 +356,8 @@ class NotificationServices {
       icon: 'icon_app',
       sound: RawResourceAndroidNotificationSound('alarm'),
     );
-    const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
+    const NotificationDetails platformDetails =
+        NotificationDetails(android: androidDetails);
     DateTime newScheduledTime = wakeUpTime;
     // Nếu lặp lại là 'Everyday', kiểm tra xem thời gian đã qua chưa
     if (repeatInterval == 'Everyday') {
@@ -355,7 +370,8 @@ class NotificationServices {
       newScheduledTime = _getNextWeekdayWithSameTime(
           DateTime.now(), repeatInterval, wakeUpTime);
     }
-    final tz.TZDateTime scheduledTZDateTime = tz.TZDateTime.from(newScheduledTime, tz.local);
+    final tz.TZDateTime scheduledTZDateTime =
+        tz.TZDateTime.from(newScheduledTime, tz.local);
     if (repeatInterval == 'no') {
       // Thông báo một lần
       await _localNotifications.zonedSchedule(
@@ -368,7 +384,8 @@ class NotificationServices {
         }),
         platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
       );
     } else if (repeatInterval == 'Everyday') {
       // Thông báo hàng ngày
@@ -382,7 +399,8 @@ class NotificationServices {
         }),
         platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
     } else {
@@ -413,12 +431,14 @@ class NotificationServices {
             }),
             platformDetails,
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.wallClockTime,
             matchDateTimeComponents: DateTimeComponents.time,
           );
         }
         // Tính ngày tiếp theo trong tuần
-        currentScheduledTime = _nextInstanceOfWeekday(currentScheduledTime, weekdaysSet);
+        currentScheduledTime =
+            _nextInstanceOfWeekday(currentScheduledTime, weekdaysSet);
       }
       // Kiểm tra nếu ngày lên lịch không nằm trong danh sách, thêm vào
       if (!weekdaysSet.contains(scheduledTZDateTime.weekday)) {
@@ -433,11 +453,12 @@ class NotificationServices {
           }),
           platformDetails,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.wallClockTime,
         );
       }
     }
-    print('Notification ID updated for wakeup ${id.hashCode +1 }');
+    print('Notification ID updated for wakeup ${id.hashCode + 1}');
     return id.hashCode.toString();
   }
 
@@ -448,7 +469,8 @@ class NotificationServices {
     required String Name,
     required String pic,
   }) async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
       'meal_channel',
       'Meal Notifications',
       channelDescription: 'This channel is used for meal reminders',
@@ -456,11 +478,14 @@ class NotificationServices {
       priority: Priority.high,
       icon: 'icon_app',
     );
-    const NotificationDetails platformDetails = NotificationDetails(android: androidDetails,);
+    const NotificationDetails platformDetails = NotificationDetails(
+      android: androidDetails,
+    );
 
     DateTime newScheduledTime = Time;
 
-    final tz.TZDateTime scheduledTZDateTime = tz.TZDateTime.from(newScheduledTime, tz.local);
+    final tz.TZDateTime scheduledTZDateTime =
+        tz.TZDateTime.from(newScheduledTime, tz.local);
 
     // Thông báo một lần
     await _localNotifications.zonedSchedule(
@@ -476,7 +501,8 @@ class NotificationServices {
         'image': pic,
       }),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.wallClockTime,
     );
     print('Notification ID updated for meal ${id.hashCode}');
     return id.hashCode.toString();
@@ -491,7 +517,8 @@ class NotificationServices {
     required String pic,
     required String diff,
   }) async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
       'workout_channel',
       'Workout Notifications',
       channelDescription: 'This channel is used for workout reminders',
@@ -499,7 +526,9 @@ class NotificationServices {
       priority: Priority.high,
       icon: 'icon_app',
     );
-    const NotificationDetails platformDetails = NotificationDetails(android: androidDetails,);
+    const NotificationDetails platformDetails = NotificationDetails(
+      android: androidDetails,
+    );
     DateTime newScheduledTime = scheduledTime;
     // Nếu lặp lại là 'Everyday', kiểm tra xem thời gian đã qua chưa
     if (repeatInterval == 'Everyday') {
@@ -512,7 +541,8 @@ class NotificationServices {
       newScheduledTime = _getNextWeekdayWithSameTime(
           DateTime.now(), repeatInterval, scheduledTime);
     }
-    final tz.TZDateTime scheduledTZDateTime = tz.TZDateTime.from(newScheduledTime, tz.local);
+    final tz.TZDateTime scheduledTZDateTime =
+        tz.TZDateTime.from(newScheduledTime, tz.local);
     if (repeatInterval == 'no') {
       // Thông báo một lần
       await _localNotifications.zonedSchedule(
@@ -529,8 +559,8 @@ class NotificationServices {
           'type': 'workout',
         }),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
-            .wallClockTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
       );
       // Tạo dữ liệu cho notification
       final Map<String, dynamic> data = {
@@ -539,7 +569,8 @@ class NotificationServices {
         'image': pic,
         'difficulty': diff,
       };
-      await _addNotificationToArr(data, scheduledTZDateTime); // Pass the scheduled time
+      await _addNotificationToArr(
+          data, scheduledTZDateTime); // Pass the scheduled time
     } else if (repeatInterval == 'Everyday') {
       // Thông báo hàng ngày
       await _localNotifications.zonedSchedule(
@@ -556,8 +587,8 @@ class NotificationServices {
           'type': 'workout',
         }),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
-            .wallClockTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
       // Tạo dữ liệu cho notification
@@ -567,7 +598,8 @@ class NotificationServices {
         'image': pic,
         'difficulty': diff,
       };
-      await _addNotificationToArr(data, scheduledTZDateTime); // Pass the scheduled time
+      await _addNotificationToArr(
+          data, scheduledTZDateTime); // Pass the scheduled time
     } else {
       // Tính toán ngày kết thúc (365 ngày sau)
       final DateTime endDate = scheduledTime.add(Duration(days: 365));
@@ -600,7 +632,8 @@ class NotificationServices {
               'type': 'workout',
             }),
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.wallClockTime,
             matchDateTimeComponents: DateTimeComponents.time,
           );
           // Tạo dữ liệu cho notification
@@ -614,7 +647,8 @@ class NotificationServices {
           //print('Scheduled ${id.hashCode} notification for: $currentScheduledTime');
         }
         // Tính ngày tiếp theo trong tuần
-        currentScheduledTime = _nextInstanceOfWeekday(currentScheduledTime, weekdaysSet);
+        currentScheduledTime =
+            _nextInstanceOfWeekday(currentScheduledTime, weekdaysSet);
       }
       // Kiểm tra nếu ngày lên lịch không nằm trong danh sách, thêm vào
       if (!weekdaysSet.contains(scheduledTZDateTime.weekday)) {
@@ -633,7 +667,8 @@ class NotificationServices {
             'type': 'workout',
           }),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.wallClockTime,
           matchDateTimeComponents: DateTimeComponents.time,
         );
         // Tạo dữ liệu cho notification
@@ -643,7 +678,8 @@ class NotificationServices {
           'image': pic,
           'difficulty': diff,
         };
-        await _addNotificationToArr(data, scheduledTZDateTime); // Pass the scheduled time
+        await _addNotificationToArr(
+            data, scheduledTZDateTime); // Pass the scheduled time
       }
     }
     print('Notification ID updated for workout ${id.hashCode}');
@@ -663,17 +699,20 @@ class NotificationServices {
     }
     // Lưu giờ ban đầu để giữ nguyên
     DateTime newScheduledTime = DateTime(
-        currentDateTime.year, currentDateTime.month, currentDateTime.day,
-        originalScheduledTime.hour, originalScheduledTime.minute);
+        currentDateTime.year,
+        currentDateTime.month,
+        currentDateTime.day,
+        originalScheduledTime.hour,
+        originalScheduledTime.minute);
     // Tìm ngày gần nhất trong tuần cho mỗi ngày yêu cầu
     while (!weekdaysSet.contains(newScheduledTime.weekday)) {
-      newScheduledTime = newScheduledTime.add(
-          Duration(days: 1)); // Tìm ngày tiếp theo trong tuần
+      newScheduledTime = newScheduledTime
+          .add(Duration(days: 1)); // Tìm ngày tiếp theo trong tuần
     }
     // Kiểm tra xem thời gian có qua chưa, nếu có, chuyển sang ngày tiếp theo
     if (newScheduledTime.isBefore(currentDateTime)) {
-      newScheduledTime = newScheduledTime.add(
-          Duration(days: 7)); // Nếu đã qua, chuyển sang tuần sau
+      newScheduledTime = newScheduledTime
+          .add(Duration(days: 7)); // Nếu đã qua, chuyển sang tuần sau
     }
     return newScheduledTime;
   }
@@ -700,7 +739,8 @@ class NotificationServices {
   }
 
 // Cập nhật để tránh lặp vô hạn và chỉ lấy các ngày trong tuần cần thông báo
-  tz.TZDateTime _nextInstanceOfWeekday(tz.TZDateTime dateTime, Set<int> weekdaysSet) {
+  tz.TZDateTime _nextInstanceOfWeekday(
+      tz.TZDateTime dateTime, Set<int> weekdaysSet) {
     tz.TZDateTime scheduledDate = tz.TZDateTime.from(dateTime, tz.local);
     do {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
@@ -741,7 +781,7 @@ class NotificationServices {
         var day = workoutScheduleDoc['day'];
         var title = workoutScheduleDoc['name']; // Tiêu đề workout
         var repeatInterval = workoutScheduleDoc['repeat_interval'];
-        var id_cate = workoutScheduleDoc['id_cate'];
+        var idCate = workoutScheduleDoc['id_cate'];
         var pic = workoutScheduleDoc['pic'];
         var diff = workoutScheduleDoc['difficulty'];
 
@@ -758,16 +798,17 @@ class NotificationServices {
           selectedHour.minute,
         );
         // Kiểm tra nếu lịch là trong quá khứ và không phải lịch lặp lại
-        if (selectedDateTime.isBefore(DateTime.now()) && repeatInterval == 'no') {
+        if (selectedDateTime.isBefore(DateTime.now()) &&
+            repeatInterval == 'no') {
           continue;
         }
         // Lên lịch lại thông báo dựa trên thông tin từ Firestore
-        String id_notify = await scheduleWorkoutNotification(
+        String idNotify = await scheduleWorkoutNotification(
           id: workoutId,
           scheduledTime: selectedDateTime,
           workoutName: title,
           repeatInterval: repeatInterval,
-          id_cate: id_cate,
+          id_cate: idCate,
           pic: pic,
           diff: diff,
         );
@@ -775,7 +816,7 @@ class NotificationServices {
             .collection('WorkoutSchedule')
             .doc(workoutScheduleDoc.id) // Lấy ID tài liệu để cập nhật
             .update({
-          'id_notify': id_notify, // Cập nhật id_notify với giá trị đã lấy
+          'id_notify': idNotify, // Cập nhật id_notify với giá trị đã lấy
         });
         print('Notification ID updated for workout ${workoutScheduleDoc.id}');
       }
@@ -786,10 +827,10 @@ class NotificationServices {
           .get();
 
       for (var alarmScheduleDoc in alarmScheduleSnapshot.docs) {
-        bool notify_Bed = alarmScheduleDoc['notify_Bed'];
-        bool notify_Wakeup = alarmScheduleDoc['notify_Wakeup'];
+        bool notifyBed = alarmScheduleDoc['notify_Bed'];
+        bool notifyWakeup = alarmScheduleDoc['notify_Wakeup'];
 
-        if (!notify_Bed && !notify_Wakeup) {
+        if (!notifyBed && !notifyWakeup) {
           continue;
         }
         var alarmId = alarmScheduleDoc['id'];
@@ -797,7 +838,7 @@ class NotificationServices {
         var hourWakeup = alarmScheduleDoc['hourWakeup'];
         var day = alarmScheduleDoc['day'];
         var repeatInterval = alarmScheduleDoc['repeat_interval'];
-        var id_notify = alarmScheduleDoc['id_notify'];
+        var idNotify = alarmScheduleDoc['id_notify'];
 
         // Chuyển đổi chuỗi ngày và giờ thành DateTime
         final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
@@ -823,33 +864,33 @@ class NotificationServices {
         );
 
         if (selectedDateTimeWakeup.isBefore(selectedDateTimeBed)) {
-          selectedDateTimeWakeup = selectedDateTimeWakeup.add(const Duration(days: 1));
+          selectedDateTimeWakeup =
+              selectedDateTimeWakeup.add(const Duration(days: 1));
         }
 
         // Kiểm tra nếu lịch là trong quá khứ và không phải lịch lặp lại
-        if (selectedDateTimeBed.isBefore(DateTime.now()) && repeatInterval == 'no') {
+        if (selectedDateTimeBed.isBefore(DateTime.now()) &&
+            repeatInterval == 'no') {
           continue;
         }
 
-        if(notify_Bed) {
-          id_notify = await scheduleBedtimeNotification(
+        if (notifyBed) {
+          idNotify = await scheduleBedtimeNotification(
             id: alarmId,
             bedtime: selectedDateTimeBed,
             repeatInterval: repeatInterval,
           );
         }
-        if(notify_Wakeup) {
-          id_notify = await scheduleWakeUpNotification(
+        if (notifyWakeup) {
+          idNotify = await scheduleWakeUpNotification(
               id: alarmId,
               wakeUpTime: selectedDateTimeWakeup,
-              repeatInterval: repeatInterval
-          );
+              repeatInterval: repeatInterval);
         }
 
-        await _firestore
-            .collection('Alarm')
-            .doc(alarmScheduleDoc.id)
-            .update({'id_notify': id_notify,});
+        await _firestore.collection('Alarm').doc(alarmScheduleDoc.id).update({
+          'id_notify': idNotify,
+        });
       }
       res = "success";
     } catch (err) {
@@ -858,5 +899,3 @@ class NotificationServices {
     return res;
   }
 }
-
-

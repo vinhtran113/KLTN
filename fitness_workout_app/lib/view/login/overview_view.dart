@@ -43,20 +43,30 @@ class _OverviewViewState extends State<OverviewView> {
   void _getUser() async {
     try {
       // Lấy thông tin người dùng
-      UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      UserModel? user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
 
       setState(() {
         weight = double.parse(user!.weight);
         height = double.parse(user.height);
-        name = user.fname + " " + user.lname;
+        name = "${user.fname} ${user.lname}";
         gender = user.gender;
         dob = user.dateOfBirth;
         age = user.getAge();
         bodyFatPercent = double.parse(user.body_fat);
         activityLevel = user.ActivityLevel;
         goal = user.level;
-        bmr = NutritionCalculator.calculateBMR(weight: weight, height: height, age: age, bodyFatPercent: bodyFatPercent);
-        tdee = NutritionCalculator.calculateTDEE(weight: weight, height: height, age: age, activityLevel: activityLevel, bodyFatPercent: bodyFatPercent);
+        bmr = NutritionCalculator.calculateBMR(
+            weight: weight,
+            height: height,
+            age: age,
+            bodyFatPercent: bodyFatPercent);
+        tdee = NutritionCalculator.calculateTDEE(
+            weight: weight,
+            height: height,
+            age: age,
+            activityLevel: activityLevel,
+            bodyFatPercent: bodyFatPercent);
         cals = NutritionCalculator.adjustCaloriesForGoal(tdee, goal);
         carb = NutritionCalculator.calculateMaxCarb(cals, goal);
         protein = NutritionCalculator.calculateMaxProtein(cals, goal);
@@ -153,7 +163,8 @@ class _OverviewViewState extends State<OverviewView> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildMacroCard("Protein", protein, Colors.lightBlue, "g"),
+                  child: _buildMacroCard(
+                      "Protein", protein, Colors.lightBlue, "g"),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -162,18 +173,16 @@ class _OverviewViewState extends State<OverviewView> {
               ],
             ),
             const SizedBox(height: 20),
-
             RoundButton(
                 title: "Next >",
-                onPressed: (){
+                onPressed: () {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const WelcomeView(),
                     ),
                   );
-                }
-            ),
+                }),
           ],
         ),
       ),
@@ -216,7 +225,6 @@ class _OverviewViewState extends State<OverviewView> {
     );
   }
 
-
   Widget _buildSectionTitle(String title) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -245,7 +253,6 @@ class _OverviewViewState extends State<OverviewView> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label),
-
             Tooltip(
               message: _getTooltipText(label),
               child: Icon(Icons.info_outline, size: 18, color: Colors.grey),
@@ -271,13 +278,16 @@ class _OverviewViewState extends State<OverviewView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+                Text(label,
+                    style:
+                        TextStyle(color: color, fontWeight: FontWeight.bold)),
                 const SizedBox(width: 4),
                 Icon(Icons.info_outline, size: 16, color: Colors.grey),
               ],
             ),
             const SizedBox(height: 8),
-            Text("${value.toStringAsFixed(1)} $unit", style: const TextStyle(fontSize: 16)),
+            Text("${value.toStringAsFixed(1)} $unit",
+                style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),

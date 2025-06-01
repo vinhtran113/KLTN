@@ -87,8 +87,10 @@ class _IconEditFoodRowState extends State<IconEditFoodRow> {
               border: Border.all(color: TColor.gray, width: 1),
             ),
             child: ExpansionTile(
-              tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              tilePadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              childrenPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               title: Text(
                 meal.name,
                 style: TextStyle(color: TColor.black, fontSize: 13),
@@ -101,17 +103,23 @@ class _IconEditFoodRowState extends State<IconEditFoodRow> {
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Row(
                       children: [
-                        Expanded(flex: 4, child: Text(ingredient.name, style: TextStyle(fontSize: 12))),
+                        Expanded(
+                            flex: 4,
+                            child: Text(ingredient.name,
+                                style: TextStyle(fontSize: 12))),
                         Expanded(
                           flex: 3,
                           child: TextFormField(
                             initialValue: ingredient.amount.toString(),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: const InputDecoration(isDense: true, border: OutlineInputBorder()),
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: const InputDecoration(
+                                isDense: true, border: OutlineInputBorder()),
                             onChanged: (val) {
                               double? newAmount = double.tryParse(val);
                               if (newAmount != null) {
-                                widget.onIngredientAmountChanged(ingIndex, newAmount);
+                                widget.onIngredientAmountChanged(
+                                    ingIndex, newAmount);
                               }
                             },
                           ),
@@ -119,10 +127,15 @@ class _IconEditFoodRowState extends State<IconEditFoodRow> {
                         const SizedBox(width: 8),
                         Expanded(
                           flex: 2,
-                          child: Text(ingredient.unit.isNotEmpty ? ingredient.unit : "-", style: TextStyle(fontSize: 12)),
+                          child: Text(
+                              ingredient.unit.isNotEmpty
+                                  ? ingredient.unit
+                                  : "-",
+                              style: TextStyle(fontSize: 12)),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.remove_circle_outline, size: 20, color: Colors.red),
+                          icon: const Icon(Icons.remove_circle_outline,
+                              size: 20, color: Colors.red),
                           onPressed: () {
                             setState(() {
                               meal.ingredients.removeAt(ingIndex);
@@ -132,7 +145,7 @@ class _IconEditFoodRowState extends State<IconEditFoodRow> {
                       ],
                     ),
                   );
-                }).toList(),
+                }),
 
                 // Add Ingredient
                 Align(
@@ -142,7 +155,8 @@ class _IconEditFoodRowState extends State<IconEditFoodRow> {
                       _showAddIngredientDialog(context);
                     },
                     icon: const Icon(Icons.add, size: 18),
-                    label: const Text("Add Ingredient", style: TextStyle(fontSize: 12)),
+                    label: const Text("Add Ingredient",
+                        style: TextStyle(fontSize: 12)),
                   ),
                 ),
               ],
@@ -174,26 +188,32 @@ class _IconEditFoodRowState extends State<IconEditFoodRow> {
                   );
                 }).toList(),
                 onChanged: (val) => setState(() => selectedIngredient = val),
-                decoration: const InputDecoration(labelText: "Select Ingredient"),
+                decoration:
+                    const InputDecoration(labelText: "Select Ingredient"),
               ),
               const SizedBox(height: 12),
               if (selectedIngredient != null)
-                Text("Unit: ${selectedIngredient!.unit}", style: const TextStyle(fontSize: 13)),
+                Text("Unit: ${selectedIngredient!.unit}",
+                    style: const TextStyle(fontSize: 13)),
               TextField(
                 decoration: const InputDecoration(labelText: "Amount"),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (val) => newAmount = double.tryParse(val) ?? 0,
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel")),
           ElevatedButton(
             onPressed: () {
               if (selectedIngredient != null && newAmount > 0) {
-                final existingIndex = widget.selectedMeal.ingredients.indexWhere(
-                      (ing) => ing.name == selectedIngredient!.name,
+                final existingIndex =
+                    widget.selectedMeal.ingredients.indexWhere(
+                  (ing) => ing.name == selectedIngredient!.name,
                 );
 
                 if (existingIndex != -1) {

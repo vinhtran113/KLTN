@@ -12,17 +12,18 @@ class BreakTime extends StatelessWidget {
   final String diff;
 
   const BreakTime({
-    Key? key,
+    super.key,
     required this.exercises,
     required this.index,
     required this.historyId,
     required this.diff,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<TimerModelSec>(
-      create: (context) => TimerModelSec(context, 10, exercises, index, historyId, diff),
+      create: (context) =>
+          TimerModelSec(context, 10, exercises, index, historyId, diff),
       child: Scaffold(
         body: Container(
           height: MediaQuery.of(context).size.height,
@@ -38,14 +39,21 @@ class BreakTime extends StatelessWidget {
             children: [
               Spacer(),
               Text(
-                AppLocalizations.of(context)?.translate("Break Time") ?? "Break Time",
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.white),
+                AppLocalizations.of(context)?.translate("Break Time") ??
+                    "Break Time",
+                style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
               Consumer<TimerModelSec>(
                 builder: (context, myModel, child) {
                   return Text(
                     myModel.countdown.toString(),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 55, color: Colors.white),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 55,
+                        color: Colors.white),
                   );
                 },
               ),
@@ -57,8 +65,11 @@ class BreakTime extends StatelessWidget {
                       timerModel.addTime(10); // Gọi addTime từ Consume
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
-                      child: Text("+10 ${AppLocalizations.of(context)?.translate("sec") ?? "sec"}", style: TextStyle(fontSize: 19)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 24),
+                      child: Text(
+                          "+10 ${AppLocalizations.of(context)?.translate("sec") ?? "sec"}",
+                          style: TextStyle(fontSize: 19)),
                     ),
                   );
                 },
@@ -71,30 +82,33 @@ class BreakTime extends StatelessWidget {
                   children: [
                     index != 0
                         ? Consumer<TimerModelSec>(
-                      builder: (context, myModel, child) {
-                        return TextButton(
-                          onPressed: () async {
-                            myModel.Pass();
-                            await Future.delayed(Duration(seconds: 1));
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => WorkOutDet(
-                                  exercises: exercises,
-                                  index: index - 1,
-                                  historyId: historyId,
-                                  diff: diff,
+                            builder: (context, myModel, child) {
+                              return TextButton(
+                                onPressed: () async {
+                                  myModel.Pass();
+                                  await Future.delayed(Duration(seconds: 1));
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => WorkOutDet(
+                                        exercises: exercises,
+                                        index: index - 1,
+                                        historyId: historyId,
+                                        diff: diff,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  AppLocalizations.of(context)
+                                          ?.translate("Previous") ??
+                                      "Previous",
+                                  style: const TextStyle(
+                                      fontSize: 16, color: Colors.white),
                                 ),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            AppLocalizations.of(context)?.translate("Previous") ?? "Previous",
-                            style: const TextStyle(fontSize: 16, color: Colors.white),
-                          ),
-                        );
-                      },
-                    )
+                              );
+                            },
+                          )
                         : Container(),
                     Consumer<TimerModelSec>(
                       builder: (context, myModel, child) {
@@ -116,7 +130,8 @@ class BreakTime extends StatelessWidget {
                             );
                           },
                           child: Text(
-                              AppLocalizations.of(context)?.translate("Skip") ?? "Skip",
+                            AppLocalizations.of(context)?.translate("Skip") ??
+                                "Skip",
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         );
@@ -129,11 +144,15 @@ class BreakTime extends StatelessWidget {
               Align(
                 alignment: Alignment.bottomLeft,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                   child: Text(
                     "${AppLocalizations.of(context)?.translate("Next:") ?? "Next:"}"
-                        " ${index != exercises.length ? exercises[index].name : AppLocalizations.of(context)?.translate("Finish") ?? "Finish"}",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    " ${index != exercises.length ? exercises[index].name : AppLocalizations.of(context)?.translate("Finish") ?? "Finish"}",
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ),
               ),
@@ -151,15 +170,17 @@ class TimerModelSec with ChangeNotifier {
   bool isPassed = false;
   Timer? _timer;
 
-
-  TimerModelSec(BuildContext context, int initialTime, List<Exercise> exercises, int index, String historyId, String diff)
+  TimerModelSec(BuildContext context, int initialTime, List<Exercise> exercises,
+      int index, String historyId, String diff)
       : countdown = initialTime {
     _startTimer(context, exercises, index, historyId, diff);
   }
 
-  void _startTimer(BuildContext context, List<Exercise> exercises, int index, String historyId, String diff) {
+  void _startTimer(BuildContext context, List<Exercise> exercises, int index,
+      String historyId, String diff) {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (!visible && !isPassed) { // Đếm ngược nếu không tạm dừng hoặc chuyển bài
+      if (!visible && !isPassed) {
+        // Đếm ngược nếu không tạm dừng hoặc chuyển bài
         countdown--;
         notifyListeners();
 
@@ -169,9 +190,12 @@ class TimerModelSec with ChangeNotifier {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  WorkOutDet(
-                    exercises: exercises, index: index, historyId: historyId, diff: diff,),
+              builder: (context) => WorkOutDet(
+                exercises: exercises,
+                index: index,
+                historyId: historyId,
+                diff: diff,
+              ),
             ),
           );
         }
@@ -182,8 +206,8 @@ class TimerModelSec with ChangeNotifier {
   }
 
   void addTime(int seconds) {
-    countdown += seconds;  // Tăng thời gian đếm ngược
-    notifyListeners();     // Thông báo các widget cần cập nhật
+    countdown += seconds; // Tăng thời gian đếm ngược
+    notifyListeners(); // Thông báo các widget cần cập nhật
   }
 
   void show() {
@@ -202,11 +226,9 @@ class TimerModelSec with ChangeNotifier {
     notifyListeners();
   }
 
-
   @override
   void dispose() {
-    _timer?.cancel();  // Hủy bỏ timer khi không sử dụng
+    _timer?.cancel(); // Hủy bỏ timer khi không sử dụng
     super.dispose();
   }
 }
-

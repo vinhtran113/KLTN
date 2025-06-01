@@ -35,8 +35,8 @@ class _ResetPasswordView extends State<ResetPasswordView> {
           isCheck = false;
         });
       } else {
-        String res = await AuthService().sendOtpEmailResetPass(
-            emailController.text.trim());
+        String res = await AuthService()
+            .sendOtpEmailResetPass(emailController.text.trim());
         if (res == "success") {
           setState(() {
             isCheck = false;
@@ -53,7 +53,7 @@ class _ResetPasswordView extends State<ResetPasswordView> {
           );
         }
       }
-    }catch (e) {
+    } catch (e) {
       setState(() {
         isCheck = false;
       });
@@ -69,16 +69,18 @@ class _ResetPasswordView extends State<ResetPasswordView> {
     });
 
     try {
-      if (emailController.text.isEmpty || passwordController.text.isEmpty
-          || confirmPassController.text.isEmpty || otpController.text.isEmpty) {
+      if (emailController.text.isEmpty ||
+          passwordController.text.isEmpty ||
+          confirmPassController.text.isEmpty ||
+          otpController.text.isEmpty) {
         setState(() {
           isCheck = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Vui lòng điền đầy đủ thông tin')),
         );
-      } else
-      if (passwordController.text.trim() != confirmPassController.text.trim()) {
+      } else if (passwordController.text.trim() !=
+          confirmPassController.text.trim()) {
         setState(() {
           isCheck = false;
         });
@@ -107,7 +109,7 @@ class _ResetPasswordView extends State<ResetPasswordView> {
                         MaterialPageRoute(
                           builder: (context) => const LoginView(),
                         ),
-                            (route) => false, // Xóa toàn bộ route cũ
+                        (route) => false, // Xóa toàn bộ route cũ
                       );
                     },
                     child: Text("OK"),
@@ -116,8 +118,7 @@ class _ResetPasswordView extends State<ResetPasswordView> {
               );
             },
           );
-        }
-        else {
+        } else {
           setState(() {
             isCheck = false;
           });
@@ -137,7 +138,6 @@ class _ResetPasswordView extends State<ResetPasswordView> {
     }
   }
 
-
   @override
   void dispose() {
     super.dispose();
@@ -147,12 +147,9 @@ class _ResetPasswordView extends State<ResetPasswordView> {
     otpController.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: TColor.white,
       appBar: AppBar(
@@ -195,14 +192,14 @@ class _ResetPasswordView extends State<ResetPasswordView> {
                     ),
                     Text(
                       "Reset password",
-                      style: TextStyle(color: TColor.black,
+                      style: TextStyle(
+                          color: TColor.black,
                           fontSize: 24,
                           fontWeight: FontWeight.w700),
                     ),
                     Text(
                       "Please enter your email and new password to reset the password",
-                      style: TextStyle(
-                          color: TColor.gray, fontSize: 13),
+                      style: TextStyle(color: TColor.gray, fontSize: 13),
                     ),
                     SizedBox(
                       height: media.width * 0.05,
@@ -289,7 +286,7 @@ class _ResetPasswordView extends State<ResetPasswordView> {
                           ),
                         ),
                         SizedBox(width: 10),
-                        Container(
+                        SizedBox(
                           width: 100,
                           child: RoundButton(
                             type: RoundButtonType.bgSGradient,
@@ -304,8 +301,7 @@ class _ResetPasswordView extends State<ResetPasswordView> {
                     ),
                     RoundButton(
                         title: "Reset Password",
-                        onPressed: handleResetpassword
-                    ),
+                        onPressed: handleResetpassword),
                   ],
                 ),
               ),

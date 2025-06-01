@@ -52,7 +52,6 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     setState(() {
       // Lấy giờ và phút từ DateTime và định dạng lại
       hour = DateFormat('h:mm a').format(newDate);
-      ;
     });
   }
 
@@ -80,7 +79,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$res')),);
+          SnackBar(content: Text(res)),
+        );
         setState(() {
           isLoading = false;
         });
@@ -106,8 +106,11 @@ class _AddScheduleViewState extends State<AddScheduleView> {
             children: ["Beginner", "Normal", "Professional"].map((difficulty) {
               return ListTile(
                 title: Text(
-                  AppLocalizations.of(context)?.translate(difficulty) ?? difficulty,
-                  style: TextStyle(color: darkmode? TColor.white : TColor.black, fontSize: 14),
+                  AppLocalizations.of(context)?.translate(difficulty) ??
+                      difficulty,
+                  style: TextStyle(
+                      color: darkmode ? TColor.white : TColor.black,
+                      fontSize: 14),
                 ),
                 onTap: () {
                   setState(() {
@@ -128,7 +131,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
         centerTitle: true,
         elevation: 0,
         leading: InkWell(
@@ -152,7 +155,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
           ),
         ),
         title: Text(
-          AppLocalizations.of(context)?.translate("Add Schedule") ?? "Add Schedule",
+          AppLocalizations.of(context)?.translate("Add Schedule") ??
+              "Add Schedule",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
@@ -160,8 +164,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(
                 children: [
                   Image.asset(
@@ -183,9 +187,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
               ),
               Text(
                 AppLocalizations.of(context)?.translate("Time") ?? "Time",
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
               ),
               SizedBox(
                 height: media.width * 0.35,
@@ -201,17 +203,18 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                 height: media.width * 0.06,
               ),
               Text(
-                AppLocalizations.of(context)?.translate("Details Workout") ?? "Details Workout",
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500),
+                AppLocalizations.of(context)?.translate("Details Workout") ??
+                    "Details Workout",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
               ),
               SizedBox(
                 height: media.width * 0.03,
               ),
               IconTitleNextRow(
                 icon: "assets/img/choose_workout.png",
-                title: AppLocalizations.of(context)?.translate("Choose Workout") ?? "Choose Workout",
+                title:
+                    AppLocalizations.of(context)?.translate("Choose Workout") ??
+                        "Choose Workout",
                 time: selectedWorkout.text,
                 color: TColor.lightGray,
                 onPressed: () async {
@@ -236,8 +239,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                   _showDifficultySelector(context);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 8, horizontal: 15),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
                   decoration: BoxDecoration(
                     color: TColor.lightGray,
                     borderRadius: BorderRadius.circular(15),
@@ -259,11 +262,12 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          AppLocalizations.of(context)?.translate("Difficulty") ?? "Difficulty",
+                          AppLocalizations.of(context)
+                                  ?.translate("Difficulty") ??
+                              "Difficulty",
                           style: TextStyle(color: TColor.gray, fontSize: 12),
                         ),
                       ),
-
                       SizedBox(
                         width: 120,
                         child: Text(
@@ -272,7 +276,6 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                           style: TextStyle(color: TColor.gray, fontSize: 12),
                         ),
                       ),
-
                       Container(
                         width: 25,
                         height: 25,
@@ -293,7 +296,9 @@ class _AddScheduleViewState extends State<AddScheduleView> {
               ),
               RepetitionsRow(
                 icon: "assets/img/Repeat.png",
-                title: AppLocalizations.of(context)?.translate("Custom Repetitions") ?? "Custom Repetitions",
+                title: AppLocalizations.of(context)
+                        ?.translate("Custom Repetitions") ??
+                    "Custom Repetitions",
                 color: TColor.lightGray,
                 repetitionController: selectedRepetition,
               ),
@@ -304,7 +309,9 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    AppLocalizations.of(context)?.translate("Enable Notifications") ?? "Enable Notifications",
+                    AppLocalizations.of(context)
+                            ?.translate("Enable Notifications") ??
+                        "Enable Notifications",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -323,7 +330,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
               ),
               Spacer(),
               RoundButton(
-                  title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
+                  title:
+                      AppLocalizations.of(context)?.translate("Save") ?? "Save",
                   onPressed: _handleAddSchedule),
               const SizedBox(
                 height: 20,

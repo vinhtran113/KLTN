@@ -34,7 +34,8 @@ class SpeechState {
 
 class SpeechService extends StateNotifier<SpeechState> {
   final SpeechToText _speech = SpeechToText();
-  StreamController<String> _textStreamController = StreamController.broadcast();
+  final StreamController<String> _textStreamController =
+      StreamController.broadcast();
 
   Stream<String> get textStream => _textStreamController.stream;
 
@@ -77,7 +78,6 @@ class SpeechService extends StateNotifier<SpeechState> {
     state = state.copyWith(isAvailable: available);
   }
 
-
   void _onStatus(String status) {
     print('📢 Status: $status');
     if (status == 'listening') {
@@ -102,7 +102,7 @@ class SpeechService extends StateNotifier<SpeechState> {
 
     final locales = await _speech.locales();
     final selectedLocale = locales.firstWhere(
-          (locale) => locale.localeId == 'vi_VN',
+      (locale) => locale.localeId == 'vi_VN',
       orElse: () => locales.first,
     );
 
@@ -121,7 +121,6 @@ class SpeechService extends StateNotifier<SpeechState> {
       localeId: selectedLocale.localeId,
     );
   }
-
 
   Future<void> stopListening() async {
     _speech.stop();

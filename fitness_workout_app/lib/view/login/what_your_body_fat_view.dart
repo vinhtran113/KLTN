@@ -24,14 +24,16 @@ class _WhatYourBodyFatViewState extends State<WhatYourBodyFatView> {
     {'label': '34–37%', 'value': 35.5, 'asset': 'assets/img/bodyfat_34_37.png'},
     {'label': '38–42%', 'value': 40.0, 'asset': 'assets/img/bodyfat_38_42.jpg'},
     {'label': '43–49%', 'value': 46.0, 'asset': 'assets/img/bodyfat_43_49.jpg'},
-    {'label': '50% +', 'value': 52.0, 'asset': 'assets/img/bodyfat_50_plus.jpg'},
+    {
+      'label': '50% +',
+      'value': 52.0,
+      'asset': 'assets/img/bodyfat_50_plus.jpg'
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Scaffold(
       body: Column(
         children: [
@@ -41,9 +43,7 @@ class _WhatYourBodyFatViewState extends State<WhatYourBodyFatView> {
           Text(
             "What is your body fat level?",
             style: TextStyle(
-                color: TColor.black,
-                fontSize: 20,
-                fontWeight: FontWeight.w700),
+                color: TColor.black, fontSize: 20, fontWeight: FontWeight.w700),
           ),
           Text(
             "Use a visual assessment and don’t worry about being too precise",
@@ -88,7 +88,8 @@ class _WhatYourBodyFatViewState extends State<WhatYourBodyFatView> {
                           aspectRatio: 0.75, // Hình luôn vuông
                           child: Image.asset(
                             option['asset'],
-                            fit: BoxFit.cover, // Hiển thị đầy đủ, cắt viền nếu cần
+                            fit: BoxFit
+                                .cover, // Hiển thị đầy đủ, cắt viền nếu cần
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -112,25 +113,26 @@ class _WhatYourBodyFatViewState extends State<WhatYourBodyFatView> {
             child: ElevatedButton(
               onPressed: selectedIndex != null
                   ? () async {
-                final selectedValue = bodyFatOptions[selectedIndex!]['value'];
-                String result = await AuthService().updateUserBodyFat(
-                    FirebaseAuth.instance.currentUser!.uid,
-                    selectedValue.toString());
+                      final selectedValue =
+                          bodyFatOptions[selectedIndex!]['value'];
+                      String result = await AuthService().updateUserBodyFat(
+                          FirebaseAuth.instance.currentUser!.uid,
+                          selectedValue.toString());
 
-                if (result == "success") {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const WhatYourGoalView(),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Lỗi xảy ra: $result')),
-                  );
-                }
-              } : null,
-              child: const Text("Confirm"),
+                      if (result == "success") {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WhatYourGoalView(),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Lỗi xảy ra: $result')),
+                        );
+                      }
+                    }
+                  : null,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: selectedIndex != null
@@ -138,6 +140,7 @@ class _WhatYourBodyFatViewState extends State<WhatYourBodyFatView> {
                     : Colors.grey.shade400,
                 foregroundColor: Colors.white,
               ),
+              child: const Text("Confirm"),
             ),
           ),
         ],

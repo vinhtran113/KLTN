@@ -1,15 +1,28 @@
-import 'package:fl_chart/fl_chart.dart';
+import 'package:fitness_workout_app/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:screenshot/screenshot.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common/common.dart';
-import '../../common_widget/round_button.dart';
 
 class ResultView extends StatefulWidget {
   final DateTime date1;
   final DateTime date2;
-  const ResultView({super.key, required this.date1, required this.date2});
+  final List<Map<String, dynamic>> photosDay1;
+  final List<Map<String, dynamic>> photosDay2;
+  final UserModel user;
+
+  const ResultView(
+      {super.key,
+      required this.date1,
+      required this.date2,
+      required this.photosDay1,
+      required this.photosDay2,
+      required this.user});
 
   @override
   State<ResultView> createState() => _ResultViewState();
@@ -17,56 +30,248 @@ class ResultView extends StatefulWidget {
 
 class _ResultViewState extends State<ResultView> {
   int selectButton = 0;
+  int progressScore = 0;
+  double progressRatio = 0.0;
+  String progressLabel = "";
+  String progressMessage = "";
+  Color progressColor = Colors.grey;
+  List<Map<String, dynamic>> imaArr = [];
+  List statArr = [];
+  final ScreenshotController screenshotController = ScreenshotController();
 
-  List imaArr = [
-    {
-      "title": "Front Facing",
-      "month_1_image": "assets/img/pp_1.png",
-      "month_2_image": "assets/img/pp_2.png",
-    },
-    {
-      "title": "Back Facing",
-      "month_1_image": "assets/img/pp_3.png",
-      "month_2_image": "assets/img/pp_4.png",
-    },
-    {
-      "title": "Left Facing",
-      "month_1_image": "assets/img/pp_5.png",
-      "month_2_image": "assets/img/pp_6.png",
-    },
-    {
-      "title": "Right Facing",
-      "month_1_image": "assets/img/pp_7.png",
-      "month_2_image": "assets/img/pp_8.png",
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
 
-  List statArr = [
-    {
-      "title": "Lose Weight",
-      "diff_per": "33",
-      "month_1_per": "33%",
-      "month_2_per": "67%",
-    },
-    {
-      "title": "Height Increase",
-      "diff_per": "88",
-      "month_1_per": "88%",
-      "month_2_per": "12%",
-    },
-    {
-      "title": "Muscle Mass Increase",
-      "diff_per": "57",
-      "month_1_per": "57%",
-      "month_2_per": "43%",
-    },
-    {
-      "title": "Abs",
-      "diff_per": "89",
-      "month_1_per": "89%",
-      "month_2_per": "11%",
-    },
-  ];
+    final statsDay1 = extractBodyStats(widget.photosDay1);
+    final statsDay2 = extractBodyStats(widget.photosDay2);
+    final loadStatarr = buildStatArr(statsDay1, statsDay2);
+
+    final result = calculateProgress(
+      weightBefore: statsDay2['weight']!,
+      weightAfter: statsDay1['weight']!,
+      bodyFatBefore: statsDay2['bodyFat']!,
+      bodyFatAfter: statsDay1['bodyFat']!,
+      height: statsDay1['height']!,
+      goal: widget.user.level,
+    );
+
+    final score = result['score'];
+    final message = result['message'];
+    final progress = getProgressDisplay(score);
+    final loadImaarr =
+        buildImageComparisonList(widget.photosDay1, widget.photosDay2);
+
+    setState(() {
+      progressScore = score;
+      progressMessage = message;
+      progressColor = progress['color'];
+      progressLabel = progress['label'];
+      progressRatio = score / 100;
+      imaArr = loadImaarr;
+      statArr = loadStatarr;
+    });
+  }
+
+  Map<String, double> extractBodyStats(List<Map<String, dynamic>> photos) {
+    if (photos.isEmpty) {
+      return {
+        'weight': 0.0,
+        'height': 0.0,
+        'bodyFat': 0.0,
+      };
+    }
+
+    final photo = photos.first;
+
+    return {
+      'weight': double.tryParse(photo['weight']?.toString() ?? '') ?? 0.0,
+      'height': double.tryParse(photo['height']?.toString() ?? '') ?? 0.0,
+      'bodyFat': double.tryParse(photo['bodyFat']?.toString() ?? '') ?? 0.0,
+    };
+  }
+
+  List<Map<String, dynamic>> buildImageComparisonList(
+    List<Map<String, dynamic>> photosDay1,
+    List<Map<String, dynamic>> photosDay2,
+  ) {
+    const fallbackImage = "assets/img/no_image.png";
+    final styles = [
+      "Front Facing",
+      "Back Facing",
+      "Left Facing",
+      "Right Facing"
+    ];
+
+    String? findImage(List<Map<String, dynamic>> photos, String style) {
+      try {
+        return photos.firstWhere((p) => p['style'] == style)['imageUrl'];
+      } catch (e) {
+        return null;
+      }
+    }
+
+    return styles.map((style) {
+      final image1 = findImage(photosDay1, style);
+      final image2 = findImage(photosDay2, style);
+      return {
+        "title": style,
+        "image_day_1": image1 ?? fallbackImage,
+        "image_day_2": image2 ?? fallbackImage,
+      };
+    }).toList();
+  }
+
+  List<Map<String, dynamic>> buildStatArr(
+    Map<String, double> stat1,
+    Map<String, double> stat2,
+  ) {
+    double diffPercent(double a, double b) {
+      if (a == 0) return 0.0;
+      return ((b - a) / a) * 100.0;
+    }
+
+    return [
+      {
+        "title": "Lose Weight",
+        "diff_per": diffPercent(stat1["weight"]!, stat2["weight"]!)
+            .abs()
+            .toStringAsFixed(0),
+        "month_1_per": "${stat1["weight"]?.toStringAsFixed(0)}kg",
+        "month_2_per": "${stat2["weight"]?.toStringAsFixed(0)}kg",
+      },
+      {
+        "title": "Height Increase",
+        "diff_per":
+            diffPercent(stat1["height"]!, stat2["height"]!).toStringAsFixed(0),
+        "month_1_per": "${stat1["height"]?.toStringAsFixed(0)}cm",
+        "month_2_per": "${stat2["height"]?.toStringAsFixed(0)}cm",
+      },
+      {
+        "title": "Body Fat Reduction",
+        "diff_per": diffPercent(stat1["bodyFat"]!, stat2["bodyFat"]!)
+            .abs()
+            .toStringAsFixed(0),
+        "month_1_per": "${stat1["bodyFat"]?.toStringAsFixed(0)}%",
+        "month_2_per": "${stat2["bodyFat"]?.toStringAsFixed(0)}%",
+      },
+    ];
+  }
+
+  Map<String, dynamic> getProgressDisplay(int score) {
+    String label;
+    Color color;
+
+    if (score >= 80) {
+      label = "Excellent";
+      color = const Color(0xFF6DD570); // Green
+    } else if (score >= 60) {
+      label = "Good";
+      color = const Color(0xFFB6D94C); // Light Green/Yellow
+    } else if (score >= 40) {
+      label = "Average";
+      color = const Color(0xFFFFC107); // Orange
+    } else {
+      label = "Poor";
+      color = const Color(0xFFFF4C4C); // Red
+    }
+
+    return {
+      "label": label,
+      "color": color,
+    };
+  }
+
+  Map<String, dynamic> calculateProgress({
+    required double weightBefore,
+    required double weightAfter,
+    required double bodyFatBefore,
+    required double bodyFatAfter,
+    required double height, // tính theo cm
+    required String goal,
+  }) {
+    double weightChange = weightAfter - weightBefore;
+    double fatChange = bodyFatAfter - bodyFatBefore;
+    double bmi = weightAfter / ((height / 100) * (height / 100));
+
+    int score = 50;
+    String message = "";
+
+    if (goal.toLowerCase() != "lose a fat" && bmi > 27) {
+      return {
+        'score': 20,
+        'message':
+            "⚠️ Your BMI is already quite high. You should not gain any more weight."
+      };
+    }
+
+    // ⚠️ Cảnh báo BMI quá cao hoặc quá thấp
+    if (bmi >= 30) {
+      return {
+        'score': 10,
+        'message':
+            "⚠️ Your BMI is in the obese range. Please adjust your diet and exercise."
+      };
+    }
+
+    if (bmi < 18.5) {
+      return {
+        'score': 15,
+        'message':
+            "⚠️ Your BMI is in the underweight range. You need to improve your nutrition and exercise."
+      };
+    }
+
+    // ✅ Phân tích theo mục tiêu cụ thể
+    switch (goal.toLowerCase()) {
+      case "lose a fat":
+        if (weightChange < -0.2 && fatChange < -0.2) {
+          score = 90;
+          message = "🎯 You're losing weight and fat very well!";
+        } else if (weightChange > 0.3) {
+          score = 20;
+          message =
+              "⚠️ Your weight is increasing, contrary to the goal of losing fat.";
+        } else {
+          score = 60;
+          message =
+              "🔄 The progress is stable, but there is room for improvement.";
+        }
+        break;
+
+      case "improve shape":
+        if (weightChange > 0.2 && fatChange < 0.2) {
+          score = 90;
+          message = "💪 You're gaining muscle effectively!";
+        } else if (fatChange > 1.0) {
+          score = 30;
+          message = "⚠️ You may be gaining more fat than muscle.";
+        } else {
+          score = 60;
+          message = "🔄 The progress is stable, keep it up.";
+        }
+        break;
+
+      case "lean & tone":
+        if (weightChange.abs() < 0.2 && fatChange.abs() < 0.2) {
+          score = 85;
+          message = "✅ You're maintaining your shape very well!";
+        } else {
+          score = 40;
+          message = "⚠️ Your weight or fat is changing inconsistently.";
+        }
+        break;
+
+      default:
+        score = 20;
+        message = "❓ Unable to determine the goal.";
+    }
+
+    return {
+      'score': score.clamp(0, 100),
+      'message': message,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +309,16 @@ class _ResultViewState extends State<ResultView> {
         ),
         actions: [
           InkWell(
-            onTap: () {},
+            onTap: () async {
+              final image = await screenshotController.capture();
+              if (image != null) {
+                final tempDir = await getTemporaryDirectory();
+                final file = await File('${tempDir.path}/result.png').create();
+                await file.writeAsBytes(image);
+                await Share.shareXFiles([XFile(file.path)],
+                    text: 'My fitness progress result!');
+              }
+            },
             child: Container(
               margin: const EdgeInsets.all(8),
               height: 40,
@@ -121,27 +335,8 @@ class _ResultViewState extends State<ResultView> {
               ),
             ),
           ),
-          InkWell(
-            onTap: () {},
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              height: 40,
-              width: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                  color: TColor.lightGray,
-                  borderRadius: BorderRadius.circular(10)),
-              child: Image.asset(
-                "assets/img/more_btn.png",
-                width: 15,
-                height: 15,
-                fit: BoxFit.contain,
-              ),
-            ),
-          )
         ],
       ),
-      backgroundColor: TColor.white,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
@@ -243,18 +438,17 @@ class _ResultViewState extends State<ResultView> {
                               fontSize: 16,
                               fontWeight: FontWeight.w700),
                         ),
-                        const Text(
-                          "Good",
+                        Text(
+                          progressLabel,
                           style: TextStyle(
-                              color: Color(0xFF6DD570),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500),
+                            color: progressColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(
-                      height: 15,
-                    ),
+                    const SizedBox(height: 15),
                     Stack(
                       alignment: Alignment.center,
                       children: [
@@ -262,131 +456,157 @@ class _ResultViewState extends State<ResultView> {
                           height: 20,
                           width: media.width - 40,
                           backgroundColor: Colors.grey.shade100,
-                          foregroundColor: Colors.purple,
-                          ratio: 0.62,
+                          foregroundColor: progressColor,
+                          ratio: progressRatio,
                           direction: Axis.horizontal,
                           curve: Curves.fastLinearToSlowEaseIn,
-                          duration: const Duration(seconds: 3),
+                          duration: const Duration(seconds: 2),
                           borderRadius: BorderRadius.circular(10),
                           gradientColor: LinearGradient(
-                              colors: TColor.primaryG,
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight),
-                        ),
-                        Text(
-                          "62%",
-                          style: TextStyle(
-                            color: TColor.white,
-                            fontSize: 12,
+                            colors: [
+                              progressColor.withOpacity(0.8),
+                              progressColor
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
                           ),
                         ),
+                        Text(
+                          "${(progressRatio * 100).toStringAsFixed(0)}%",
+                          style: TextStyle(color: TColor.white, fontSize: 12),
+                        ),
                       ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      progressMessage,
+                      style: TextStyle(
+                        color: progressScore < 50
+                            ? Colors.red
+                            : Colors.grey.shade800,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     const SizedBox(
                       height: 15,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          dateToString(widget.date1, formatStr: "MMMM"),
-                          style: TextStyle(
-                              color: TColor.gray,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700),
-                        ),
-                        Text(
-                          dateToString(widget.date2, formatStr: "MMMM"),
-                          style: TextStyle(
-                              color: TColor.gray,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ),
-                    ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: imaArr.length,
-                        itemBuilder: (context, index) {
-                          var iObj = imaArr[index] as Map? ?? {};
+                    // Only screenshot from here down
+                    Screenshot(
+                      controller: screenshotController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                dateToString(widget.date2,
+                                    formatStr: "dd MMMM, yyyy"),
+                                style: TextStyle(
+                                    color: TColor.gray,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                              Text(
+                                dateToString(widget.date1,
+                                    formatStr: "dd MMMM, yyyy"),
+                                style: TextStyle(
+                                    color: TColor.gray,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700),
+                              ),
+                            ],
+                          ),
+                          ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: imaArr.length,
+                            itemBuilder: (context, index) {
+                              var iObj = imaArr[index];
 
-                          return Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const SizedBox(
-                                  height: 8,
-                                ),
-                                Text(
-                                  iObj["title"].toString(),
-                                  style: TextStyle(
-                                      color: TColor.gray,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                                const SizedBox(
-                                  height: 8,
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: AspectRatio(
-                                        aspectRatio: 1,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: TColor.lightGray,
-                                            borderRadius:
-                                            BorderRadius.circular(20),
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                            BorderRadius.circular(20),
-                                            child: Image.asset(
-                                              iObj["month_1_image"].toString(),
-                                              width: double.maxFinite,
-                                              height: double.maxFinite,
-                                              fit: BoxFit.cover,
+                              Widget imageWidget(String imagePath) {
+                                if (imagePath.startsWith("http")) {
+                                  return Image.network(
+                                    imagePath,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                          "assets/img/no_image.png",
+                                          fit: BoxFit.cover);
+                                    },
+                                  );
+                                } else {
+                                  return Image.asset(
+                                    imagePath,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    fit: BoxFit.cover,
+                                  );
+                                }
+                              }
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    iObj["title"].toString(),
+                                    style: TextStyle(
+                                        color: TColor.gray,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: AspectRatio(
+                                          aspectRatio: 1,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: TColor.lightGray,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              child: imageWidget(
+                                                  iObj["image_day_2"]),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      width: 15,
-                                    ),
-                                    Expanded(
-                                      child: AspectRatio(
-                                        aspectRatio: 1,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: TColor.lightGray,
-                                            borderRadius:
-                                            BorderRadius.circular(20),
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                            BorderRadius.circular(20),
-                                            child: Image.asset(
-                                              iObj["month_2_image"].toString(),
-                                              width: double.maxFinite,
-                                              height: double.maxFinite,
-                                              fit: BoxFit.cover,
+                                      const SizedBox(width: 15),
+                                      Expanded(
+                                        child: AspectRatio(
+                                          aspectRatio: 1,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: TColor.lightGray,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              child: imageWidget(
+                                                  iObj["image_day_1"]),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    )
-                                  ],
-                                )
-                              ]);
-                        }),
-                    RoundButton(
-                        title: "Back to Home",
-                        onPressed: () {
-                          Navigator.pop(context);
-                        }),
-                    const SizedBox(
-                      height: 15,
+                                    ],
+                                  )
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -396,126 +616,20 @@ class _ResultViewState extends State<ResultView> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.only(left: 10),
-                      height: media.width * 0.5,
-                      width: double.maxFinite,
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(
-                            enabled: true,
-                            handleBuiltInTouches: false,
-                            touchCallback: (FlTouchEvent event,
-                                LineTouchResponse? response) {
-                              if (response == null ||
-                                  response.lineBarSpots == null) {
-                                return;
-                              }
-                              // if (event is FlTapUpEvent) {
-                              //   final spotIndex =
-                              //       response.lineBarSpots!.first.spotIndex;
-                              //   showingTooltipOnSpots.clear();
-                              //   setState(() {
-                              //     showingTooltipOnSpots.add(spotIndex);
-                              //   });
-                              // }
-                            },
-                            mouseCursorResolver: (FlTouchEvent event,
-                                LineTouchResponse? response) {
-                              if (response == null ||
-                                  response.lineBarSpots == null) {
-                                return SystemMouseCursors.basic;
-                              }
-                              return SystemMouseCursors.click;
-                            },
-                            getTouchedSpotIndicator: (LineChartBarData barData,
-                                List<int> spotIndexes) {
-                              return spotIndexes.map((index) {
-                                return TouchedSpotIndicatorData(
-                                  FlLine(
-                                    color: Colors.transparent,
-                                  ),
-                                  FlDotData(
-                                    show: true,
-                                    getDotPainter:
-                                        (spot, percent, barData, index) =>
-                                        FlDotCirclePainter(
-                                          radius: 3,
-                                          color: Colors.white,
-                                          strokeWidth: 3,
-                                          strokeColor: TColor.secondaryColor1,
-                                        ),
-                                  ),
-                                );
-                              }).toList();
-                            },
-                            touchTooltipData: LineTouchTooltipData(
-                              getTooltipColor: (touchedBarSpot) => TColor.secondaryColor1,
-                              tooltipRoundedRadius: 20,
-                              getTooltipItems:
-                                  (List<LineBarSpot> lineBarsSpot) {
-                                return lineBarsSpot.map((lineBarSpot) {
-                                  return LineTooltipItem(
-                                    "${lineBarSpot.x.toInt()} mins ago",
-                                    const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  );
-                                }).toList();
-                              },
-                            ),
-                          ),
-                          lineBarsData: lineBarsData1,
-                          minY: -0.5,
-                          maxY: 110,
-                          titlesData: FlTitlesData(
-                              show: true,
-                              leftTitles: AxisTitles(),
-                              topTitles: AxisTitles(),
-                              bottomTitles: AxisTitles(
-                                sideTitles: bottomTitles,
-                              ),
-                              rightTitles: AxisTitles(
-                                sideTitles: rightTitles,
-                              )),
-                          gridData: FlGridData(
-                            show: true,
-                            drawHorizontalLine: true,
-                            horizontalInterval: 25,
-                            drawVerticalLine: false,
-                            getDrawingHorizontalLine: (value) {
-                              return FlLine(
-                                color: TColor.lightGray,
-                                strokeWidth: 2,
-                              );
-                            },
-                          ),
-                          borderData: FlBorderData(
-                            show: true,
-                            border: Border.all(
-                              color: Colors.transparent,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          dateToString(widget.date1, formatStr: "MMMM"),
+                          dateToString(widget.date2,
+                              formatStr: "dd MMMM, yyyy"),
                           style: TextStyle(
                               color: TColor.gray,
                               fontSize: 16,
                               fontWeight: FontWeight.w700),
                         ),
                         Text(
-                          dateToString(widget.date2, formatStr: "MMMM"),
+                          dateToString(widget.date1,
+                              formatStr: "dd MMMM, yyyy"),
                           style: TextStyle(
                               color: TColor.gray,
                               fontSize: 16,
@@ -524,225 +638,101 @@ class _ResultViewState extends State<ResultView> {
                       ],
                     ),
                     ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: statArr.length,
-                        itemBuilder: (context, index) {
-                          var iObj = statArr[index] as Map? ?? {};
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: statArr.length,
+                      itemBuilder: (context, index) {
+                        var iObj = statArr[index] as Map? ?? {};
 
-                          return Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                        double diffPer =
+                            double.tryParse(iObj["diff_per"].toString()) ?? 0.0;
+
+                        // Xác định chiều hướng và màu sắc
+                        IconData trendIcon;
+                        Color trendColor;
+
+                        if (diffPer > 0) {
+                          trendIcon = Icons.arrow_upward;
+                          trendColor = Colors.redAccent;
+                        } else if (diffPer < 0) {
+                          trendIcon = Icons.arrow_downward;
+                          trendColor = Colors.green;
+                        } else {
+                          trendIcon = Icons.remove;
+                          trendColor = Colors.grey;
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 15),
+                            Text(
+                              iObj["title"].toString(),
+                              style: TextStyle(
+                                  color: TColor.gray,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const SizedBox(
-                                  height: 15,
+                                SizedBox(
+                                  width: 40,
+                                  child: Text(
+                                    iObj["month_2_per"].toString(),
+                                    textAlign: TextAlign.right,
+                                    style: TextStyle(
+                                        color: TColor.gray, fontSize: 12),
+                                  ),
                                 ),
-                                Text(
-                                  iObj["title"].toString(),
-                                  style: TextStyle(
-                                      color: TColor.gray,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                                const SizedBox(
-                                  height: 8,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    SizedBox(
-                                      width: 25,
-                                      child: Text(
-                                        iObj["month_1_per"].toString(),
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                            color: TColor.gray, fontSize: 12),
-                                      ),
-                                    ),
-
-                                    SimpleAnimationProgressBar(
-                                      height: 10,
-                                      width: media.width - 120,
-                                      backgroundColor: TColor.primaryColor1,
-                                      foregroundColor: const Color(0xffFFB2B1) ,
-                                      ratio: (double.tryParse(iObj["diff_per"].toString()) ?? 0.0) / 100.0 ,
-                                      direction: Axis.horizontal,
-                                      curve: Curves.fastLinearToSlowEaseIn,
-                                      duration: const Duration(seconds: 3),
-                                      borderRadius: BorderRadius.circular(5),
-
-                                    ),
-
-                                    SizedBox(
-                                      width: 25,
-                                      child: Text(
-                                        iObj["month_2_per"].toString(),
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
-                                          color: TColor.gray,
-                                          fontSize: 12,
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: SimpleAnimationProgressBar(
+                                          height: 10,
+                                          width: media.width - 160,
+                                          backgroundColor: TColor.primaryColor1,
+                                          foregroundColor:
+                                              trendColor.withOpacity(0.6),
+                                          ratio: diffPer.abs() / 100.0,
+                                          direction: Axis.horizontal,
+                                          curve: Curves.fastLinearToSlowEaseIn,
+                                          duration: const Duration(seconds: 3),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
                                         ),
                                       ),
+                                      const SizedBox(width: 6),
+                                      Icon(trendIcon,
+                                          color: trendColor, size: 16),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 40,
+                                  child: Text(
+                                    iObj["month_1_per"].toString(),
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                      color: TColor.gray,
+                                      fontSize: 12,
                                     ),
-                                  ],
-                                )
-                              ]);
-                        }),
-
-                    RoundButton(
-                        title: "Back to Home",
-                        onPressed: () {
-                          Navigator.pop(context);
-                        }),
-                    const SizedBox(
-                      height: 15,
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        );
+                      },
                     ),
                   ],
-                )
+                ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  LineTouchData get lineTouchData1 => LineTouchData(
-    handleBuiltInTouches: true,
-    touchTooltipData: LineTouchTooltipData(
-      getTooltipColor: (touchedBarSpot) => Colors.blueGrey.withOpacity(0.8),
-    ),
-  );
-
-  List<LineChartBarData> get lineBarsData1 => [
-    lineChartBarData1_1,
-    lineChartBarData1_2,
-  ];
-
-  LineChartBarData get lineChartBarData1_1 => LineChartBarData(
-    isCurved: true,
-    gradient: LinearGradient(colors: TColor.primaryG),
-    barWidth: 3,
-    isStrokeCapRound: true,
-    dotData: FlDotData(show: false),
-    belowBarData: BarAreaData(show: false),
-    spots: const [
-      FlSpot(1, 35),
-      FlSpot(2, 70),
-      FlSpot(3, 40),
-      FlSpot(4, 80),
-      FlSpot(5, 25),
-      FlSpot(6, 70),
-      FlSpot(7, 35),
-    ],
-  );
-
-  LineChartBarData get lineChartBarData1_2 => LineChartBarData(
-    isCurved: true,
-    gradient: LinearGradient(colors: [
-      TColor.secondaryColor2.withOpacity(0.5),
-      TColor.secondaryColor1.withOpacity(0.5)
-    ]),
-    barWidth: 2,
-    isStrokeCapRound: true,
-    dotData: FlDotData(show: false),
-    belowBarData: BarAreaData(
-      show: false,
-    ),
-    spots: const [
-      FlSpot(1, 80),
-      FlSpot(2, 50),
-      FlSpot(3, 90),
-      FlSpot(4, 40),
-      FlSpot(5, 80),
-      FlSpot(6, 35),
-      FlSpot(7, 60),
-    ],
-  );
-
-  SideTitles get rightTitles => SideTitles(
-    getTitlesWidget: rightTitleWidgets,
-    showTitles: true,
-    interval: 20,
-    reservedSize: 40,
-  );
-
-  Widget rightTitleWidgets(double value, TitleMeta meta) {
-    String text;
-    switch (value.toInt()) {
-      case 0:
-        text = '0%';
-        break;
-      case 20:
-        text = '20%';
-        break;
-      case 40:
-        text = '40%';
-        break;
-      case 60:
-        text = '60%';
-        break;
-      case 80:
-        text = '80%';
-        break;
-      case 100:
-        text = '100%';
-        break;
-      default:
-        return Container();
-    }
-
-    return Text(text,
-        style: TextStyle(
-          color: TColor.gray,
-          fontSize: 12,
-        ),
-        textAlign: TextAlign.center);
-  }
-
-  SideTitles get bottomTitles => SideTitles(
-    showTitles: true,
-    reservedSize: 32,
-    interval: 1,
-    getTitlesWidget: bottomTitleWidgets,
-  );
-
-  Widget bottomTitleWidgets(double value, TitleMeta meta) {
-    var style = TextStyle(
-      color: TColor.gray,
-      fontSize: 12,
-    );
-    Widget text;
-    switch (value.toInt()) {
-      case 1:
-        text = Text('Jan', style: style);
-        break;
-      case 2:
-        text = Text('Feb', style: style);
-        break;
-      case 3:
-        text = Text('Mar', style: style);
-        break;
-      case 4:
-        text = Text('Apr', style: style);
-        break;
-      case 5:
-        text = Text('May', style: style);
-        break;
-      case 6:
-        text = Text('Jun', style: style);
-        break;
-      case 7:
-        text = Text('Jul', style: style);
-        break;
-      default:
-        text = const Text('');
-        break;
-    }
-
-    return SideTitleWidget(
-      meta: meta,
-      space: 10,
-      child: text,
     );
   }
 }

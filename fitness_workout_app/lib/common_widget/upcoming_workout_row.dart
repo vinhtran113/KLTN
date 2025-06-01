@@ -10,10 +10,10 @@ class UpcomingWorkoutRow extends StatefulWidget {
   final VoidCallback onRefresh; // Định nghĩa onRefresh đúng kiểu
 
   const UpcomingWorkoutRow({
-    Key? key,
+    super.key,
     required this.wObj,
     required this.onRefresh,
-  }) : super(key: key);
+  });
 
   @override
   State<UpcomingWorkoutRow> createState() => _UpcomingWorkoutRowState();
@@ -49,11 +49,12 @@ class _UpcomingWorkoutRowState extends State<UpcomingWorkoutRow> {
             ClipRRect(
               borderRadius: BorderRadius.circular(30),
               child: Image.network(
-                widget.wObj.pic.toString(),  // Đây là URL của ảnh từ mạng
+                widget.wObj.pic.toString(), // Đây là URL của ảnh từ mạng
                 width: 60,
                 height: 60,
                 fit: BoxFit.cover,
-                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                loadingBuilder: (BuildContext context, Widget child,
+                    ImageChunkEvent? loadingProgress) {
                   if (loadingProgress == null) {
                     return child; // Hiển thị ảnh khi tải xong
                   } else {
@@ -61,7 +62,7 @@ class _UpcomingWorkoutRowState extends State<UpcomingWorkoutRow> {
                       child: CircularProgressIndicator(
                         value: loadingProgress.expectedTotalBytes != null
                             ? loadingProgress.cumulativeBytesLoaded /
-                            (loadingProgress.expectedTotalBytes ?? 1)
+                                (loadingProgress.expectedTotalBytes ?? 1)
                             : null,
                       ),
                     );
@@ -86,31 +87,28 @@ class _UpcomingWorkoutRowState extends State<UpcomingWorkoutRow> {
                     widget.wObj.repeatInterval.toString() == "Everyday"
                         ? "Everyday"
                         : widget.wObj.repeatInterval.contains(",")
-                        ? "Repeat: ${widget.wObj.repeatInterval
-                            .split(",")
-                            .map((day) {
-                          // Chuyển đổi tên ngày thành số thứ tự (nếu cần)
-                          switch (day) {
-                            case "Monday":
-                              return "2";
-                            case "Tuesday":
-                              return "3";
-                            case "Wednesday":
-                              return "4";
-                            case "Thursday":
-                              return "5";
-                            case "Friday":
-                              return "6";
-                            case "Saturday":
-                              return "7";
-                            case "Sunday":
-                              return "CN";
-                            default:
-                              return day;
-                          }
-                        })
-                            .join(",")}"
-                        : widget.wObj.day.toString(),
+                            ? "Repeat: ${widget.wObj.repeatInterval.split(",").map((day) {
+                                // Chuyển đổi tên ngày thành số thứ tự (nếu cần)
+                                switch (day) {
+                                  case "Monday":
+                                    return "2";
+                                  case "Tuesday":
+                                    return "3";
+                                  case "Wednesday":
+                                    return "4";
+                                  case "Thursday":
+                                    return "5";
+                                  case "Friday":
+                                    return "6";
+                                  case "Saturday":
+                                    return "7";
+                                  case "Sunday":
+                                    return "CN";
+                                  default:
+                                    return day;
+                                }
+                              }).join(",")}"
+                            : widget.wObj.day.toString(),
                     style: TextStyle(
                       color: TColor.gray,
                       fontSize: 12,
@@ -154,8 +152,8 @@ class _UpcomingWorkoutRowState extends State<UpcomingWorkoutRow> {
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(colors: TColor.thirdG),
-                                borderRadius:
-                                const BorderRadius.all(Radius.circular(50.0)),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(50.0)),
                               ),
                             ),
                           ),
@@ -170,7 +168,7 @@ class _UpcomingWorkoutRowState extends State<UpcomingWorkoutRow> {
                           decoration: BoxDecoration(
                             color: TColor.white,
                             borderRadius:
-                            const BorderRadius.all(Radius.circular(25.0)),
+                                const BorderRadius.all(Radius.circular(25.0)),
                             boxShadow: const [
                               BoxShadow(
                                 color: Colors.black38,
