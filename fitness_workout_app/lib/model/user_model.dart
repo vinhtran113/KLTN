@@ -14,6 +14,9 @@ class UserModel {
   final String pass;
   final String ActivityLevel;
   final String body_fat;
+  final List<String> medicalHistory;
+  final List<String> medicalHistoryOther;
+  final String medicalNote;
 
   UserModel({
     required this.uid,
@@ -29,6 +32,9 @@ class UserModel {
     required this.pass,
     required this.ActivityLevel,
     required this.body_fat,
+    required this.medicalHistory,
+    required this.medicalHistoryOther,
+    required this.medicalNote,
   });
 
   // Tính tuổi người dùng từ ngày sinh
@@ -41,7 +47,8 @@ class UserModel {
     int age = today.year - dob.year;
 
     // Nếu chưa đến ngày sinh nhật trong năm nay, thì trừ 1 tuổi
-    if (today.month < dob.month || (today.month == dob.month && today.day < dob.day)) {
+    if (today.month < dob.month ||
+        (today.month == dob.month && today.day < dob.day)) {
       age--;
     }
 
@@ -64,7 +71,10 @@ class UserModel {
       pass: json['password'] ?? '',
       ActivityLevel: json['ActivityLevel'] ?? '',
       body_fat: json['body_fat'] ?? '',
+      medicalHistory: List<String>.from(json['medical_history'] ?? []),
+      medicalHistoryOther:
+          List<String>.from(json['medical_history_other'] ?? []),
+      medicalNote: json['medical_note'] ?? '',
     );
   }
 }
-

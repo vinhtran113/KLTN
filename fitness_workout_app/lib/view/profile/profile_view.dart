@@ -284,8 +284,8 @@ class _ProfileViewState extends State<ProfileView> {
                     SettingRow(
                       icon: "assets/img/p_workout.png",
                       title: AppLocalizations.of(context)
-                              ?.translate("Workout Progress") ??
-                          "Workout Progress",
+                              ?.translate("Statistics") ??
+                          "Statistics",
                       onPressed: () {
                         Navigator.push(
                           context,

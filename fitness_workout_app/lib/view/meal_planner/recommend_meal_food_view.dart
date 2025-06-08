@@ -10,8 +10,12 @@ import 'food_info_details_view.dart';
 class RecommendMealFoodView extends StatefulWidget {
   final Map mObj;
   final String level;
+  final List<String> medicalHistory;
   const RecommendMealFoodView(
-      {super.key, required this.level, required this.mObj});
+      {super.key,
+      required this.level,
+      required this.mObj,
+      required this.medicalHistory});
 
   @override
   State<RecommendMealFoodView> createState() => _RecommendMealFoodViewState();
@@ -61,6 +65,7 @@ class _RecommendMealFoodViewState extends State<RecommendMealFoodView> {
       List<Meal> meals = await _mealService.fetchMealsByRecommendAndLevel(
         recommend: widget.mObj["name"],
         level: widget.level,
+        userMedicalHistory: widget.medicalHistory,
       );
       setState(() {
         allMealByCateArr = meals;

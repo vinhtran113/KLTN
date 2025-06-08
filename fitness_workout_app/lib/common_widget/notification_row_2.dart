@@ -1,12 +1,12 @@
 import 'package:fitness_workout_app/common/colo_extension.dart';
+import 'package:fitness_workout_app/view/meal_planner/food_info_details2_view.dart';
 import 'package:flutter/material.dart';
 
 import '../main.dart';
-import '../view/workout_tracker/workout_detail_view.dart';
 
-class NotificationRow extends StatelessWidget {
+class NotificationRow2 extends StatelessWidget {
   final Map nObj;
-  const NotificationRow({super.key, required this.nObj});
+  const NotificationRow2({super.key, required this.nObj});
 
   String _formatTime(DateTime time) {
     final now = DateTime.now();
@@ -44,7 +44,7 @@ class NotificationRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String imageUrl = nObj["image"].toString();
-    final String title = nObj["title"].toString();
+    final String title = nObj["name"].toString();
     final String timeString = nObj["time"].toString();
 
     // Chuyển đổi `time` từ chuỗi sang `DateTime`
@@ -121,7 +121,7 @@ class NotificationRow extends StatelessWidget {
               onPressed: () {
                 navigatorKey.currentState?.push(
                   MaterialPageRoute(
-                    builder: (context) => WorkoutDetailView(dObj: nObj),
+                    builder: (context) => FoodInfoDetails2View(dObj: nObj),
                   ),
                 );
               },

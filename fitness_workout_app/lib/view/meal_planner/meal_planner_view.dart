@@ -237,7 +237,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                     ),
                     lineBarsData: lineBarsData1,
                     minY: -0.5,
-                    maxY: 3000,
+                    maxY: 3001,
                     titlesData: FlTitlesData(
                         show: true,
                         leftTitles: AxisTitles(),
@@ -251,7 +251,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                     gridData: FlGridData(
                       show: true,
                       drawHorizontalLine: true,
-                      horizontalInterval: 25,
+                      horizontalInterval: 500,
                       drawVerticalLine: false,
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
@@ -511,11 +511,6 @@ class _MealPlannerViewState extends State<MealPlannerView> {
         ),
       ),
     );
-  }
-
-  String getDayLabel(double x) {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return days[x.toInt() - 1];
   }
 
   List<LineChartBarData> get lineBarsData1 => [

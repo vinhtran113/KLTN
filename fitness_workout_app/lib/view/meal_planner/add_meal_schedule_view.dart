@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/services/roboflow_service.dart';
 import 'package:fitness_workout_app/view/meal_planner/select_meal_food_view.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -380,6 +379,7 @@ class _AddMealScheduleViewState extends State<AddMealScheduleView> {
       for (final name in foodNames) {
         try {
           final futures = foodNames.map((name) =>
+              // ignore: invalid_return_type_for_catch_error
               MealService().getMealByName(name).catchError((_) => null));
           final meals = await Future.wait(futures);
           for (final meal in meals) {

@@ -63,6 +63,7 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
   List<Meal> popularArr = [];
   List<Meal> allMealArr = [];
   List<Meal> filteredMeals = [];
+  List<String> medicalHistory = [];
 
   @override
   void initState() {
@@ -112,14 +113,17 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
 
     if (user != null) {
       String lv = user.level;
+      List<String> medicalHs = user.medicalHistory;
 
       List<Meal> meals = await _mealService.fetchMealsByRecommendAndLevel(
         recommend: mealType,
         level: lv,
+        userMedicalHistory: medicalHs,
       );
 
       setState(() {
         level = lv;
+        medicalHistory = medicalHs;
         recommendArr = meals;
         isLoading = false;
       });
@@ -352,6 +356,7 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
                           builder: (context) => RecommendMealFoodView(
                             level: level.toString(),
                             mObj: widget.eObj,
+                            medicalHistory: medicalHistory,
                           ),
                         ),
                       );
@@ -391,9 +396,6 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
                             style: const TextStyle(color: Colors.grey),
                           ),
                         ),
-            ),
-            SizedBox(
-              height: media.width * 0.05,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),

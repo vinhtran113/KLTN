@@ -151,8 +151,6 @@ class _MealScheduleViewState extends State<MealScheduleView> {
 
     for (var mealGroup in [breakfastArr, lunchArr, dinnerArr, snacksArr]) {
       for (var meal in mealGroup) {
-        final nutri = Map<String, dynamic>.from(meal['nutri'] ?? {});
-
         dailyNutrition['calories'] = dailyNutrition['calories']! +
             (meal['totalCalories'] ?? 0).toDouble();
         dailyNutrition['protein'] =

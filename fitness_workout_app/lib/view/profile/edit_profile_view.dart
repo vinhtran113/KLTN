@@ -7,6 +7,7 @@ import 'package:fitness_workout_app/common_widget/icon_title_next_row_2.dart';
 import 'package:fitness_workout_app/view/main_tab/main_tab_view.dart';
 import 'package:fitness_workout_app/view/profile/change_activity_level_view.dart';
 import 'package:fitness_workout_app/view/profile/change_body_fat_view.dart';
+import 'package:fitness_workout_app/view/profile/change_medical_history_view.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -62,7 +63,8 @@ class _EditProfileViewState extends State<EditProfileView> {
     selectedGoal.text = widget.user.level;
     selectedActivityLevel.text = widget.user.ActivityLevel;
     selectedBodyFat.text = widget.user.body_fat;
-    currentPic = widget.user.pic.isNotEmpty ? widget.user.pic : "assets/img/u2.png";
+    currentPic =
+        widget.user.pic.isNotEmpty ? widget.user.pic : "assets/img/u2.png";
 
     // Lưu dữ liệu gốc để so sánh sau
     initialData = {
@@ -119,8 +121,8 @@ class _EditProfileViewState extends State<EditProfileView> {
         File file = File(image.path);
 
         // Upload ảnh lên Firebase
-        TaskSnapshot snapshot = await FirebaseStorage.instance.ref(filePath)
-            .putFile(file);
+        TaskSnapshot snapshot =
+            await FirebaseStorage.instance.ref(filePath).putFile(file);
         String downloadUrl = await snapshot.ref.getDownloadURL();
 
         // Gán ảnh trên Firebase vào người dùng
@@ -184,8 +186,8 @@ class _EditProfileViewState extends State<EditProfileView> {
 
     try {
       // Lấy lại thông tin người dùng
-      UserModel? user = await AuthService().getUserInfo(
-          FirebaseAuth.instance.currentUser!.uid);
+      UserModel? user = await AuthService()
+          .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
 
       if (user != null) {
         Navigator.pushReplacement(
@@ -255,12 +257,10 @@ class _EditProfileViewState extends State<EditProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : TColor.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
         elevation: 0,
         leading: InkWell(
           onTap: getUserInfo,
@@ -291,14 +291,16 @@ class _EditProfileViewState extends State<EditProfileView> {
                 child: Column(
                   children: [
                     Text(
-                      AppLocalizations.of(context)?.translate("Hey there,") ?? "Hey there,",
+                      AppLocalizations.of(context)?.translate("Hey there,") ??
+                          "Hey there,",
                       style: TextStyle(color: TColor.gray, fontSize: 16),
                     ),
                     Text(
-                      AppLocalizations.of(context)?.translate("Edit Your Profile") ?? "Edit Your Profile",
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700),
+                      AppLocalizations.of(context)
+                              ?.translate("Edit Your Profile") ??
+                          "Edit Your Profile",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                     ),
                     SizedBox(
                       height: media.width * 0.05,
@@ -307,17 +309,17 @@ class _EditProfileViewState extends State<EditProfileView> {
                       borderRadius: BorderRadius.circular(media.width * 0.2),
                       child: currentPic.startsWith('http')
                           ? Image.network(
-                        currentPic,
-                        width: media.width * 0.35,
-                        height: media.width * 0.35,
-                        fit: BoxFit.cover,
-                      )
+                              currentPic,
+                              width: media.width * 0.35,
+                              height: media.width * 0.35,
+                              fit: BoxFit.cover,
+                            )
                           : Image.asset(
-                        currentPic,
-                        width: media.width * 0.35,
-                        height: media.width * 0.35,
-                        fit: BoxFit.cover,
-                      ),
+                              currentPic,
+                              width: media.width * 0.35,
+                              height: media.width * 0.35,
+                              fit: BoxFit.cover,
+                            ),
                     ),
                     SizedBox(
                       height: media.width * 0.05,
@@ -327,7 +329,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                       child: Column(
                         children: [
                           RoundTextField(
-                            labelText: AppLocalizations.of(context)?.translate("First Name") ?? "First Name",
+                            labelText: AppLocalizations.of(context)
+                                    ?.translate("First Name") ??
+                                "First Name",
                             icon: "assets/img/user_text.png",
                             controller: fnameController,
                           ),
@@ -335,7 +339,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                             height: media.width * 0.04,
                           ),
                           RoundTextField(
-                            labelText: AppLocalizations.of(context)?.translate("Last Name") ?? "Last Name",
+                            labelText: AppLocalizations.of(context)
+                                    ?.translate("Last Name") ??
+                                "Last Name",
                             icon: "assets/img/user_text.png",
                             controller: lnameController,
                           ),
@@ -353,7 +359,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                           ),
                           GenderDropdown(
                             icon: "assets/img/gender.png",
-                            labelText:"Choose Gender",
+                            labelText: "Choose Gender",
                             options: ["Male", "Female"],
                             controller: selectedGender,
                           ),
@@ -367,7 +373,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                             child: IgnorePointer(
                               child: RoundTextField(
                                 controller: selectDate,
-                                labelText: AppLocalizations.of(context)?.translate("Date of Birth") ?? "Date of Birth",
+                                labelText: AppLocalizations.of(context)
+                                        ?.translate("Date of Birth") ??
+                                    "Date of Birth",
                                 icon: "assets/img/date.png",
                               ),
                             ),
@@ -380,7 +388,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                               Expanded(
                                 child: RoundTextField(
                                   controller: selectWeight,
-                                  labelText: AppLocalizations.of(context)?.translate("Your Weight") ?? "Your Weight",
+                                  labelText: AppLocalizations.of(context)
+                                          ?.translate("Your Weight") ??
+                                      "Your Weight",
                                   icon: "assets/img/weight.png",
                                 ),
                               ),
@@ -399,8 +409,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                                 ),
                                 child: Text(
                                   "KG",
-                                  style:
-                                  TextStyle(color: TColor.white, fontSize: 12),
+                                  style: TextStyle(
+                                      color: TColor.white, fontSize: 12),
                                 ),
                               )
                             ],
@@ -413,7 +423,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                               Expanded(
                                 child: RoundTextField(
                                   controller: selectHeight,
-                                  labelText: AppLocalizations.of(context)?.translate("Your Height") ?? "Your Height",
+                                  labelText: AppLocalizations.of(context)
+                                          ?.translate("Your Height") ??
+                                      "Your Height",
                                   icon: "assets/img/hight.png",
                                 ),
                               ),
@@ -432,8 +444,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                                 ),
                                 child: Text(
                                   "CM",
-                                  style:
-                                  TextStyle(color: TColor.white, fontSize: 12),
+                                  style: TextStyle(
+                                      color: TColor.white, fontSize: 12),
                                 ),
                               )
                             ],
@@ -443,14 +455,17 @@ class _EditProfileViewState extends State<EditProfileView> {
                           ),
                           IconTitleNextRow2(
                             icon: "assets/img/body_icon.png",
-                            title: AppLocalizations.of(context)?.translate("Body Fat(%)") ?? "Body Fat(%)",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Body Fat(%)") ??
+                                "Body Fat(%)",
                             time: selectedBodyFat.text,
                             color: TColor.lightGray,
                             onPressed: () async {
                               final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => ChangeBodyFatView(value: selectedBodyFat.text)),
+                                    builder: (context) => ChangeBodyFatView(
+                                        value: selectedBodyFat.text)),
                               );
                               if (result != null && result is String) {
                                 setState(() {
@@ -464,14 +479,17 @@ class _EditProfileViewState extends State<EditProfileView> {
                           ),
                           IconTitleNextRow2(
                             icon: "assets/img/cup_icon.png",
-                            title: AppLocalizations.of(context)?.translate("Goal") ?? "Goal",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Goal") ??
+                                "Goal",
                             time: selectedGoal.text,
                             color: TColor.lightGray,
                             onPressed: () async {
                               final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => ChangeGoalView(goal: selectedGoal.text)),
+                                    builder: (context) => ChangeGoalView(
+                                        goal: selectedGoal.text)),
                               );
                               if (result != null && result is String) {
                                 setState(() {
@@ -485,14 +503,18 @@ class _EditProfileViewState extends State<EditProfileView> {
                           ),
                           IconTitleNextRow2(
                             icon: "assets/img/choose_workout.png",
-                            title: AppLocalizations.of(context)?.translate("Activity Level") ?? "Activity Level",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Activity Level") ??
+                                "Activity Level",
                             time: selectedActivityLevel.text,
                             color: TColor.lightGray,
                             onPressed: () async {
                               final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => ChangeActivityLevelView(goal: selectedActivityLevel.text)),
+                                    builder: (context) =>
+                                        ChangeActivityLevelView(
+                                            goal: selectedActivityLevel.text)),
                               );
                               if (result != null && result is String) {
                                 setState(() {
@@ -502,17 +524,42 @@ class _EditProfileViewState extends State<EditProfileView> {
                             },
                           ),
                           SizedBox(
+                            height: media.width * 0.04,
+                          ),
+                          IconTitleNextRow2(
+                            icon: "assets/img/health_history.png",
+                            title: "Medical History",
+                            time: "",
+                            color: TColor.lightGray,
+                            onPressed: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ChangeMedicalHistoryView(),
+                                ),
+                              );
+                            },
+                          ),
+                          SizedBox(
+                            height: media.width * 0.04,
+                          ),
+                          SizedBox(
                             height: media.width * 0.06,
                           ),
                           RoundButton(
-                            title: AppLocalizations.of(context)?.translate("Upload your image") ?? "Upload your image",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Upload your image") ??
+                                "Upload your image",
                             onPressed: uploadImage,
                           ),
                           SizedBox(
                             height: media.width * 0.04,
                           ),
                           RoundButton(
-                            title: AppLocalizations.of(context)?.translate("Save") ?? "Save",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Save") ??
+                                "Save",
                             onPressed: updateUserProfile,
                           ),
                           SizedBox(
@@ -521,12 +568,15 @@ class _EditProfileViewState extends State<EditProfileView> {
                           Visibility(
                             visible: passController.text.isNotEmpty,
                             child: RoundButton(
-                              title: AppLocalizations.of(context)?.translate("Change password") ?? "Change password",
+                              title: AppLocalizations.of(context)
+                                      ?.translate("Change password") ??
+                                  "Change password",
                               onPressed: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ChangePasswordView(),
+                                    builder: (context) =>
+                                        const ChangePasswordView(),
                                   ),
                                 );
                               },
@@ -540,7 +590,6 @@ class _EditProfileViewState extends State<EditProfileView> {
               ),
             ),
           ),
-
           AnimatedOpacity(
             opacity: isLoading ? 1.0 : 0.0,
             duration: Duration(milliseconds: 300),

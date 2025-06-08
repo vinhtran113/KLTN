@@ -1,11 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_workout_app/common_widget/selectDate.dart';
 import 'package:fitness_workout_app/services/alarm_services.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../common/colo_extension.dart';
-import '../../common/common.dart';
 import '../../common_widget/icon_title_next_row.dart';
 import '../../common_widget/repetition_row.dart';
 import '../../common_widget/round_button.dart';
@@ -13,8 +12,7 @@ import '../../main.dart';
 import '../../localization/app_localizations.dart';
 
 class SleepAddAlarmView extends StatefulWidget {
-  final DateTime date;
-  const SleepAddAlarmView({super.key, required this.date});
+  const SleepAddAlarmView({super.key});
 
   @override
   State<SleepAddAlarmView> createState() => _SleepAddAlarmViewState();
@@ -23,25 +21,28 @@ class SleepAddAlarmView extends StatefulWidget {
 class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
   final AlarmService _alarmService = AlarmService();
   final TextEditingController selectedRepetition = TextEditingController();
+  TextEditingController selectDateController = TextEditingController();
   bool isBedEnabled = true;
   bool isWakeupEnabled = true;
   String selectedTimeBed = "";
   String selectedTimeWakeup = "";
   bool isLoading = false;
-  String day = "";
   bool darkmode = darkModeNotifier.value;
 
   @override
   void initState() {
     super.initState();
     selectedRepetition.text = "no";
-    day = dateToString(widget.date, formatStr: "d/M/yyyy");
+    // Gán ngày hôm nay cho controller
+    DateTime now = DateTime.now();
+    selectDateController.text = "${now.day}/${now.month}/${now.year}";
   }
 
   @override
   void dispose() {
     super.dispose();
     selectedRepetition.dispose();
+    selectDateController.dispose();
   }
 
   Future<void> _selectTimeBed(BuildContext context) async {
@@ -130,7 +131,7 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
       });
       String uid = FirebaseAuth.instance.currentUser!.uid;
       String res = await _alarmService.addAlarmSchedule(
-        day: day,
+        day: selectDateController.text.trim(),
         hourWakeup: selectedTimeWakeup,
         hourBed: selectedTimeBed,
         notify_Bed: isBedEnabled,
@@ -166,7 +167,6 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: darkmode ? Colors.blueGrey[900] : TColor.white,
@@ -194,7 +194,7 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
         ),
         title: Text(
           AppLocalizations.of(context)?.translate("Add Alarm") ?? "Add Alarm",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
       ),
       body: Stack(
@@ -203,27 +203,30 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                AppLocalizations.of(context)?.translate("Custom Your Alarm:") ??
+                    "Custom Your Alarm:",
+                style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+              ),
               const SizedBox(
-                height: 8,
+                height: 10,
               ),
-              Row(
-                children: [
-                  Image.asset(
-                    "assets/img/date.png",
-                    width: 21,
-                    height: 21,
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  Text(
-                    dateToString(widget.date, formatStr: "E, dd MMMM yyyy"),
-                    style: TextStyle(color: TColor.gray, fontSize: 15),
-                  ),
-                ],
+              IconTitleNextRow(
+                icon: "assets/img/time.png",
+                title: AppLocalizations.of(context)?.translate(
+                      "Date",
+                    ) ??
+                    "Date",
+                time: selectDateController.text,
+                color: TColor.lightGray,
+                onPressed: () async {
+                  await DatePickerHelper.selectDate3(
+                      context, selectDateController);
+                  setState(() {}); // Cập nhật lại UI sau khi chọn ngày
+                },
               ),
-              SizedBox(
-                height: media.width * 0.04,
+              const SizedBox(
+                height: 10,
               ),
               IconTitleNextRow(
                 icon: "assets/img/Bed_Add.png",

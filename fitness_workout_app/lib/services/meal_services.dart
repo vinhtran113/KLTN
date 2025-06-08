@@ -23,6 +23,7 @@ class MealService {
   Future<List<Meal>> fetchMealsByRecommendAndLevel({
     required String recommend,
     required String level,
+    required List<String> userMedicalHistory,
   }) async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('Meals')
@@ -31,8 +32,13 @@ class MealService {
 
     List<Meal> meals = snapshot.docs
         .map((doc) => Meal.fromMap(doc.data() as Map<String, dynamic>))
-        .where((meal) => meal.level.contains(level)) // lọc thêm ở client
-        .toList();
+        .where((meal) => meal.level.contains(level))
+        .where((meal) {
+      // Lọc health_risks giao với userMedicalHistory
+      if (meal.healthRisks.isEmpty) return true;
+      return !meal.healthRisks.any((risk) => userMedicalHistory.contains(risk));
+    }).toList();
+
     // Tạo danh sách unique tên nguyên liệu
     final allIngredientNames = <String>{};
     for (var meal in meals) {
@@ -357,6 +363,7 @@ class MealService {
     meals.removeWhere((meal) => meal['name'] == mealName);
 
     await notificationServices.cancelNotificationById(int.parse(id_notify));
+    await notificationServices.removeMealNotifications(id_notify);
 
     await docRef.update({mealType: meals});
     return null;
@@ -642,6 +649,7 @@ class MealService {
       size: originalMeal.size,
       time: originalMeal.time,
       id: originalMeal.id,
+      healthRisks: originalMeal.healthRisks,
     );
 
     return updatedMeal;
@@ -716,5 +724,41 @@ class MealService {
       'fat': fatSpots,
       'protein': proteinSpots,
     };
+  }
+
+  Future<List<Map<String, dynamic>>> getCaloriesPerMeal({
+    required String uid,
+    required DateTime date,
+  }) async {
+    final docId = '${uid}_${DateFormat('yyyy-MM-dd').format(date)}';
+    final docRef =
+        FirebaseFirestore.instance.collection('MealSchedules').doc(docId);
+    final snapshot = await docRef.get();
+
+    List<Map<String, dynamic>> result = [
+      {"title": "Breakfast", "subtitle": "0kCal"},
+      {"title": "Lunch", "subtitle": "0kCal"},
+      {"title": "Dinner", "subtitle": "0kCal"},
+      {"title": "Snacks", "subtitle": "0kCal"},
+    ];
+
+    if (!snapshot.exists) return result;
+
+    final data = snapshot.data()!;
+    final mealTypes = ['breakfast', 'lunch', 'dinner', 'snacks'];
+
+    for (int i = 0; i < mealTypes.length; i++) {
+      final type = mealTypes[i];
+      double totalCalories = 0.0;
+      if (data.containsKey(type)) {
+        final List<dynamic> meals = data[type];
+        for (final meal in meals) {
+          totalCalories += (meal['totalCalories'] ?? 0.0) as num;
+        }
+      }
+      result[i]['subtitle'] = "${totalCalories.toStringAsFixed(0)}kCal";
+    }
+
+    return result;
   }
 }

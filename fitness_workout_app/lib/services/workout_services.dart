@@ -21,6 +21,9 @@ class WorkoutService {
         String workoutId = workoutDoc.id;
         String image = workoutDoc['pic'];
         String title = workoutDoc['name'];
+        final data = workoutDoc.data() as Map<String, dynamic>;
+        List<String> healthRisks =
+            List<String>.from(data['health_risks'] ?? []);
         List<String> exerciseNames =
             (workoutDoc['exercise_list'] as Map<dynamic, dynamic>)
                 .values
@@ -64,6 +67,7 @@ class WorkoutService {
           'difficulty': 'Beginner',
           'levels': levels,
           'tools': tools,
+          'health_risks': healthRisks,
         });
       }
     } catch (e) {
@@ -74,7 +78,7 @@ class WorkoutService {
   }
 
   Future<List<Map<String, dynamic>>> fetchWorkoutsByLevel(
-      {required String level}) async {
+      {required String level, required List<String> userMedicalHistory}) async {
     List<Map<String, dynamic>> workoutList = [];
 
     try {
@@ -88,11 +92,19 @@ class WorkoutService {
         String workoutId = workoutDoc.id;
         String image = workoutDoc['pic'];
         String title = workoutDoc['name'];
+        final data = workoutDoc.data() as Map<String, dynamic>;
+        List<String> healthRisks =
+            List<String>.from(data['health_risks'] ?? []);
         List<String> exerciseNames =
             (workoutDoc['exercise_list'] as Map<dynamic, dynamic>)
                 .values
                 .map((e) => e.toString())
                 .toList();
+
+        // Nếu có giao nhau giữa healthRisks và userMedicalHistory thì bỏ qua
+        bool hasWarning =
+            healthRisks.any((risk) => userMedicalHistory.contains(risk));
+        if (hasWarning) continue;
 
         // Truy vấn Exercises với tên bài tập trong exercise_list
         QuerySnapshot exerciseSnapshot = await _firestore
@@ -127,6 +139,7 @@ class WorkoutService {
           'time': "$totalTimeInMinutes Mins",
           'calo': "$totalCalo Calories Burn",
           'difficulty': 'Beginner',
+          'health_risks': healthRisks,
         });
       }
     } catch (e) {
@@ -560,11 +573,10 @@ class WorkoutService {
 
       var doc = snapshot.docs.first;
       String idNotify = doc['id_notify'];
-      String idCate = doc['id_cate'];
 
       await notificationServices.cancelNotificationById(int.parse(idNotify));
 
-      await notificationServices.removeNotification(idCate);
+      await notificationServices.removeWorkoutNotifications(idNotify);
 
       // Truy cập đến collection 'WorkoutSchedule' và xoá tài liệu theo id
       await FirebaseFirestore.instance
@@ -635,7 +647,7 @@ class WorkoutService {
       }
 
       await notificationServices.cancelNotificationById(int.parse(id_notify));
-      await notificationServices.removeNotification(name);
+      await notificationServices.removeWorkoutNotifications(id_notify);
 
       if (notify) {
         newidNotify = await notificationServices.scheduleWorkoutNotification(
@@ -919,5 +931,30 @@ class WorkoutService {
       'calories': calorieSpots,
       'duration': durationSpots,
     };
+  }
+
+  Future<int> calculateTodayCalories(String uid) async {
+    int totalCalories = 0;
+
+    // Lấy ngày hiện tại (định dạng 00:00:00 - 23:59:59)
+    DateTime now = DateTime.now();
+    DateTime startOfDay = DateTime(now.year, now.month, now.day);
+    DateTime endOfDay = startOfDay.add(const Duration(days: 1));
+
+    // Truy vấn Firestore
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('WorkoutHistory')
+        .where('uid', isEqualTo: uid) // Lọc theo uid
+        .where('completedAt', isGreaterThanOrEqualTo: startOfDay)
+        .where('completedAt', isLessThan: endOfDay)
+        .get();
+
+    // Tính tổng caloriesBurned
+    for (var doc in querySnapshot.docs) {
+      int calories = doc['caloriesBurned'] ?? 0;
+      totalCalories += calories;
+    }
+
+    return totalCalories;
   }
 }

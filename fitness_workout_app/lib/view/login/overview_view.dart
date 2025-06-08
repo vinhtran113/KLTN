@@ -32,6 +32,9 @@ class _OverviewViewState extends State<OverviewView> {
   int age = 0;
   double bodyFatPercent = 0;
   String activityLevel = "";
+  List<String> medicalHistory = [];
+  List<String> medicalHistoryOther = [];
+  String medicalNote = "";
   bool darkmode = darkModeNotifier.value;
 
   @override
@@ -56,6 +59,9 @@ class _OverviewViewState extends State<OverviewView> {
         bodyFatPercent = double.parse(user.body_fat);
         activityLevel = user.ActivityLevel;
         goal = user.level;
+        medicalHistory = user.medicalHistory;
+        medicalHistoryOther = user.medicalHistoryOther;
+        medicalNote = user.medicalNote;
         bmr = NutritionCalculator.calculateBMR(
             weight: weight,
             height: height,
@@ -206,6 +212,20 @@ class _OverviewViewState extends State<OverviewView> {
             _buildUserInfoRow("Height", "$height cm"),
             _buildUserInfoRow("Body Fat %", "$bodyFatPercent %"),
             _buildUserInfoRow("Activity Level", activityLevel),
+            _buildUserInfoRow(
+              "Medical History",
+              medicalHistory.isNotEmpty ? medicalHistory.join(", ") : "",
+            ),
+            _buildUserInfoRow(
+              "Other Diseases",
+              medicalHistoryOther.isNotEmpty
+                  ? medicalHistoryOther.join(", ")
+                  : "",
+            ),
+            _buildUserInfoRow(
+              "Medical Note",
+              medicalNote,
+            ),
           ],
         ),
       ),
@@ -216,10 +236,23 @@ class _OverviewViewState extends State<OverviewView> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          Text(value),
+          SizedBox(
+            width: 110,
+            child: Text(label,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              softWrap: true,
+              maxLines: null,
+              overflow: TextOverflow.visible,
+              textAlign: TextAlign.right,
+            ),
+          ),
         ],
       ),
     );

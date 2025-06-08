@@ -62,7 +62,7 @@ class _LoginViewState extends State<LoginView> {
       }
 
       if (res == "not-bodyfat") {
-        _showNeedCompleteProfileDialog(context);
+        _showNeedCompleteBodyFatDialog(context);
         setState(() {
           isLoading = false;
         });
@@ -87,8 +87,8 @@ class _LoginViewState extends State<LoginView> {
 
       if (res == "success") {
         // Lấy thông tin người dùng
-        UserModel? user = await AuthService().getUserInfo(
-            FirebaseAuth.instance.currentUser!.uid);
+        UserModel? user = await AuthService()
+            .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
 
         if (user != null) {
           // Điều hướng đến HomeView với user
@@ -96,7 +96,7 @@ class _LoginViewState extends State<LoginView> {
             MaterialPageRoute(
               builder: (context) => const WelcomeView(),
             ),
-                (route) => false,
+            (route) => false,
           );
         }
         setState(() {
@@ -154,7 +154,7 @@ class _LoginViewState extends State<LoginView> {
                   MaterialPageRoute(
                     builder: (context) => const CompleteProfileView(),
                   ),
-                      (route) => false,
+                  (route) => false,
                 );
               },
               child: const Text("Xác nhận"),
@@ -179,7 +179,7 @@ class _LoginViewState extends State<LoginView> {
                   MaterialPageRoute(
                     builder: (context) => const WhatYourBodyFatView(),
                   ),
-                      (route) => false,
+                  (route) => false,
                 );
               },
               child: const Text("Xác nhận"),
@@ -204,7 +204,7 @@ class _LoginViewState extends State<LoginView> {
                   MaterialPageRoute(
                     builder: (context) => const WhatYourGoalView(),
                   ),
-                      (route) => false,
+                  (route) => false,
                 );
               },
               child: const Text("Xác nhận"),
@@ -229,7 +229,7 @@ class _LoginViewState extends State<LoginView> {
                   MaterialPageRoute(
                     builder: (context) => const ChooseActivityLevelView(),
                   ),
-                      (route) => false,
+                  (route) => false,
                 );
               },
               child: const Text("Xác nhận"),
@@ -250,42 +250,47 @@ class _LoginViewState extends State<LoginView> {
 
       switch (res) {
         case "success":
-          UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+          UserModel? user = await AuthService()
+              .getUserInfo(FirebaseAuth.instance.currentUser!.uid);
           if (user != null) {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const WelcomeView()),
-                  (route) => false,
+              (route) => false,
             );
           } else {
-            throw Exception("Không thể lấy thông tin người dùng sau khi đăng nhập.");
+            throw Exception(
+                "Không thể lấy thông tin người dùng sau khi đăng nhập.");
           }
           break;
 
         case "not-profile":
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const CompleteProfileView()),
-                (route) => false,
+            MaterialPageRoute(
+                builder: (context) => const CompleteProfileView()),
+            (route) => false,
           );
           break;
 
         case "not-bodyfat":
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const WhatYourBodyFatView()),
-              (route) => false,
-        );
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (context) => const WhatYourBodyFatView()),
+            (route) => false,
+          );
 
         case "not-level":
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const WhatYourGoalView()),
-                (route) => false,
+            (route) => false,
           );
           break;
 
         case "not-ActivityLevel":
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const ChooseActivityLevelView()),
-              (route) => false,
-        );
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (context) => const ChooseActivityLevelView()),
+            (route) => false,
+          );
 
         case "not-activate":
           showDialog(
@@ -325,9 +330,7 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: TColor.white,
       body: Stack(
@@ -402,8 +405,8 @@ class _LoginViewState extends State<LoginView> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (
-                                    context) => const ResetPasswordView()));
+                                builder: (context) =>
+                                    const ResetPasswordView()));
                       },
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -426,10 +429,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const Spacer(),
-                    RoundButton(
-                        title: "Sign In",
-                        onPressed: handleLogin
-                    ),
+                    RoundButton(title: "Sign In", onPressed: handleLogin),
                     SizedBox(
                       height: media.width * 0.04,
                     ),
@@ -438,18 +438,18 @@ class _LoginViewState extends State<LoginView> {
                       children: [
                         Expanded(
                             child: Container(
-                              height: 1,
-                              color: TColor.gray.withOpacity(0.5),
-                            )),
+                          height: 1,
+                          color: TColor.gray.withOpacity(0.5),
+                        )),
                         Text(
                           "  Or  ",
                           style: TextStyle(color: TColor.black, fontSize: 12),
                         ),
                         Expanded(
                             child: Container(
-                              height: 1,
-                              color: TColor.gray.withOpacity(0.5),
-                            )),
+                          height: 1,
+                          color: TColor.gray.withOpacity(0.5),
+                        )),
                       ],
                     ),
                     SizedBox(
@@ -525,7 +525,6 @@ class _LoginViewState extends State<LoginView> {
                         ],
                       ),
                     ),
-
                   ],
                 ),
               ),
@@ -549,4 +548,3 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 }
-

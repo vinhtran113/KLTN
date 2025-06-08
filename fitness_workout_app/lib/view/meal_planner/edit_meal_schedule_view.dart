@@ -211,6 +211,7 @@ class _EditMealScheduleViewState extends State<EditMealScheduleView> {
 
     String idNotify = widget.bObj['id_notify'];
     await _notificationServices.cancelNotificationById(int.parse(idNotify));
+    await _notificationServices.removeMealNotifications(idNotify);
 
     if (isNotificationEnabled) {
       final DateFormat hourFormat = DateFormat('hh:mm a');

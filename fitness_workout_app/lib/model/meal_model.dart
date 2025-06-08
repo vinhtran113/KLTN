@@ -15,21 +15,22 @@ class Meal {
   final double time;
   final String name;
   final String id;
+  final List<String> healthRisks;
 
-  Meal({
-    required this.description,
-    required this.image,
-    required this.category,
-    required this.level,
-    required this.recipe,
-    required this.recommend,
-    required this.ingredients,
-    required this.nutri,
-    required this.size,
-    required this.time,
-    required this.name,
-    required this.id,
-  });
+  Meal(
+      {required this.description,
+      required this.image,
+      required this.category,
+      required this.level,
+      required this.recipe,
+      required this.recommend,
+      required this.ingredients,
+      required this.nutri,
+      required this.size,
+      required this.time,
+      required this.name,
+      required this.id,
+      required this.healthRisks});
 
   factory Meal.fromMap(Map<String, dynamic> map) {
     return Meal(
@@ -54,6 +55,7 @@ class Meal {
       size: map['size'] ?? '',
       time: (map['time'] as num?)?.toDouble() ?? 0.0,
       id: map['id'] ?? '',
+      healthRisks: List<String>.from(map['health_risks'] ?? []),
     );
   }
 
@@ -98,5 +100,6 @@ class Meal {
         size: '',
         time: 0,
         id: '',
+        healthRisks: [],
       );
 }

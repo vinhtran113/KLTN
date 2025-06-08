@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:fitness_workout_app/view/meal_planner/food_review_view.dart';
@@ -7,7 +8,6 @@ import 'package:readmore/readmore.dart';
 
 import '../../common_widget/food_step_detail_row.dart';
 import '../../model/meal_model.dart';
-import 'meal_schedule_view.dart';
 
 class SelectDetailFoodView extends StatefulWidget {
   final Function(Meal) onSelect;
@@ -22,6 +22,8 @@ class SelectDetailFoodView extends StatefulWidget {
 class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
   List<Map<String, String>> nutritionArr = [];
   List<Map<String, String>> ingredientsArr = [];
+  List<String> userMedicalHistory = [];
+  List<String> warningRisks = [];
 
   // Thêm các biến cho review
   double avgRating = 0;
@@ -32,6 +34,26 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
     super.initState();
     nutritionArr = widget.dObj.nutri.toDisplayList();
     ingredientsArr = widget.dObj.getIngredientDisplayList();
+    _loadReviewInfo();
+    _loadUserMedicalHistory();
+  }
+
+  void _loadUserMedicalHistory() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    final userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final List<String> medicalHistory =
+        List<String>.from(userDoc.data()?['medical_history'] ?? []);
+    setState(() {
+      userMedicalHistory = medicalHistory;
+      // So sánh với health_risks của món ăn
+      final List<String> healthRisks =
+          List<String>.from(widget.dObj.healthRisks);
+      warningRisks = healthRisks
+          .where((risk) => userMedicalHistory.contains(risk))
+          .toList();
+    });
   }
 
   Future<void> _loadReviewInfo() async {
@@ -188,6 +210,32 @@ class _SelectDetailFoodViewState extends State<SelectDetailFoodView> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  if (warningRisks.isNotEmpty)
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: Colors.red),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.warning,
+                                              color: Colors.red),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              "Warning: This food may not be suitable for your medical condition(s): ${warningRisks.join(', ')}",
+                                              style: const TextStyle(
+                                                  color: Colors.red,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   Text(
                                     widget.dObj.name.toString(),
                                     style: TextStyle(

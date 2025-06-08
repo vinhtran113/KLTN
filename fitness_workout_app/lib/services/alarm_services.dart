@@ -163,8 +163,11 @@ class AlarmService {
       String idNotify = doc['id_notify'];
 
       await notificationServices.cancelNotificationById(int.parse(idNotify));
+      await notificationServices.removeAlarmNotifications(idNotify);
       await notificationServices
           .cancelNotificationById(int.parse(idNotify) + 1);
+      await notificationServices
+          .removeAlarmNotifications((int.parse(idNotify) + 1).toString());
 
       await FirebaseFirestore.instance
           .collection('Alarm')
@@ -219,8 +222,11 @@ class AlarmService {
             selectedDateTimeWakeup.add(const Duration(days: 1));
       }
       await notificationServices.cancelNotificationById(int.parse(id_notify));
+      await notificationServices.removeAlarmNotifications(id_notify);
       await notificationServices
           .cancelNotificationById(int.parse(id_notify) + 1);
+      await notificationServices
+          .removeAlarmNotifications((int.parse(id_notify) + 1).toString());
 
       if (notify_Bed) {
         // Đặt lịch thông báo
@@ -245,6 +251,7 @@ class AlarmService {
         'notify_Bed': notify_Bed,
         'notify_Wakeup': notify_Wakeup,
         'id_notify': newidNotify,
+        'day': day,
       });
 
       res = ("success");
@@ -258,7 +265,6 @@ class AlarmService {
       {required String uid}) async {
     List<AlarmSchedule> alarmSchedules = [];
     final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
-    final String today = dateFormat.format(DateTime.now());
     final String currentDayOfWeek = DateFormat('EEEE').format(DateTime.now());
     final DateFormat hourFormat =
         DateFormat('hh:mm a'); // Lấy tên ngày hiện tại (e.g., Monday)

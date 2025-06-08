@@ -163,7 +163,7 @@
   "Select": "Chọn",
   "exercise": "Bài",
   "Mins": "Phút",
-  "Calories Burned": "Calo đốt cháy",
+  "Calories Burned": "Calo Đốt Cháy",
   "Add to Schedule": "Thêm vào lịch tập",
   "You'll Need": "Bạn sẽ cần",
   "Items": "Dụng cụ",
@@ -194,5 +194,10 @@
   "Nutrition Summary": "Tóm tắt dinh dưỡng",
   "Meal Planner": "Lập Kế Hoạch Bữa Ăn",
   "Daily Meal Schedule": "Lịch Trình Bữa Ăn Hàng Ngày",
-  "Not Scheduled": "Chưa lên lịch"
+  "Not Scheduled": "Chưa lên lịch",
+  "Statistics": "Thống kê thông số",
+  "Total Sleep Hours": "Tổng Giờ Ngủ",
+  "Calories Intake": "Calo Hấp Thụ",
+  "Progress This Week": "Tiến Trình Tuần Này"
+
 }

@@ -1,12 +1,12 @@
 import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:fitness_workout_app/view/meal_planner/meal_planner_view.dart';
+import 'package:fitness_workout_app/view/sleep_tracker/sleep_schedule_view.dart';
 import 'package:fitness_workout_app/view/workout_tracker/workout_tracker_view.dart';
 import 'package:flutter/material.dart';
 
 import '../../chatbox/screens/chat/chat_screen.dart';
 import '../../common/colo_extension.dart';
 import '../../main.dart';
-import '../sleep_tracker/sleep_tracker_view.dart';
 import '../tips/tips_view.dart';
 import '../../localization/app_localizations.dart';
 
@@ -20,18 +20,17 @@ class _SelectViewState extends State<SelectView> {
   bool darkmode = darkModeNotifier.value;
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery
-        .of(context)
-        .size;
+    var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : Colors.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : Colors.white,
         centerTitle: true,
         elevation: 0,
         leadingWidth: 0,
         leading: const SizedBox(),
         title: Text(
-          AppLocalizations.of(context)?.translate("Select Activity") ?? "Select Activity",
+          AppLocalizations.of(context)?.translate("Select Activity") ??
+              "Select Activity",
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
       ),
@@ -40,8 +39,7 @@ class _SelectViewState extends State<SelectView> {
           children: [
             SizedBox(height: 4),
             Padding(
-              padding:
-              const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
               child: Container(
                 width: double.maxFinite,
                 padding: const EdgeInsets.all(20),
@@ -62,14 +60,18 @@ class _SelectViewState extends State<SelectView> {
                             height: 15,
                           ),
                           Text(
-                            AppLocalizations.of(context)?.translate("Workout Tracker") ?? "Workout Tracker",
+                            AppLocalizations.of(context)
+                                    ?.translate("Workout Tracker") ??
+                                "Workout Tracker",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           Text(
-                            AppLocalizations.of(context)?.translate("Train your body") ?? "Train your body",
+                            AppLocalizations.of(context)
+                                    ?.translate("Train your body") ??
+                                "Train your body",
                             style: TextStyle(
                                 color: TColor.primaryColor2,
                                 fontSize: 14,
@@ -80,14 +82,16 @@ class _SelectViewState extends State<SelectView> {
                             width: 110,
                             height: 35,
                             child: RoundButton(
-                                title: AppLocalizations.of(context)?.translate("Start") ?? "Start",
+                                title: AppLocalizations.of(context)
+                                        ?.translate("Start") ??
+                                    "Start",
                                 fontSize: 12,
                                 onPressed: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (
-                                          context) => const WorkoutTrackerView(),
+                                      builder: (context) =>
+                                          const WorkoutTrackerView(),
                                     ),
                                   );
                                 }),
@@ -129,14 +133,18 @@ class _SelectViewState extends State<SelectView> {
                           height: 15,
                         ),
                         Text(
-                          AppLocalizations.of(context)?.translate("Meal Tracker") ?? "Meal Tracker",
+                          AppLocalizations.of(context)
+                                  ?.translate("Meal Tracker") ??
+                              "Meal Tracker",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         Text(
-                          AppLocalizations.of(context)?.translate("Manage your meal") ?? "Manage your meal",
+                          AppLocalizations.of(context)
+                                  ?.translate("Manage your meal") ??
+                              "Manage your meal",
                           style: TextStyle(
                             color: TColor.primaryColor2,
                             fontSize: 14,
@@ -148,7 +156,9 @@ class _SelectViewState extends State<SelectView> {
                           width: 110,
                           height: 35,
                           child: RoundButton(
-                            title: AppLocalizations.of(context)?.translate("Start") ?? "Start",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Start") ??
+                                "Start",
                             fontSize: 12,
                             onPressed: () {
                               Navigator.push(
@@ -168,8 +178,7 @@ class _SelectViewState extends State<SelectView> {
             ),
             const SizedBox(height: 0.01),
             Padding(
-              padding:
-              const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
               child: Container(
                 width: double.maxFinite,
                 padding: const EdgeInsets.all(20),
@@ -190,14 +199,18 @@ class _SelectViewState extends State<SelectView> {
                             height: 15,
                           ),
                           Text(
-                            AppLocalizations.of(context)?.translate("Sleep Tracker") ?? "Sleep Tracker",
+                            AppLocalizations.of(context)
+                                    ?.translate("Sleep Tracker") ??
+                                "Sleep Tracker",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           Text(
-                              AppLocalizations.of(context)?.translate("Manage your sleep") ?? "Manage your sleep",
+                            AppLocalizations.of(context)
+                                    ?.translate("Manage your sleep") ??
+                                "Manage your sleep",
                             style: TextStyle(
                                 color: TColor.primaryColor2,
                                 fontSize: 14,
@@ -208,14 +221,16 @@ class _SelectViewState extends State<SelectView> {
                             width: 110,
                             height: 35,
                             child: RoundButton(
-                                title: AppLocalizations.of(context)?.translate("Start") ?? "Start",
+                                title: AppLocalizations.of(context)
+                                        ?.translate("Start") ??
+                                    "Start",
                                 fontSize: 12,
                                 onPressed: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (
-                                          context) => const SleepTrackerView(),
+                                      builder: (context) =>
+                                          const SleepScheduleView(),
                                     ),
                                   );
                                 }),
@@ -257,14 +272,18 @@ class _SelectViewState extends State<SelectView> {
                           height: 15,
                         ),
                         Text(
-                          AppLocalizations.of(context)?.translate("Health Bot") ?? "Health Bot",
+                          AppLocalizations.of(context)
+                                  ?.translate("Health Bot") ??
+                              "Health Bot",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         Text(
-                          AppLocalizations.of(context)?.translate("Health Care Chat") ?? "Health Care Chat",
+                          AppLocalizations.of(context)
+                                  ?.translate("Health Care Chat") ??
+                              "Health Care Chat",
                           style: TextStyle(
                             color: TColor.primaryColor2,
                             fontSize: 14,
@@ -276,12 +295,15 @@ class _SelectViewState extends State<SelectView> {
                           width: 110,
                           height: 35,
                           child: RoundButton(
-                            title: AppLocalizations.of(context)?.translate("Start") ?? "Start",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Start") ??
+                                "Start",
                             fontSize: 12,
                             onPressed: () {
                               Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const ChatScreen()),
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const ChatScreen()),
                               );
                             },
                           ),
@@ -316,14 +338,17 @@ class _SelectViewState extends State<SelectView> {
                           height: 15,
                         ),
                         Text(
-                          AppLocalizations.of(context)?.translate("Tips") ?? "Tips",
+                          AppLocalizations.of(context)?.translate("Tips") ??
+                              "Tips",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         Text(
-                          AppLocalizations.of(context)?.translate("Helpful tips for you") ?? "Helpful tips for you",
+                          AppLocalizations.of(context)
+                                  ?.translate("Helpful tips for you") ??
+                              "Helpful tips for you",
                           style: TextStyle(
                             color: TColor.primaryColor2,
                             fontSize: 14,
@@ -335,7 +360,9 @@ class _SelectViewState extends State<SelectView> {
                           width: 110,
                           height: 35,
                           child: RoundButton(
-                            title: AppLocalizations.of(context)?.translate("Learn More") ?? "Learn More",
+                            title: AppLocalizations.of(context)
+                                    ?.translate("Learn More") ??
+                                "Learn More",
                             fontSize: 11,
                             onPressed: () {
                               Navigator.push(

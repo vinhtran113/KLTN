@@ -28,6 +28,8 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
   List<Map<String, dynamic>> youArr = [];
   List<Exercise> exercisesArr = [];
   Map<String, String> listInfo = {};
+  List<String> userMedicalHistory = [];
+  List<String> warningRisks = [];
   bool darkmode = darkModeNotifier.value;
 
   // Thêm các biến cho review
@@ -42,6 +44,25 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
     _loadExercises();
     _loadCaloAndTime();
     _loadReviewInfo();
+    _loadUserMedicalHistory();
+  }
+
+  void _loadUserMedicalHistory() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    final userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final List<String> medicalHistory =
+        List<String>.from(userDoc.data()?['medical_history'] ?? []);
+    setState(() {
+      userMedicalHistory = medicalHistory;
+      // So sánh với health_risks của bài tập
+      final List<String> healthRisks =
+          List<String>.from(widget.dObj['health_risks'] ?? []);
+      warningRisks = healthRisks
+          .where((risk) => userMedicalHistory.contains(risk))
+          .toList();
+    });
   }
 
   Future<void> _loadReviewInfo() async {
@@ -258,6 +279,32 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                if (warningRisks.isNotEmpty)
+                                  Container(
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 8),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.red),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.warning,
+                                            color: Colors.red),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            "Warning: This workout may not be suitable for your medical condition(s): ${warningRisks.join(', ')}",
+                                            style: const TextStyle(
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 Text(
                                   widget.dObj["title"].toString(),
                                   style: TextStyle(

@@ -44,10 +44,10 @@ class ChatController extends StateNotifier<ChatState> {
 
   ChatController({required this.userId})
       : super(ChatState(
-    messages: [],
-    isLoading: false,
-    inputController: TextEditingController(),
-  )) {
+          messages: [],
+          isLoading: false,
+          inputController: TextEditingController(),
+        )) {
     _initializeChat();
   }
 
@@ -99,7 +99,7 @@ class ChatController extends StateNotifier<ChatState> {
     final compressedFile = await compressImage(file);
     final fileName = DateTime.now().millisecondsSinceEpoch.toString();
     final storageRef =
-    FirebaseStorage.instance.ref().child('chat_images/$fileName.jpg');
+        FirebaseStorage.instance.ref().child('chat_images/$fileName.jpg');
     await storageRef.putFile(compressedFile);
     return await storageRef.getDownloadURL();
   }
@@ -142,6 +142,8 @@ class ChatController extends StateNotifier<ChatState> {
 
     try {
       final userInfo = await FirestoreService.getUserInfo(userId);
+      final extraInfo = await FirestoreService.getUserExtraInfo(
+          userId); // Lấy thêm thông tin sức khoẻ
 
       // 👉 Lấy 3 cặp user-assistant gần nhất
       final history = _buildHistoryMessages(updatedMessages);
@@ -152,6 +154,10 @@ class ChatController extends StateNotifier<ChatState> {
         gender: userInfo['gender'] ?? '',
         height: userInfo['height'] ?? '',
         weight: userInfo['weight'] ?? '',
+        bodyFat: extraInfo['body_fat'] ?? '',
+        medicalHistory: extraInfo['medical_history'] ?? [],
+        medicalHistoryOther: extraInfo['medical_history_other'] ?? [],
+        medicalNote: extraInfo['medical_note'] ?? '',
         historyMessages: history, // 👈 truyền vào GPT
       );
 
@@ -195,7 +201,6 @@ class ChatController extends StateNotifier<ChatState> {
     return history;
   }
 
-
   Future<void> deleteChatHistory() async {
     state = state.copyWith(isLoading: true);
 
@@ -208,6 +213,4 @@ class ChatController extends StateNotifier<ChatState> {
       state = state.copyWith(isLoading: false);
     }
   }
-
-
 }

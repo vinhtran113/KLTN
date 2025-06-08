@@ -235,55 +235,74 @@ class _IconSelectFoodRowState extends State<IconSelectFoodRow> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Add New Ingredient"),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DropdownButtonFormField<Ingredient>(
-                    value: selectedIngredient,
-                    items: availableIngredients.map((ingredient) {
-                      return DropdownMenuItem<Ingredient>(
-                        value: ingredient,
-                        child: Text(ingredient.name),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedIngredient = value;
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      labelText: "Select Ingredient",
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  if (selectedIngredient != null)
-                    Row(
-                      children: [
-                        const Text(
-                          "Unit: ",
-                          style: TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.w500),
+          content: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8,
+              ),
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DropdownButtonFormField<Ingredient>(
+                        value: selectedIngredient,
+                        isExpanded:
+                            true, // Thêm dòng này để dropdown không bị tràn
+                        items: availableIngredients.map((ingredient) {
+                          return DropdownMenuItem<Ingredient>(
+                            value: ingredient,
+                            child: Text(
+                              ingredient.name,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedIngredient = value;
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          labelText: "Select Ingredient",
+                          isDense: true, // Giảm padding
                         ),
-                        Text(
-                          selectedIngredient!.unit,
-                          style: const TextStyle(fontSize: 13),
+                      ),
+                      const SizedBox(height: 12),
+                      if (selectedIngredient != null)
+                        Row(
+                          children: [
+                            const Text(
+                              "Unit: ",
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w500),
+                            ),
+                            Expanded(
+                              // Đổi từ Flexible sang Expanded để chiếm hết chỗ còn lại
+                              child: Text(
+                                selectedIngredient!.unit,
+                                style: const TextStyle(fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    decoration: const InputDecoration(labelText: "Amount"),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (val) {
-                      newAmount = double.tryParse(val) ?? 0;
-                    },
-                  ),
-                ],
-              );
-            },
+                      const SizedBox(height: 12),
+                      TextField(
+                        decoration: const InputDecoration(labelText: "Amount"),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        onChanged: (val) {
+                          newAmount = double.tryParse(val) ?? 0;
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
           actions: [
             TextButton(

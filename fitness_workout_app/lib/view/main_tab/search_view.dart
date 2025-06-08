@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../main.dart';
 import '../meal_planner/meal_planner_view.dart';
-import '../sleep_tracker/sleep_tracker_view.dart';
+import '../sleep_tracker/sleep_schedule_view.dart';
 import '../tips/tips_view.dart';
 import '../workout_tracker/workout_tracker_view.dart';
 import '../../localization/app_localizations.dart';
@@ -38,9 +38,10 @@ class _SearchViewState extends State<SearchView> {
         filteredActivities = txtSearch.text.isEmpty
             ? [] // Nếu chưa nhập gì, không hiển thị gì cả
             : allActivities
-            .where((activity) =>
-            activity.toLowerCase().contains(txtSearch.text.toLowerCase()))
-            .toList();
+                .where((activity) => activity
+                    .toLowerCase()
+                    .contains(txtSearch.text.toLowerCase()))
+                .toList();
       });
     });
   }
@@ -48,8 +49,10 @@ class _SearchViewState extends State<SearchView> {
   void navigateToActivity(String activity) {
     switch (activity) {
       case "Workout Tracker" || "Theo dõi tập luyện":
-        Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const WorkoutTrackerView()));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const WorkoutTrackerView()));
         break;
       case "Meal Tracker" || "Theo dõi bữa ăn":
         Navigator.push(context,
@@ -57,11 +60,11 @@ class _SearchViewState extends State<SearchView> {
         break;
       case "Sleep Tracker" || "Theo dõi giấc ngủ":
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const SleepTrackerView()));
+            MaterialPageRoute(builder: (context) => const SleepScheduleView()));
         break;
       case "Tips" || "Mẹo":
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const TipsView()));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const TipsView()));
         break;
       default:
         break;
@@ -73,13 +76,14 @@ class _SearchViewState extends State<SearchView> {
     var media = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: darkmode? Colors.blueGrey[900] : Colors.white,
+        backgroundColor: darkmode ? Colors.blueGrey[900] : Colors.white,
         centerTitle: true,
         elevation: 0,
         leadingWidth: 0,
         leading: const SizedBox(),
         title: Text(
-          AppLocalizations.of(context)?.translate("Search Activity") ?? "Search Activity",
+          AppLocalizations.of(context)?.translate("Search Activity") ??
+              "Search Activity",
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
         ),
       ),
@@ -91,11 +95,11 @@ class _SearchViewState extends State<SearchView> {
             margin: const EdgeInsets.symmetric(horizontal: 20),
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-                color: darkmode? Colors.black : Colors.white,
+                color: darkmode ? Colors.black : Colors.white,
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                      color: darkmode? Colors.white12 : Colors.black12,
+                      color: darkmode ? Colors.white12 : Colors.black12,
                       blurRadius: 2,
                       offset: Offset(0, 1))
                 ]),
@@ -112,8 +116,12 @@ class _SearchViewState extends State<SearchView> {
                           width: 25,
                           height: 25,
                         ),
-                        hintText: AppLocalizations.of(context)?.translate("Search here...") ?? "Search here..."),
-                    style: TextStyle(color: darkmode? Colors.white : Colors.black,),
+                        hintText: AppLocalizations.of(context)
+                                ?.translate("Search here...") ??
+                            "Search here..."),
+                    style: TextStyle(
+                      color: darkmode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
               ],
@@ -125,21 +133,32 @@ class _SearchViewState extends State<SearchView> {
             child: txtSearch.text.isEmpty
                 ? Container() // Không hiển thị gì khi chưa nhập
                 : (filteredActivities.isEmpty
-                ? Center(child: Text(AppLocalizations.of(context)?.translate("No activities found") ?? "No activities found",
-                style: TextStyle(color: darkmode? Colors.white : Colors.black, fontSize: 16)))
-                : ListView.builder(
-              itemCount: filteredActivities.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(filteredActivities[index], style: TextStyle(color: darkmode? Colors.white : Colors.black),),
-                  onTap: () => navigateToActivity(filteredActivities[index]),
-                );
-              },
-            )),
+                    ? Center(
+                        child: Text(
+                            AppLocalizations.of(context)
+                                    ?.translate("No activities found") ??
+                                "No activities found",
+                            style: TextStyle(
+                                color: darkmode ? Colors.white : Colors.black,
+                                fontSize: 16)))
+                    : ListView.builder(
+                        itemCount: filteredActivities.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(
+                              filteredActivities[index],
+                              style: TextStyle(
+                                  color:
+                                      darkmode ? Colors.white : Colors.black),
+                            ),
+                            onTap: () =>
+                                navigateToActivity(filteredActivities[index]),
+                          );
+                        },
+                      )),
           ),
         ],
       ),
     );
   }
 }
-

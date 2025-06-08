@@ -105,8 +105,11 @@ class _WorkoutReviewViewState extends State<WorkoutReviewView> {
 
     // Lấy dữ liệu review
     reviews = [];
+    userReview = {};
     for (var doc in snapshot.docs) {
       final data = doc.data();
+      data['uid'] = doc['uid'] ?? doc.id;
+
       // Lấy thông tin user
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
@@ -121,11 +124,16 @@ class _WorkoutReviewViewState extends State<WorkoutReviewView> {
         data['userName'] = data['uid'];
         data['userPic'] = '';
       }
-      reviews.add(data);
-    }
 
-    userReview = reviews.firstWhere((r) => r['uid'] == currentUser!.uid,
-        orElse: () => {});
+      if (data['uid'] == currentUser!.uid && data['hidden'] != true) {
+        userReview = data;
+        reviews.add(data);
+      } else if (data['uid'] == currentUser!.uid && data['hidden'] == true) {
+        userReview = data;
+      } else if (data['hidden'] != true) {
+        reviews.add(data);
+      }
+    }
 
     if (userReview!.isNotEmpty) {
       rating = (userReview!['rating'] ?? 0).toDouble();
@@ -153,7 +161,6 @@ class _WorkoutReviewViewState extends State<WorkoutReviewView> {
       final file = pickedFile;
       final ref = FirebaseStorage.instance.ref().child(
           'review_media/${DateTime.now().millisecondsSinceEpoch}_${file.name}');
-      final uploadTask = await ref.putData(await file.readAsBytes());
       final url = await ref.getDownloadURL();
       setState(() {
         mediaUrls.add(url);
@@ -181,12 +188,21 @@ class _WorkoutReviewViewState extends State<WorkoutReviewView> {
       return;
     }
 
+    final reviewRef = FirebaseFirestore.instance
+        .collection('Workouts')
+        .doc(widget.workoutId)
+        .collection('Reviews')
+        .doc(currentUser!.uid);
+
+    final docSnap = await reviewRef.get();
+
     final data = {
       'uid': currentUser!.uid,
       'rating': rating,
       'comment': commentController.text.trim(),
       'mediaUrls': mediaUrls,
       'updatedAt': Timestamp.now(),
+      if (!docSnap.exists) 'hidden': false, // Thêm hidden=false nếu lần đầu
     };
 
     // Xóa media cũ đã bị loại khỏi mediaUrls
@@ -198,12 +214,6 @@ class _WorkoutReviewViewState extends State<WorkoutReviewView> {
         } catch (_) {}
       }
     }
-
-    final reviewRef = FirebaseFirestore.instance
-        .collection('Workouts')
-        .doc(widget.workoutId)
-        .collection('Reviews')
-        .doc(currentUser!.uid);
 
     await reviewRef.set(data, SetOptions(merge: true));
 

@@ -37,7 +37,6 @@ class FirestoreService {
     return newChat.id;
   }
 
-
   // Lưu tin nhắn vào Firestore
   static Future<void> saveMessage(String chatId, Message message) async {
     await _firestore
@@ -75,7 +74,8 @@ class FirestoreService {
         text: data['text'] ?? '', // Văn bản tin nhắn
         imageUrl: data['imageUrl'], // URL ảnh (nếu có)
         isUser: data['isUser'] ?? false, // Xác định tin nhắn của ai
-        timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(), // Thời gian
+        timestamp: (data['timestamp'] as Timestamp?)?.toDate() ??
+            DateTime.now(), // Thời gian
       );
     }).toList();
   }
@@ -112,4 +112,25 @@ class FirestoreService {
     }
   }
 
+  static Future<Map<String, dynamic>> getUserExtraInfo(String userId) async {
+    final userDoc = await _firestore.collection('users').doc(userId).get();
+
+    if (userDoc.exists) {
+      final data = userDoc.data()!;
+      return {
+        'body_fat': data['body_fat'] ?? '',
+        'medical_history': List<String>.from(data['medical_history'] ?? []),
+        'medical_history_other':
+            List<String>.from(data['medical_history_other'] ?? []),
+        'medical_note': data['medical_note'] ?? '',
+      };
+    }
+
+    return {
+      'body_fat': '',
+      'medical_history': <String>[],
+      'medical_history_other': <String>[],
+      'medical_note': '',
+    };
+  }
 }

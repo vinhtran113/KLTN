@@ -1,12 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_workout_app/common_widget/selectDate.dart';
 import 'package:fitness_workout_app/model/alarm_model.dart';
 import 'package:fitness_workout_app/services/alarm_services.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../common/colo_extension.dart';
-import '../../common/common.dart';
 import '../../common_widget/delete_button.dart';
 import '../../common_widget/icon_title_next_row.dart';
 import '../../common_widget/repetition_row.dart';
@@ -25,12 +24,12 @@ class SleepEditAlarmView extends StatefulWidget {
 class _SleepEditAlarmViewState extends State<SleepEditAlarmView> {
   final AlarmService _alarmService = AlarmService();
   final TextEditingController selectedRepetition = TextEditingController();
+  TextEditingController selectDateController = TextEditingController();
   bool isBedEnabled = true;
   bool isWakeupEnabled = true;
   String selectedTimeBed = "";
   String selectedTimeWakeup = "";
   bool isLoading = false;
-  String day = "";
   DateTime? parsedDay;
   bool darkmode = darkModeNotifier.value;
 
@@ -38,18 +37,18 @@ class _SleepEditAlarmViewState extends State<SleepEditAlarmView> {
   void initState() {
     super.initState();
     selectedRepetition.text = widget.schedule.repeatInterval;
-    day = widget.schedule.day;
-    parsedDay = DateFormat("d/M/yyyy").parse(widget.schedule.day);
     selectedTimeBed = widget.schedule.hourBed;
     selectedTimeWakeup = widget.schedule.hourWakeup;
     isWakeupEnabled = widget.schedule.notifyWakeup;
     isBedEnabled = widget.schedule.notifyBed;
+    selectDateController.text = widget.schedule.day;
   }
 
   @override
   void dispose() {
     super.dispose();
     selectedRepetition.dispose();
+    selectDateController.dispose();
   }
 
   Future<void> _selectTimeBed(BuildContext context) async {
@@ -176,7 +175,7 @@ class _SleepEditAlarmViewState extends State<SleepEditAlarmView> {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       String res = await _alarmService.updateAlarmSchedule(
           id: widget.schedule.id,
-          day: day,
+          day: selectDateController.text.trim(),
           hourBed: selectedTimeBed,
           hourWakeup: selectedTimeWakeup,
           notify_Wakeup: isWakeupEnabled,
@@ -248,28 +247,30 @@ class _SleepEditAlarmViewState extends State<SleepEditAlarmView> {
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                AppLocalizations.of(context)?.translate("Custom Your Alarm:") ??
+                    "Custom Your Alarm:",
+                style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+              ),
               const SizedBox(
-                height: 8,
+                height: 10,
               ),
-              Row(
-                children: [
-                  Image.asset(
-                    "assets/img/date.png",
-                    width: 21,
-                    height: 21,
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  Text(
-                    dateToString(parsedDay as DateTime,
-                        formatStr: "E, dd MMMM yyyy"),
-                    style: TextStyle(color: TColor.gray, fontSize: 15),
-                  ),
-                ],
+              IconTitleNextRow(
+                icon: "assets/img/time.png",
+                title: AppLocalizations.of(context)?.translate(
+                      "Date",
+                    ) ??
+                    "Date",
+                time: selectDateController.text,
+                color: TColor.lightGray,
+                onPressed: () async {
+                  await DatePickerHelper.selectDate3(
+                      context, selectDateController);
+                  setState(() {}); // Cập nhật lại UI sau khi chọn ngày
+                },
               ),
-              SizedBox(
-                height: media.width * 0.04,
+              const SizedBox(
+                height: 10,
               ),
               IconTitleNextRow(
                 icon: "assets/img/Bed_Add.png",

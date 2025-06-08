@@ -62,24 +62,34 @@ class NotificationServices {
   Future<void> _addNotificationToArr(
       Map<String, dynamic> notificationData, DateTime scheduledTime) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> notificationArr = prefs.getStringList('notificationArr') ?? [];
 
     // Thêm trường 'time' với thời gian đã lên lịch
     notificationData['time'] = scheduledTime.toIso8601String();
 
-    // Thêm thông báo mới (chuyển thành String JSON)
-    notificationArr.add(jsonEncode(notificationData));
+    String type = notificationData['type'] ?? 'workout'; // mặc định là workout
 
-    // Lưu lại danh sách đã cập nhật
-    await prefs.setStringList('notificationArr', notificationArr);
+    String key;
+    if (type == 'workout') {
+      key = 'workoutNotificationArr';
+    } else if (type == 'alarm') {
+      key = 'alarmNotificationArr';
+    } else if (type == 'meal') {
+      key = 'mealNotificationArr';
+    } else {
+      key = 'otherNotificationArr';
+    }
+
+    List<String> notificationArr = prefs.getStringList(key) ?? [];
+    notificationArr.add(jsonEncode(notificationData));
+    await prefs.setStringList(key, notificationArr);
   }
 
   // Tải danh sách notificationArr từ SharedPreferences
-  Future<List<Map<String, String>>> loadNotificationArr() async {
+  Future<List<Map<String, String>>> loadWorkoutNotifications() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final encodedData = prefs.getStringList(
-          'notificationArr'); // Sử dụng getStringList thay vì getString
+          'workoutNotificationArr'); // Sử dụng getStringList thay vì getString
       if (encodedData != null && encodedData.isNotEmpty) {
         // Giải mã từng phần tử trong danh sách JSON
         final decodedData = encodedData.map((item) {
@@ -95,9 +105,52 @@ class NotificationServices {
     return [];
   }
 
-  Future<void> removeNotification(String notificationId) async {
+  // Tải danh sách notificationArr từ SharedPreferences
+  Future<List<Map<String, String>>> loadMealNotifications() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encodedData = prefs.getStringList(
+          'mealNotificationArr'); // Sử dụng getStringList thay vì getString
+      if (encodedData != null && encodedData.isNotEmpty) {
+        // Giải mã từng phần tử trong danh sách JSON
+        final decodedData = encodedData.map((item) {
+          return Map<String, String>.from(jsonDecode(item));
+        }).toList();
+
+        print("Notifications loaded successfully");
+        return decodedData;
+      }
+    } catch (e) {
+      print("Error loading notifications: $e");
+    }
+    return [];
+  }
+
+  // Tải danh sách notificationArr từ SharedPreferences
+  Future<List<Map<String, String>>> loadAlarmNotifications() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encodedData = prefs.getStringList(
+          'alarmNotificationArr'); // Sử dụng getStringList thay vì getString
+      if (encodedData != null && encodedData.isNotEmpty) {
+        // Giải mã từng phần tử trong danh sách JSON
+        final decodedData = encodedData.map((item) {
+          return Map<String, String>.from(jsonDecode(item));
+        }).toList();
+
+        print("Notifications loaded successfully");
+        return decodedData;
+      }
+    } catch (e) {
+      print("Error loading notifications: $e");
+    }
+    return [];
+  }
+
+  Future<void> removeWorkoutNotifications(String notificationId) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> notificationArr = prefs.getStringList('notificationArr') ?? [];
+    List<String> notificationArr =
+        prefs.getStringList('workoutNotificationArr') ?? [];
 
     // Tìm và xóa thông báo có ID tương ứng
     notificationArr.removeWhere((item) {
@@ -105,20 +158,46 @@ class NotificationServices {
       return notificationData['id'] == notificationId; // Kiểm tra ID
     });
     // Lưu lại danh sách đã cập nhật
-    await prefs.setStringList('notificationArr', notificationArr);
+    await prefs.setStringList('workoutNotificationArr', notificationArr);
   }
 
-  // Cập nhật trạng thái thông báo mới khi người dùng nhấn vào
-  Future<void> _markNotificationsAsRead() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('hasNewNotification', true);
+  Future<void> removeAlarmNotifications(String notificationId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> notificationArr =
+        prefs.getStringList('alarmNotificationArr') ?? [];
+
+    // Tìm và xóa thông báo có ID tương ứng
+    notificationArr.removeWhere((item) {
+      final Map<String, dynamic> notificationData = jsonDecode(item);
+      return notificationData['id'] == notificationId; // Kiểm tra ID
+    });
+    // Lưu lại danh sách đã cập nhật
+    await prefs.setStringList('alarmNotificationArr', notificationArr);
+  }
+
+  Future<void> removeMealNotifications(String notificationId) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> notificationArr =
+        prefs.getStringList('mealNotificationArr') ?? [];
+
+    // Tìm và xóa thông báo có ID tương ứng
+    notificationArr.removeWhere((item) {
+      final Map<String, dynamic> notificationData = jsonDecode(item);
+      return notificationData['id'] == notificationId; // Kiểm tra ID
+    });
+    // Lưu lại danh sách đã cập nhật
+    await prefs.setStringList('mealNotificationArr', notificationArr);
   }
 
   Future<void> clearNotificationArr() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     // Xóa toàn bộ thông tin trong 'notificationArr'
-    await prefs.remove('notificationArr');
+    await prefs.remove('workoutNotificationArr');
+
+    await prefs.remove('mealNotificationArr');
+
+    await prefs.remove('alarmNotificationArr');
   }
 
   Future<void> initNotifications() async {
@@ -266,6 +345,13 @@ class NotificationServices {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.wallClockTime,
       );
+      // Thêm vào notificationArr
+      final Map<String, dynamic> data = {
+        'title': 'Bedtime Reminder',
+        'type': 'alarm',
+        'id': id.hashCode.toString(),
+      };
+      await _addNotificationToArr(data, scheduledTZDateTime);
     } else if (repeatInterval == 'Everyday') {
       // Thông báo hàng ngày
       await _localNotifications.zonedSchedule(
@@ -282,6 +368,13 @@ class NotificationServices {
             UILocalNotificationDateInterpretation.wallClockTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
+      // Thêm vào notificationArr
+      final Map<String, dynamic> data = {
+        'title': 'Bedtime Reminder',
+        'type': 'alarm',
+        'id': id.hashCode.toString(),
+      };
+      await _addNotificationToArr(data, scheduledTZDateTime);
     } else {
       // Tính toán ngày kết thúc (365 ngày sau)
       final DateTime endDate = bedtime.add(Duration(days: 365));
@@ -314,6 +407,13 @@ class NotificationServices {
                 UILocalNotificationDateInterpretation.wallClockTime,
             matchDateTimeComponents: DateTimeComponents.time,
           );
+          // Thêm vào notificationArr
+          final Map<String, dynamic> data = {
+            'title': 'Bedtime Reminder',
+            'type': 'alarm',
+            'id': id.hashCode.toString(),
+          };
+          await _addNotificationToArr(data, currentScheduledTime);
         }
         // Tính ngày tiếp theo trong tuần
         currentScheduledTime =
@@ -335,6 +435,13 @@ class NotificationServices {
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.wallClockTime,
         );
+        // Thêm vào notificationArr
+        final Map<String, dynamic> data = {
+          'title': 'Bedtime Reminder',
+          'type': 'alarm',
+          'id': id.hashCode.toString(),
+        };
+        await _addNotificationToArr(data, scheduledTZDateTime);
       }
     }
     print('Notification ID updated for bedtime ${id.hashCode}');
@@ -387,6 +494,13 @@ class NotificationServices {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.wallClockTime,
       );
+      // Thêm vào notificationArr
+      final Map<String, dynamic> data = {
+        'title': 'Wake Up Alarm',
+        'type': 'alarm',
+        'id': (id.hashCode + 1).toString()
+      };
+      await _addNotificationToArr(data, scheduledTZDateTime);
     } else if (repeatInterval == 'Everyday') {
       // Thông báo hàng ngày
       await _localNotifications.zonedSchedule(
@@ -403,6 +517,13 @@ class NotificationServices {
             UILocalNotificationDateInterpretation.wallClockTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
+      // Thêm vào notificationArr
+      final Map<String, dynamic> data = {
+        'title': 'Wake Up Alarm',
+        'type': 'alarm',
+        'id': (id.hashCode + 1).toString()
+      };
+      await _addNotificationToArr(data, scheduledTZDateTime);
     } else {
       // Tính toán ngày kết thúc (365 ngày sau)
       final DateTime endDate = wakeUpTime.add(Duration(days: 365));
@@ -435,6 +556,13 @@ class NotificationServices {
                 UILocalNotificationDateInterpretation.wallClockTime,
             matchDateTimeComponents: DateTimeComponents.time,
           );
+          // Thêm vào notificationArr
+          final Map<String, dynamic> data = {
+            'title': 'Wake Up Alarm',
+            'type': 'alarm',
+            'id': (id.hashCode + 1).toString()
+          };
+          await _addNotificationToArr(data, currentScheduledTime);
         }
         // Tính ngày tiếp theo trong tuần
         currentScheduledTime =
@@ -456,6 +584,13 @@ class NotificationServices {
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.wallClockTime,
         );
+        // Thêm vào notificationArr
+        final Map<String, dynamic> data = {
+          'title': 'Wake Up Alarm',
+          'type': 'alarm',
+          'id': (id.hashCode + 1).toString()
+        };
+        await _addNotificationToArr(data, scheduledTZDateTime);
       }
     }
     print('Notification ID updated for wakeup ${id.hashCode + 1}');
@@ -504,6 +639,16 @@ class NotificationServices {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.wallClockTime,
     );
+    // Thêm vào notificationArr
+    final Map<String, dynamic> data = {
+      'id': id.hashCode.toString(),
+      'name': Name,
+      'image': pic,
+      'mealType': mealType,
+      'type': 'meal',
+    };
+    await _addNotificationToArr(data, scheduledTZDateTime);
+
     print('Notification ID updated for meal ${id.hashCode}');
     return id.hashCode.toString();
   }
@@ -564,7 +709,7 @@ class NotificationServices {
       );
       // Tạo dữ liệu cho notification
       final Map<String, dynamic> data = {
-        'id': id_cate,
+        'id': id.hashCode.toString(),
         'title': workoutName,
         'image': pic,
         'difficulty': diff,
@@ -593,7 +738,7 @@ class NotificationServices {
       );
       // Tạo dữ liệu cho notification
       final Map<String, dynamic> data = {
-        'id': id_cate,
+        'id': id.hashCode.toString(),
         'title': workoutName,
         'image': pic,
         'difficulty': diff,
@@ -638,7 +783,7 @@ class NotificationServices {
           );
           // Tạo dữ liệu cho notification
           final Map<String, dynamic> data = {
-            'id': id_cate,
+            'id': id.hashCode.toString(),
             'title': workoutName,
             'image': pic,
             'difficulty': diff,
@@ -673,7 +818,7 @@ class NotificationServices {
         );
         // Tạo dữ liệu cho notification
         final Map<String, dynamic> data = {
-          'id': id_cate,
+          'id': id.hashCode.toString(),
           'title': workoutName,
           'image': pic,
           'difficulty': diff,
@@ -891,6 +1036,57 @@ class NotificationServices {
         await _firestore.collection('Alarm').doc(alarmScheduleDoc.id).update({
           'id_notify': idNotify,
         });
+      }
+
+      // Bổ sung load lại notification cho MealSchedules
+      var mealScheduleSnapshot = await _firestore
+          .collection('MealSchedules')
+          .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      for (var mealScheduleDoc in mealScheduleSnapshot.docs) {
+        final data = mealScheduleDoc.data();
+        final dateStr = data['date'] as String;
+        final date = DateFormat('yyyy-MM-dd').parse(dateStr);
+
+        for (final type in ['breakfast', 'lunch', 'dinner', 'snacks']) {
+          if (data.containsKey(type)) {
+            final List<dynamic> meals = data[type];
+            for (final m in meals) {
+              // Nếu meal có notify = false thì bỏ qua
+              if (m['notify'] == false) continue;
+
+              final name = m['name'] ?? '';
+              final pic = m['image'] ?? '';
+              final mealType = type;
+              final id = m['id_notify'] ?? '';
+              final timeStr = m['time'] ?? '';
+              if (id == '' || timeStr == '') continue;
+
+              // Parse giờ (hh:mm a)
+              DateTime mealTime;
+              try {
+                final time = DateFormat('hh:mm a').parse(timeStr);
+                mealTime = DateTime(
+                    date.year, date.month, date.day, time.hour, time.minute);
+              } catch (e) {
+                continue;
+              }
+
+              // Nếu lịch là trong quá khứ thì bỏ qua
+              if (mealTime.isBefore(DateTime.now())) continue;
+
+              // Lên lịch lại notification cho meal
+              await scheduleMealNotification(
+                id: id,
+                mealType: mealType,
+                Time: mealTime,
+                Name: name,
+                pic: pic,
+              );
+            }
+          }
+        }
       }
       res = "success";
     } catch (err) {

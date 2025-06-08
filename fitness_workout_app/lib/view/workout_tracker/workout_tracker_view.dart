@@ -54,7 +54,8 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     if (user != null) {
       String level = user.level;
       List<Map<String, dynamic>> workouts =
-          await _workoutService.fetchWorkoutsByLevel(level: level);
+          await _workoutService.fetchWorkoutsByLevel(
+              level: level, userMedicalHistory: user.medicalHistory);
       setState(() {
         whatArr = workouts;
         isLoading1 = false;
@@ -225,7 +226,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                     ),
                     lineBarsData: lineBarsData1,
                     minY: -0.5,
-                    maxY: 3000,
+                    maxY: 3001,
                     titlesData: FlTitlesData(
                         show: true,
                         leftTitles: AxisTitles(),
@@ -239,7 +240,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                     gridData: FlGridData(
                       show: true,
                       drawHorizontalLine: true,
-                      horizontalInterval: 25,
+                      horizontalInterval: 500,
                       drawVerticalLine: false,
                       getDrawingHorizontalLine: (value) {
                         return FlLine(

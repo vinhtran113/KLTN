@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/view/meal_planner/select_detail_food_view.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +20,7 @@ class _SelectMealFoodViewState extends State<SelectMealFoodView> {
   final MealService _mealService = MealService();
   List<Meal> allMealArr = [];
   List<Meal> filteredMeals = [];
+  List<String> userMedicalHistory = [];
   final TextEditingController _searchController = TextEditingController();
   bool darkmode = darkModeNotifier.value;
   bool isLoading = true;
@@ -27,6 +30,7 @@ class _SelectMealFoodViewState extends State<SelectMealFoodView> {
     super.initState();
     _loadAllMeals();
     _searchController.addListener(_onSearchChanged);
+    _loadUserMedicalHistory();
   }
 
   @override
@@ -34,6 +38,18 @@ class _SelectMealFoodViewState extends State<SelectMealFoodView> {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _loadUserMedicalHistory() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    final userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final List<String> medicalHistory =
+        List<String>.from(userDoc.data()?['medical_history'] ?? []);
+    setState(() {
+      userMedicalHistory = medicalHistory;
+    });
   }
 
   void _loadAllMeals() async {
@@ -178,7 +194,39 @@ class _SelectMealFoodViewState extends State<SelectMealFoodView> {
                           },
                           child: SelectFoodRow(
                             wObj: fObj,
-                            onSelect: (selectedMeals) {
+                            onSelect: (selectedMeals) async {
+                              final List<String> healthRisks =
+                                  List<String>.from(fObj.healthRisks);
+                              final List<String> warningRisks = healthRisks
+                                  .where((risk) =>
+                                      userMedicalHistory.contains(risk))
+                                  .toList();
+
+                              if (warningRisks.isNotEmpty) {
+                                final shouldContinue = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("Health Warning"),
+                                    content: Text(
+                                      "This food may not be suitable for your medical condition(s):\n${warningRisks.join(', ')}\n\nDo you want to continue?",
+                                      style: const TextStyle(color: Colors.red),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: const Text("Cancel"),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        child: const Text("Continue"),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (shouldContinue != true) return;
+                              }
                               Navigator.pop(context, selectedMeals);
                             },
                           ),

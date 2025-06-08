@@ -353,6 +353,24 @@ class AuthService {
     }
   }
 
+  Future<String> updateUserMedicalHistory({
+    required String uid,
+    required List<String> medicalHistory,
+    required List<String> medicalHistoryOther,
+    required String medicalNote,
+  }) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'medical_history': medicalHistory,
+        'medical_history_other': medicalHistoryOther,
+        'medical_note': medicalNote,
+      });
+      return "success";
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
   Future<String> updateUserProfile({
     required String uid,
     required String dateOfBirth,
