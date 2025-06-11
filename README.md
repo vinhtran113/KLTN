@@ -1,6 +1,6 @@
-# Fitness Workout App
+# HealthMate App
 
-**Fitness Workout App** là ứng dụng hỗ trợ quản lý tập luyện, dinh dưỡng, theo dõi tiến trình sức khỏe cá nhân và nhiều tính năng hữu ích khác dành cho người dùng yêu thích thể thao và chăm sóc sức khỏe.
+**HealthMate App** là ứng dụng hỗ trợ quản lý tập luyện, dinh dưỡng, theo dõi tiến trình sức khỏe cá nhân và nhiều tính năng hữu ích khác dành cho người dùng yêu thích thể thao và chăm sóc sức khỏe.
 
 ## Tính năng nổi bật
 
